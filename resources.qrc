@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/Cursor">
+        <file>Cursors/PointCursor.png</file>
+        <file>Cursors/PointCursor.bmp</file>
+        <file>Cursors/PointCursor.jpg</file>
+    </qresource>
+</RCC>
