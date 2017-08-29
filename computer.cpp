@@ -167,6 +167,7 @@ label_t* Computer::getMemLabel(mem_addr_t addr)
 }
 
 void Computer::setMemBreakPoint(mem_addr_t addr,breakpoint_t* breakpt){
+    if(!Action::doing)Undos->push(new Action::changeMemBreak(addr,breakpt));
     _memory[addr].breakpt = breakpt;
 }
 
@@ -177,6 +178,7 @@ breakpoint_t* Computer::getMemBreakPoint(mem_addr_t addr)
 
 void Computer::setMemComment(mem_addr_t addr, QString comment)
 {
+    if(!Action::doing)Undos->push(new Action::changeMemComment(addr,comment));
     _memory[addr].comment = comment;
 }
 

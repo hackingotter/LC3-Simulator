@@ -44,6 +44,7 @@ public:
 namespace Action
 {
 static bool doing = false;
+static int changeLevel = 0;//todo implement different levels
 class changeRegCondt: public QUndoCommand
 {
 public:

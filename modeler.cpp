@@ -132,7 +132,7 @@ QVariant modeler::data(const QModelIndex &index, int role) const
         {
             if (Computer::getDefault()->getMemLabel(addr)!= nullptr)
             {
-//                return (Computer::getDefault()->getMemLabel(addr)->name);
+//                return (Computer::getDefault()->getMemLabel(addr)->name);// todo fix
             }
             return "";
         }

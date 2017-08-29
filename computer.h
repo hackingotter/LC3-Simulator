@@ -1,10 +1,11 @@
 #ifndef COMPUTER_H
 #define COMPUTER_H
-#include <QUndoStack>
+
 #include <QObject>
 #include <QString>
 #include "GlobalTypes.h"
-
+#include "HistoryHandler.h"
+#include <QUndoStack>
 class Computer : public QObject
 {
     Q_OBJECT
@@ -13,6 +14,9 @@ public:
 
     static Computer* getDefault();
 
+    static QUndoStack* Undos;//will have to work out how to handle this when not in gui
+
+    static setUndoStack(QUndoStack* stack);
     // registers
 
     /** Returns the contents of a register
