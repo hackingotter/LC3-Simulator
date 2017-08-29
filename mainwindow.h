@@ -7,7 +7,6 @@
 #include <QMouseEvent>
 #include <QStandardItemModel>
 #include "BetterScrollbar.h"
-#include "Registers.h"
 #include "stdio.h"
 #include "modeler.h"
 #include "RegisterModel.h"

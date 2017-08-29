@@ -10,10 +10,11 @@
 #define Util_h
 
 #include "GlobalTypes.h"
+#include <QString>
 
 // TODO write stuff
-char *getHexString(uint16_t val);
+QString getHexString(uint16_t val);
 
-char *getBinString(uint16_t val);
+QString getBinString(uint16_t val);
 
 #endif /* Util_h */

@@ -7,9 +7,8 @@
 #include <QStandardItemModel>
 
 #include "Bridge.h"
-extern "C" {
-#include "Registers.h"
-}
+
+
 #define REGCOLUMNCOUNT 3
 typedef enum reg_column{
     reg_color_column = 0,

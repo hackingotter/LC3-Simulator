@@ -150,7 +150,7 @@ void Hope::fillScreen(val_t val)
 {
     for(mem_addr_t i = VIDEO_ADDR;i<MEMSIZE;i++)
     {
-        setMemValue(i,val);//TODO replace with setMemValuesBlock when done
+        Computer::getDefault()->setMemValue(i,val);//TODO replace with setMemValuesBlock when done
     }
     update();
 }
@@ -163,7 +163,7 @@ void Hope::update()
 //        mag.setPen(translater(getMemValue(i)));
 //        DRAWPOINT(ADDR2X(i),ADDR2Y(i),qpp);
 
-        setPoint(ADDR2X(i),ADDR2Y(i),translater(getMemValue(i)).rgb(),mag);
+        setPoint(ADDR2X(i),ADDR2Y(i),translater(Computer::getDefault()->getMemValue(i)).rgb(),mag);
     }
     setPixmap(QPixmap::fromImage(*mag));
 //    qpp.end();
@@ -177,7 +177,7 @@ void Hope::update(mem_addr_t addr)
     QPainter qpp(&pi);
 //    mag.setPixel(ADDR2X(addr),ADDR2Y(addr),translater(getMemValue(addr)).rgb());
 
-    setPoint(ADDR2X(addr),ADDR2Y(addr),translater(getMemValue(addr)).rgb(),mag);
+    setPoint(ADDR2X(addr),ADDR2Y(addr),translater(Computer::getDefault()->getMemValue(addr)).rgb(),mag);
 //    qpp.end();
     QPixmap pix = QPixmap::fromImage(*mag);
     BATHTIME(QString().setNum(pix.height()));

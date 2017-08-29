@@ -5,8 +5,6 @@
 
 #include "ThreadManager.h"
 #include "Simulator.h"
-#include "Registers.h"
-#include "Memory.h"
 
 bool Bridge::isRunning = false;
 
@@ -17,8 +15,8 @@ bool Bridge::isRunning = false;
 
 Bridge::Bridge(int protocol) : QObject(nullptr)
 {
-    old_Mem_State = getAllMemValues();
-    old_Reg_State = getAllRegisters();
+    old_Mem_State = Computer::getDefault()->getAllMemValues();
+    old_Reg_State = Computer::getDefault()->getAllRegisters();
     runningMode = protocol;
 }
 Bridge::~Bridge()
@@ -40,7 +38,7 @@ void Bridge::process()
     }
     Bridge::isRunning = true;
     BATHTIME(QString().setNum(runningMode))
-    BATHTIME(QString().setNum(getProgramStatus()))
+    BATHTIME(QString().setNum(Computer::getDefault()->getProgramStatus()))
     int *ok = new int(0);
     switch(runningMode)
     {
@@ -48,13 +46,13 @@ void Bridge::process()
     {
 
 
-        val_t target_PC = getRegister(PC)+1;
+        val_t target_PC = Computer::getDefault()->getRegister(PC)+1;
 
         BATHTIME("Am I done? Starting at"+ QString().setNum(target_PC))
-        while((getRegister(PC)!= target_PC)&&(*ok!=1))
+        while((Computer::getDefault()->getRegister(PC)!= target_PC)&&(*ok!=1))
         {
-            BATHTIME("Trying at "+ QString().setNum(getRegister(PC)))
-            executeSingleInstruction();
+            BATHTIME("Trying at "+ QString().setNum(Computer::getDefault()->getRegister(PC)))
+            Computer::getDefault()->executeSingleInstruction();
             BATHTIME("Executed with error of " +QString().setNum(*ok))
         }
         BATHTIME("Done!")
@@ -64,7 +62,7 @@ void Bridge::process()
     {
         BATHTIME("Steppin")
 
-        executeSingleInstruction();
+        Computer::getDefault()->executeSingleInstruction();
         BATHTIME(QString().setNum(*ok))
         break;
     }

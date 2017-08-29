@@ -7,8 +7,6 @@
 extern "C"
 {
 #include "Simulator.h"
-#include "Registers.h"
-#include "Memory.h"
 }
 
 class HistoryHandler: public QUndoStack
@@ -44,14 +42,14 @@ namespace Action
 
 class changeRegCondt: public QUndoCommand
 {
-    changeRegCondt(cond_t cond):newCondt(cond),oldCondt(getProgramStatus()){setText("set Condition");}
+    changeRegCondt(cond_t cond):newCondt(cond),oldCondt(Computer::getDefault()->getProgramStatus()){setText("set Condition");}
     UNDOFUNC
     (
-        setProgramStatus(oldCondt);
+        Computer::getDefault()->setProgramStatus(oldCondt);
     )
     REDOFUNC
     (
-        setProgramStatus(newCondt);
+        Computer::getDefault()->setProgramStatus(newCondt);
     )
 private:
     cond_t newCondt;
@@ -62,18 +60,18 @@ private:
 class changeRegValue: public QUndoCommand
 {
 public:
-    changeRegValue(reg_t reg, val_t val):regName(reg),oldValue(getRegister(reg)),newValue(val)
+    changeRegValue(reg_t reg, val_t val):regName(reg),oldValue(Computer::getDefault()->getRegister(reg)),newValue(val)
     INITFUNC
     (
         "set Register",
     )
     UNDOFUNC
     (
-        setRegister(regName,oldValue);
+        Computer::getDefault()->setRegister(regName,oldValue);
     )
     REDOFUNC
     (
-        setRegister(regName,newValue);
+        Computer::getDefault()->setRegister(regName,newValue);
     )
 private:
     reg_t regName;
@@ -83,7 +81,7 @@ private:
 class changeMemValue: public QUndoCommand
 {
 public:
-    changeMemValue(mem_addr_t addr,val_t val):mem_addr(addr),oldValue(getMemValue(addr)),newValue(val)
+    changeMemValue(mem_addr_t addr,val_t val):mem_addr(addr),oldValue(Computer::getDefault()->getMemValue(addr)),newValue(val)
     INITFUNC
     (
         "set Memory",
@@ -91,11 +89,11 @@ public:
     )
     UNDOFUNC
     (
-        setMemValue(mem_addr,oldValue);
+        Computer::getDefault()->setMemValue(mem_addr,oldValue);
     )
     REDOFUNC
     (
-        setMemValue(mem_addr,newValue);
+        Computer::getDefault()->setMemValue(mem_addr,newValue);
     )
       virtual ~changeMemValue() {;}
 private:
@@ -106,7 +104,7 @@ private:
 class changeMemLabel: public QUndoCommand
 {
 public:
-    changeMemLabel(mem_addr_t addr,label_t* newLabel):mem_addr(addr),oldLabelPtr(getMemLabel(addr)),newLabelPtr(newLabel)
+    changeMemLabel(mem_addr_t addr,label_t* newLabel):mem_addr(addr),oldLabelPtr(Computer::getDefault()->getMemLabel(addr)),newLabelPtr(newLabel)
     INITFUNC
     (
         "set Label"
@@ -114,11 +112,11 @@ public:
     )
     UNDOFUNC
     (
-        setMemLabel(mem_addr,oldLabelPtr);
+        Computer::getDefault()->setMemLabel(mem_addr,oldLabelPtr);
     )
     REDOFUNC
     (
-        setMemLabel(mem_addr,newLabelPtr);
+        Computer::getDefault()->setMemLabel(mem_addr,newLabelPtr);
     )
 private:
     mem_addr_t mem_addr;
@@ -128,14 +126,14 @@ private:
 class changeMemBreak: public QUndoCommand
 {
 public:
-    changeMemBreak(mem_addr_t addr,breakpoint_t* breakPtr):mem_addr(addr),oldBreak(getMemBreakPoint(addr)),newBreak(breakPtr){setText("set Break");}
+    changeMemBreak(mem_addr_t addr,breakpoint_t* breakPtr):mem_addr(addr),oldBreak(Computer::getDefault()->getMemBreakPoint(addr)),newBreak(breakPtr){setText("set Break");}
     UNDOFUNC
     (
-        setMemBreakPoint(mem_addr,oldBreak);
+        Computer::getDefault()->setMemBreakPoint(mem_addr,oldBreak);
     )
     REDOFUNC
     (
-        setMemBreakPoint(mem_addr,newBreak);
+        Computer::getDefault()->setMemBreakPoint(mem_addr,newBreak);
     )
 private:
     mem_addr_t mem_addr;
@@ -212,7 +210,7 @@ private:
     {
         int index = 0;
         changedRegCount= 0;
-        for(int i = 0;i<number_of_regs;i++)
+        for(int i = 0;i< NUM_OF_REGS;i++)
         {
             if(old_Reg_State[i]!=new_Reg_State[i])
             {
@@ -220,7 +218,7 @@ private:
             }
         }
         regSlices = static_cast<slice*>(malloc(sizeof(slice) * changedRegCount));
-        for(int i = 0;i<number_of_regs;i++)
+        for(int i = 0;i< NUM_OF_REGS;i++)
         {
             if(old_Reg_State[i]!=new_Reg_State[i])
             {

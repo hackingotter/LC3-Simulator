@@ -22,12 +22,12 @@ using namespace Memory_Modulos;
 modeler::modeler(QObject *parent,bool* access): QStandardItemModel(parent),threadRunning(access)
 {
     BATHTIME("THERE")
-    QStringList HeaderLabel;
+            QStringList HeaderLabel;
     //Since there is no real easy way of setting the headers, i fill it up with "EMPTY"
     //header items, then proceed to replace each
     for(int i = 0;i<NUMBER_OF_COLUMNS;i++)
     {
-    HeaderLabel.append("EMPTY");
+        HeaderLabel.append("EMPTY");
     }
 
 
@@ -90,25 +90,25 @@ QVariant modeler::data(const QModelIndex &index, int role) const
         if(column == BRCOLUMN) return 0;
         return  QVariant();
     }
-//    if(role == Qt::TextAlignmentRole){
-//        switch (column) {
+    //    if(role == Qt::TextAlignmentRole){
+    //        switch (column) {
 
-//        case NAMECOLUMN:return Qt::AlignRight;
-//        case VALUCOLUMN:return Qt::AlignCenter;
-//        }
-//    }
+    //        case NAMECOLUMN:return Qt::AlignRight;
+    //        case VALUCOLUMN:return Qt::AlignCenter;
+    //        }
+    //    }
     /*
      * Testing if it is asking for the background color
      */
     if(role == Qt::BackgroundRole&&column == 0)
     {
 
-        if(addr == getRegister(PC))
+        if(addr == Computer::getDefault()->getRegister(PC))
         {
 
             return QBrush(Qt::yellow);
         }
-        if(addr == getRegister(R7))
+        if(addr == Computer::getDefault()->getRegister(R7))
         {
 
             return QBrush(Qt::blue);
@@ -119,88 +119,89 @@ QVariant modeler::data(const QModelIndex &index, int role) const
     {
 
 
-//        BATHTIME("E")
+        //        BATHTIME("E")
         switch(column)
         {
-        case ADDRCOLUMN:return CHARPTR2QSTRING(getHexString(addr));
-//        case BRCOLUMN:return /*(bool)getMemBreakPoint(addr);*/ 0;
+        case ADDRCOLUMN:
+            return getHexString(addr);
+            //        case BRCOLUMN:return /*(bool)getMemBreakPoint(addr);*/ 0;
         case VALUCOLUMN:
-
-
-            return CHARPTR2QSTRING(getHexString(getMemValue(addr)));
+            return getHexString(Computer::getDefault()->getMemValue(addr));
         case NAMECOLUMN:
         {
-            if(getMemLabel(addr)!= nullptr)
+            if (Computer::getDefault()->getMemLabel(addr)!= nullptr)
             {
-            return CHARPTR2QSTRING(getMemLabel(addr)->name);
+                return Computer::getDefault()->getMemLabel(addr)->name;
             }
             return "";
         }
 
-        case MNEMCOLUMN:return Utility::addr2Mnem(addr);
-        case COMMCOLUMN:return CHARPTR2QSTRING(getMemComment(addr));
+        case MNEMCOLUMN:
+            return Utility::addr2Mnem(addr);
+        case COMMCOLUMN:
+            return Computer::getDefault()->getMemComment(addr);
         }
     }
-return QVariant();
+    return QVariant();
 }
 
 bool modeler::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     BATHTIME("Setting Data")
-    bool success = true;//this will change when success isn't found
+            bool success = true;//this will change when success isn't found
     mem_addr_t addr = index.row();
     int column = index.column();
     BATHTIME("Am I a valid index?")
-    if(index.isValid())
+            if(index.isValid())
     {
         switch(column)
         {
         case BRCOLUMN  :BATHTIME("You just set a breakpoint")
-            BATHTIME("TBI");
+                    BATHTIME("TBI");
 
-            setMemBreakPoint(addr,NULL);
+            Computer::getDefault()->setMemBreakPoint(addr,NULL);
             emit breakChanged(addr,nullptr);
             return true;
         case ADDRCOLUMN:BATHTIME("There must be an error") return false;
         case NAMECOLUMN:BATHTIME("You just set a Label")
             {
 
-                setMemLabelChar(addr,Utility::QString2CharPtr((value.toString())));
+                Computer::getDefault()->setMemLabelText(addr,value.toString());
             }
 
 
-                    return true;
+            return true;
         case VALUCOLUMN:
             BATHTIME("You just set a Value")
             {
                 BATHTIME(value.toString())
-                 QString valString = value.toString();
+                        QString valString = value.toString();
                 BATHTIME(valString)
-                if(value.toString().startsWith("x")) valString = valString.remove(0,1);
+                        if(value.toString().startsWith("x")) valString = valString.remove(0,1);
                 BATHTIME(valString)
                         bool ok = false;
                 val_t val = static_cast<val_t>(valString.toInt(&ok,16));
                 if(!ok)
                 {
-                   BATHTIME("NOPE")
+                    BATHTIME("NOPE")
                 }else
                 {
 
 
-                BATHTIME("Requesting Change")
-                noTry->push(new Action::changeMemValue(addr,val));
-                BATHTIME("hey")
-//                        emit update();
-//                setMemValue(addr,val);
-//                emit valueChanged(addr,val);
+                    BATHTIME("Requesting Change")
+                            noTry->push(new Action::changeMemValue(addr,val));
+                    BATHTIME("hey")
+                            //                        emit update();
+                            //                setMemValue(addr,val);
+                            //                emit valueChanged(addr,val);
                 }
             }
             return true;
         case COMMCOLUMN:BATHTIME("You just set a Comment")
 
             {
-                char* newComment = Utility::QString2CharPtr(value.toString());
-                setMemComment(addr,newComment);
+                QString newComment = value.toString();
+                Computer::getDefault()->setMemComment(addr,newComment);
                 emit commentChanged(addr,newComment);
             }
             return true;
@@ -232,11 +233,11 @@ Qt::ItemFlags modeler::flags(const QModelIndex &index) const
     }
     return 0;
 
-//    switch(index.column()){
-//    case BRCOLUMN   :return Qt::ItemIsUserCheckable+Qt::ItemIsEnabled;
-//    case ADDRCOLUMN :return Qt::NoItemFlags;
-//    case VALUCOLUMN :return Qt::ItemIsEditable;
-//    }
+    //    switch(index.column()){
+    //    case BRCOLUMN   :return Qt::ItemIsUserCheckable+Qt::ItemIsEnabled;
+    //    case ADDRCOLUMN :return Qt::NoItemFlags;
+    //    case VALUCOLUMN :return Qt::ItemIsEditable;
+    //    }
 
 }
 void modeler::update()
@@ -246,9 +247,9 @@ void modeler::update()
 QString modeler::mnemonicGen(mem_addr_t addr) const
 {
     QString out;
-    val_t instruction = getMemValue(addr);
-//    BATHTIME(getHexString(instruction>>12))
-//    BATHTIME(getHexString(andOpCode>>12))
+    val_t instruction = Computer::getDefault()->getMemValue(addr);
+    //    BATHTIME(getHexString(instruction>>12))
+    //    BATHTIME(getHexString(andOpCode>>12))
 
 
     out = Utility::addr2Mnem(instruction);

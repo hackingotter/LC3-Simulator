@@ -12,7 +12,6 @@
 #include <QUndoCommand>
 extern "C"{
 #include "Util.h"
-#include "Registers.h"
 }
 #include "HistoryHandler.h"
 #include "Utility.h"
@@ -98,9 +97,12 @@ QVariant RegisterModel::data(const QModelIndex &index,int role) const
     {
         switch(column)
         {
-        case reg_color_column:return QString("");
-        case reg_name_column :return regNameColumnHelper(row);
-        case reg_value_column:return CHARPTR2QSTRING(getHexString(getRegister(static_cast<reg_t>(row))));
+        case reg_color_column:
+            return QString("");
+        case reg_name_column :
+            return regNameColumnHelper(row);
+        case reg_value_column:
+            return getHexString(Computer::getDefault()->getRegister(static_cast<reg_t>(row)));
         }
     }
     if(role == Qt::ToolTipRole)
@@ -149,7 +151,8 @@ bool RegisterModel::setData(const QModelIndex &index, const QVariant&value,int r
         {
             BATHTIME("EDIT");
 
-        noTry->push(new Action::changeRegValue(row,QVARIANT2VAL_T(value)));
+            // TODO I uncommented this cause I have no idea what the plan with this was
+        //noTry->push(new Action::changeRegValue(row,QVARIANT2VAL_T(value)));
 
 
 //            BATHTIME(CHARPTR2QSTRING(getHexString(getRegister(row))))
@@ -161,11 +164,6 @@ bool RegisterModel::setData(const QModelIndex &index, const QVariant&value,int r
 
         }
     }
-
-
-
-
-
 
  return false;
 }

@@ -28,13 +28,15 @@ QVariant StackModeler::data(const QModelIndex &index,int role) const
     {
         switch(column)
         {
-        case ADDRCOLUMN:return QVariant(getHexString(addr));
-        case OFFSETCOLUMN:return QVariant((abs(addr-getRegister(R6))<256)?QString().setNum(addr-getRegister(R6)):"");
+        case ADDRCOLUMN:
+            return QVariant(getHexString(addr));
+        case OFFSETCOLUMN:
+            return QVariant((abs(addr - Computer::getDefault()->getRegister(R6)) < 256) ? QString().setNum(addr - Computer::getDefault()->getRegister(R6)):"");
         }
     }
     if(role == Qt::BackgroundRole)
     {
-        if(getRegister(R6)==addr) return QBrush(Qt::blue);
+        if(Computer::getDefault()->getRegister(R6)==addr) return QBrush(Qt::blue);
     }
     return QVariant();
 }

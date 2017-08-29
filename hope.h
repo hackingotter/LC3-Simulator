@@ -10,7 +10,7 @@
 #include <QPainter>
 #include <QMouseEvent>
 #include <QImage>
-#include "Memory.h"
+#include "GlobalTypes.h"
 
 #define COLORSLICE 0x1F
 

@@ -46,12 +46,11 @@ HEADERS += \
     DoUndo.h \
     Thought.h \
     hope.h \
-    Registers.h \
-    Memory.h \
     Console.h \
     Util.h \
     GlobalTypes.h \
-    Breakpoints.h
+    computer.h \
+    opcodes.h
 
 SOURCES += \
     Bridge.cpp \
@@ -68,8 +67,8 @@ SOURCES += \
     HistoryHandler.cpp \
     status.cpp \
     Console.cpp \
-    Registers.cpp \
-    Memory.cpp \
     Simulator.cpp \
-    util.cpp
+    util.cpp \
+    computer.cpp \
+    utility.cpp
 

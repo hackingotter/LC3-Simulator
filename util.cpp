@@ -7,7 +7,7 @@
 #define TO_OCT(i) ('0'+i)
 #define TO_BIN(i) ('0'+i)
 
-char *getHexString(uint16_t val)
+QString getHexString(uint16_t val)
 {
     char* out = (char *)malloc(sizeof(char) * 6);
     out[0]='x';
@@ -17,15 +17,15 @@ char *getHexString(uint16_t val)
     out[4]=TO_HEX(((val&0x000F)));
     out[5] = '\0';
 
-    return out;
+    return QString(out);
 }
 
-char *getBinString(uint16_t val)
+QString getBinString(uint16_t val)
 {
     int i;
     char* out = (char *)malloc(sizeof(char) * 18);
     out[0] = 'b';
     for(i=1;i<=16;i++)out[i] = TO_BIN(((val&(0b1<<(16-i)))>>(16-i)));
     out[17] = '\0';
-    return out;
+    return QString(out);
 }

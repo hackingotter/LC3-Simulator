@@ -4,7 +4,7 @@
 #include <QStandardItemModel>
 #include <QUndoStack>
 #include "DoUndo.h"
-#include "Memory.h"
+#include "computer.h"
 
 #define NUMBER_OF_COLUMNS 6
 
@@ -61,7 +61,7 @@ signals:
     void valueChanged(mem_addr_t,val_t);
     void nameChanged(mem_addr_t,label_t*);
     void breakChanged(mem_addr_t,breakpoint_t*);
-    void commentChanged(mem_addr_t,char *);
+    void commentChanged(mem_addr_t,QString);
     void requestMemValueChange(mem_addr_t,val_t,int);
     void change();
 private:

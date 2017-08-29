@@ -60,17 +60,11 @@ QModelIndex  a =(VIEW)->model()->index(INPUT,0);\
         default:UI->RegisterView->item((int)PSR,REGISTERVIEWNUMCOLUMN)->setText("P");\
 }
 
-
-
-
-
-
-
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
 
 
-    setProgramStatus(cond_z);
+    Computer::getDefault()->setProgramStatus(cond_z);
     Utility::systemInfoDebug();//Just some fun info
     setUpUndoStack();//QED
     setupThreadManager();//QED
@@ -82,7 +76,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 
 
-    BATHTIME(CHARPTR2QSTRING(getBinString(0xA1B2)));
+    BATHTIME(getBinString(0xA1B2));
     BATHTIME("About to setup ui")
     ui->setupUi(this);//this puts everything in place
 
@@ -268,15 +262,15 @@ void MainWindow::on_pushButton_7_pressed()
 }
 void MainWindow::on_MemView1PCButton_pressed()
 {
-    SCROLLTO(ui->MemView1View,getRegister(PC))
+    SCROLLTO(ui->MemView1View,Computer::getDefault()->getRegister(PC))
 }
 void MainWindow::on_MemView2PCButton_pressed()
 {
-    SCROLLTO(ui->MemView2View,getRegister(PC))
+    SCROLLTO(ui->MemView2View,Computer::getDefault()->getRegister(PC))
 }
 void MainWindow::on_MemView3PCButton_pressed()
 {
-    SCROLLTO(ui->MemView3View,getRegister(PC))
+    SCROLLTO(ui->MemView3View,Computer::getDefault()->getRegister(PC))
 }
 void MainWindow::on_MemView1GotoButton_pressed()
 {
