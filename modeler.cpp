@@ -7,13 +7,14 @@
 #include "Utility.h"
 #include "HistoryHandler.h"
 #include "Bridge.h"
+#include <QString>
 extern "C"
 {
 #include <string.h>
 #include <string>
 #include <Memory.h>
 #include <Util.h>
-#include <Simulator.h>
+//#include <Simulator.h>
 }
 
 
@@ -131,7 +132,7 @@ QVariant modeler::data(const QModelIndex &index, int role) const
         {
             if (Computer::getDefault()->getMemLabel(addr)!= nullptr)
             {
-                return Computer::getDefault()->getMemLabel(addr)->name;
+//                return (Computer::getDefault()->getMemLabel(addr)->name);
             }
             return "";
         }

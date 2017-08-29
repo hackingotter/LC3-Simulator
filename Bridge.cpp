@@ -4,7 +4,7 @@
 #include <QThread>
 
 #include "ThreadManager.h"
-#include "Simulator.h"
+//#include "Simulator.h"
 
 bool Bridge::isRunning = false;
 

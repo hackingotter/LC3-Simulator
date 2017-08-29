@@ -19,6 +19,11 @@ Computer* Computer::getDefault() {
     return defaultComputer;
 }
 
+void Computer::setUndoStack(QUndoStack* stack)
+{
+    Computer::Undos = stack;
+}
+
 // registers
 
 val_t Computer::getRegister(reg_t reg) {
@@ -38,6 +43,8 @@ val_t* Computer::getAllRegisters() {
 }
 
 void Computer::setRegister(reg_t reg, val_t val) {
+    //will implement an identification method
+    Undos->push(new Action::changeRegValue(reg,val));
     registers[reg] = val;
 }
 
@@ -76,6 +83,7 @@ cond_t Computer::getProgramStatus() {
 }
 
 void Computer::setProgramStatus(cond_t stat) {
+
     val_t curr = getRegister(PSR);
 
     curr &= (!7);
@@ -94,7 +102,7 @@ void Computer::setProgramStatus(cond_t stat) {
         return;
         break;
     }
-
+    if(!Action::doing)Undos->push(new Action::changeRegCondt(stat));
     this->setRegister(PSR, curr);
 }
 
@@ -107,6 +115,7 @@ mem_loc_t Computer::getMemLocation(mem_addr_t addr)
 
 void Computer::setMemValue(mem_addr_t addr, val_t val)
 {
+    if(!Action::doing)Undos->push(new Action::changeMemValue(addr,val));
     _memory[addr].value = val;
 }
 
@@ -141,6 +150,7 @@ val_t* Computer::getAllMemValues()
 
 void Computer::setMemLabel(mem_addr_t addr,label_t* newLabel)
 {
+    if(!Action::doing)Undos->push(new Action::changeMemLabel(addr,newLabel));
     _memory[addr].label=newLabel;
 }
 void Computer::setMemLabelText(mem_addr_t addr,QString labelString)

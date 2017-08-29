@@ -30,7 +30,6 @@ void systemInfoDebug()
 }
 
 #define QVARIANT2VAL_T(QVARIANT) (static_cast<val_t>(QVARIANT.toString().toInt(nullptr,16)))
-#define CHARPTR2QSTRING(CHARPTR)(QString::fromLocal8Bit(CHARPTR))
 
 #define BADOP "Bad Op"
 QString addr2Mnem(mem_addr_t addr)

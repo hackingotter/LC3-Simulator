@@ -3,7 +3,7 @@
 #include <QString>
 #include <QObject>
 #include <QSysInfo>
-#include "Simulator.h"
+//#include "Simulator.h"
 #include "Util.h"
 #include "computer.h"
 
@@ -39,9 +39,13 @@
 
 #define CONNECT(sender,signal,receiver,slot) QObject::connect(sender,SIGNAL(signal),receiver,SLOT(slot));
 
+#define CHARPTR2QSTRING(CHARPTR)(QString::fromLocal8Bit(CHARPTR))
+
 namespace Utility {
 
+
 int QSTRING2INTBASE(QString source,int suggestedBase);
+
 void systemInfoDebug();
 QString addr2Mnem(mem_addr_t addr);
 QString name_or_addr(mem_addr_t target);

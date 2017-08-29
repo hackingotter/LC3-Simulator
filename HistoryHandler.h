@@ -6,7 +6,7 @@
 #include "Utility.h"
 extern "C"
 {
-#include "Simulator.h"
+//#include "Simulator.h"
 }
 
 class HistoryHandler: public QUndoStack
@@ -28,24 +28,30 @@ public:
 
 #define UNDOFUNC(STUFF)  virtual void undo()\
 {\
+    Action::doing = true;\
     STUFF\
+    Action::doing = false;\
 }
 #define REDOFUNC(STUFF)  virtual void redo()\
 {\
+    Action::doing = true;\
     STUFF\
+    Action::doing = false;\
 }
 
 
 
 namespace Action
 {
-
+static bool doing = false;
 class changeRegCondt: public QUndoCommand
 {
+public:
     changeRegCondt(cond_t cond):newCondt(cond),oldCondt(Computer::getDefault()->getProgramStatus()){setText("set Condition");}
     UNDOFUNC
     (
         Computer::getDefault()->setProgramStatus(oldCondt);
+
     )
     REDOFUNC
     (
@@ -140,7 +146,7 @@ private:
     breakpoint_t* oldBreak;
     breakpoint_t* newBreak;
 };
-}
+
 class changeMany:public QUndoCommand
 {
     typedef struct
@@ -244,5 +250,15 @@ private:
     int changedRegCount;
 
 };
+class changeMemComment
+{
+public:
+    changeMemComment(mem_addr_t addr,QString newComment){
+        //todo
+    }
+};
+
+
+}
 
 #endif // HISTORYHANDLER_H

@@ -5,7 +5,7 @@
 #include <QScrollArea>
 #include "BetterScrollbar.h"
 #include "RegisterModel.h"
-#include "Simulator.h"
+//#include "Simulator.h"
 #include "Util.h"
 #include "stdio.h"
 #include "hope.h"
@@ -157,6 +157,8 @@ void MainWindow::setupMemView(QTableView* view)
     BATHTIME("Setting Model")
     view->setModel(model);
     BATHTIME("Resizing Columns")
+    BATHTIME("model has "+QString().setNum(model->columnCount()))
+         BATHTIME(QString().setNum(view->height()))
     view->resizeColumnsToContents();
     BATHTIME("Hiding vertical Header")
     view->verticalHeader()->hide();
