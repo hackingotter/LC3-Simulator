@@ -40,7 +40,7 @@ public:
     void mousePressEvent(QMouseEvent *ev);
     void Setup();
     QColor translater(int in);
-
+//
     void mouseMoveEvent(QMouseEvent *ev);
 
     void fillScreen(val_t val);
