@@ -16,7 +16,7 @@ public:
 
     static QUndoStack* Undos;//will have to work out how to handle this when not in gui
 
-    static setUndoStack(QUndoStack* stack);
+    static void setUndoStack(QUndoStack* stack);
     // registers
 
     /** Returns the contents of a register
