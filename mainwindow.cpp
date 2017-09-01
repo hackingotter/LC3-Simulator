@@ -22,7 +22,6 @@
 #include "StackModeler.h"
 #include "DoUndo.h"
 #include <QSettings>
-#include "computer.h"
 #define REGISTERVIEWNUMCOLUMN 2
 
 #define SCROLLTO(VIEW,INPUT)\
@@ -66,11 +65,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 
     Computer::getDefault()->setProgramStatus(cond_z);
-
     Utility::systemInfoDebug();//Just some fun info
     setUpUndoStack();//QED
     setupThreadManager();//QED
-Computer::setUndoStack(Undos);
+
 
     QFuture<void> f1 = QtConcurrent::run(threadTest,QString("1"));
     f1.waitForFinished();
@@ -105,7 +103,6 @@ void MainWindow::setUpUndoStack()
 
 void MainWindow::setupViews()
 {
-
     BATHTIME("Setting Up Views")
     BATHTIME("Now will be making the model");
     this->model = new modeler(this, threadRunning);
@@ -261,8 +258,7 @@ void MainWindow::on_pushButton_7_pressed()
 {
 //    update();
     BATHTIME("trying to undo")
-            *threadRunning = !*threadRunning;
-    Undos->undo();
+//    Undos->undo();
             *threadRunning = !*threadRunning;
 
 }
@@ -413,19 +409,4 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::on_MemView1_destroyed()
 {
     BATHTIME("Hey")
-}
-
-void MainWindow::on_undoButton_pressed()
-{
-
-    *threadRunning = !*threadRunning;
-    Undos->undo();
-    *threadRunning = !*threadRunning;
-}
-
-void MainWindow::on_redoButton_pressed()
-{
-    *threadRunning = !*threadRunning;
-    Undos->redo();
-    *threadRunning = !*threadRunning;
 }

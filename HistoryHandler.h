@@ -4,9 +4,10 @@
 #include <QUndoStack>
 #include <QStack>
 #include "Utility.h"
-#include "computer.h"
-
-
+extern "C"
+{
+//#include "Simulator.h"
+}
 
 class HistoryHandler: public QUndoStack
 {
@@ -16,7 +17,7 @@ public:
 
 
 
-    void update(){qDebug("Stack has been changed; update");}
+    void update(){BATHTIME("Stack has been changed; update")};
 };
 
 #define INITFUNC(TEXT,STUFF) \
@@ -42,17 +43,15 @@ public:
 
 namespace Action
 {
-
 static bool doing = false;
 static int changeLevel = 0;//todo implement different levels
 class changeRegCondt: public QUndoCommand
 {
 public:
-    changeRegCondt(cond_t cond):newCondt(cond),oldCondt(Computer:->getProgramStatus()){setText("set Condition");}
+    changeRegCondt(cond_t cond):newCondt(cond),oldCondt(Computer::getDefault()->getProgramStatus()){setText("set Condition");}
     UNDOFUNC
     (
         Computer::getDefault()->setProgramStatus(oldCondt);
-
 
     )
     REDOFUNC

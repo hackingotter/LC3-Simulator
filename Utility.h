@@ -11,7 +11,7 @@
 #define BUBBLES true
 
 #ifdef RUBBERDUCKY
-#define BATHTIME(STRING) {qInfo(qPrintable(STRING))};
+#define BATHTIME(STRING) qInfo(qPrintable(STRING));
 #else
 #define BATHTIME(STRING)
 #endif

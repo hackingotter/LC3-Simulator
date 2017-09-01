@@ -201,8 +201,6 @@ private slots:
     void on_Update_Temp_pressed();
     void on_IntoButton_pressed();
     void on_MemView1_destroyed();
-    void on_undoButton_pressed();
-    void on_redoButton_pressed();
 };
 
 #endif // MAINWINDOW_H
