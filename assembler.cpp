@@ -36,7 +36,7 @@ using namespace std;
 Assembler::Assembler() {
 
     parserRegex = regex(
-            R"abc([ \t]*((?!(?:ADD|AND|(?:BR[nzp]{0,3})|JMP|JSRR|JSR|LDI|LDR|LD|LEA|NOT|RET|RTI|STI|STR|ST|TRAP|MUL|GETC|OUT|IN|PUTSP|PUTS|HALT)(?:\W|$))\w*)?[ \t]*(?:(?:(ADD|AND|(?:BR[nzp]{0,3})|JMP|JSRR|JSR|LDI|LDR|LD|LEA|NOT|RET|RTI|STI|STR|ST|TRAP|MUL|\.FILL|\.STRINGZ|\.ORIG|\.END|\.BLKW|PUTS|GETC|OUT|IN|PUTSP|HALT)(?:\W|$))[ \t]*(?:r(\d),?)?[ \t]*(?:r(\d),?)?[ \t]*(?:(?:r(\d))|((?:#|x|b|o|-(?!-))?-?[0-9A-F]+\.?[0-9]*)|(\w*)|((?:".*")|(?:'.*')))?)?[ \t]*(?:;+([\S \t]*))?[ \t]*$)abc",
+            R"abc([ \t]*((?!(?:ADD|SUB|AND|(?:BR[nzp]{0,3})|JMP|JSRR|JSR|LDI|LDR|LD|LEA|NOT|RET|RTI|STI|STR|ST|TRAP|MUL|GETC|OUT|IN|PUTSP|PUTS|HALT)(?:\W|$))\w*)?[ \t]*(?:(?:(ADD|SUB|AND|(?:BR[nzp]{0,3})|JMP|JSRR|JSR|LDI|LDR|LD|LEA|NOT|RET|RTI|STI|STR|ST|TRAP|MUL|\.FILL|\.STRINGZ|\.ORIG|\.END|\.BLKW|PUTS|GETC|OUT|IN|PUTSP|HALT)(?:\W|$))[ \t]*(?:r(\d),?)?[ \t]*(?:r(\d),?)?[ \t]*(?:(?:r(\d))|((?:#|x|b|o|-(?!-))?-?[0-9A-F]+\.?[0-9]*)|(\w*)|((?:".*")|(?:'.*')))?)?[ \t]*(?:;+([\S \t]*))?[ \t]*$)abc",
             std::regex_constants::icase);
 
     labelDict = map<string, uint16_t> ();
@@ -361,10 +361,13 @@ uint16_t Assembler::getNumberOrOffset(const string &instruction, NumOrLabel nOrL
             }
             op |= (num & 0x003F);
         } else {
+            if (instruction == "SUB") {
+                num = -num; // flip sign since we add the negative to subtract...
+            }
             // imm5
             if (num > 0x000F || (~num + 1) > 0x0010) {
                 // boundary check for imm5
-                throw "ERROR: imm5 out of bounds:";
+                throw "ERROR: imm5 out of bounds";
             }
             op |= (num & 0x001F);
         }
@@ -471,6 +474,10 @@ uint16_t Assembler::getConstantBits(const string &instruction, int nOfRegs, NumO
                 }
             }
             break;
+        case 3:
+            if (instruction == "SUB") {
+                op |= 0x0010; // bit 4 set makes an add on 3 registers a sub
+            }
         default:
             break;
     }
@@ -480,6 +487,9 @@ uint16_t Assembler::getConstantBits(const string &instruction, int nOfRegs, NumO
 uint16_t Assembler::OpCodeForInstruction(string &op) {
 
     if (op == "ADD") {
+        return addOpCode;
+    }
+    if (op == "SUB") {
         return addOpCode;
     }
     if (op == "AND") {

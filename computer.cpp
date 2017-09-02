@@ -1,5 +1,7 @@
 #include "computer.h"
 #include "opcodes.h"
+#include "util.h"
+
 #define INITFUNC(TEXT,STUFF) \
 {\
     setText(TEXT);\
@@ -410,9 +412,8 @@ void Computer::add(val_t inst) {
 
     } else {
         if ( (bitMask(3)) & inst ) {
-            // bit 4 should be 0
-            // TODO invaild op error
-            return;
+            // bit 3 should be 0
+            throw "Invalid op (read as ADD/SUB): " + getHexString(inst) + "bit 3 should be 0";
         }
 
         reg_t sr2 = getRegister_0_1_2(inst);
@@ -427,7 +428,8 @@ void Computer::add(val_t inst) {
 
     if (sub)
     {
-        r = a-b;
+        // cannot do straight add because we are using unsigned types
+        r = a + (~b+1);
     }
     else
     {
@@ -435,12 +437,12 @@ void Computer::add(val_t inst) {
     }
 
     setRegister(dr, r);
-    if (r > 0) {
-        setProgramStatus(cond_p);
+    if (r & bitMask(15)) {
+        setProgramStatus(cond_n);
     } else if (r == 0) {
         setProgramStatus(cond_z);
     } else {
-        setProgramStatus(cond_n);
+        setProgramStatus(cond_p);
     }
 }
 
@@ -470,12 +472,12 @@ void Computer::and_op(val_t inst) {
 
     val_t r = a & b;
     setRegister(dr, r);
-    if (r > 0) {
-        setProgramStatus(cond_p);
+    if (r & 0x8000) {
+        setProgramStatus(cond_n);
     } else if (r == 0) {
         setProgramStatus(cond_z);
     } else {
-        setProgramStatus(cond_n);
+        setProgramStatus(cond_p);
     }
 }
 
@@ -503,14 +505,30 @@ void Computer::mul(val_t inst) {
         b = getRegister(sr2);
     }
 
+    // we cannot do straigt mul since we have unsigned values
+    // TODO make this better
+    // I don't know how c++ casts exactly work so her a quick hack
+    bool resultPositive = true;
+    if (a & bitMask(15)) {
+        resultPositive ^= true;
+        a = (~a + 1);
+    }
+    if (b & bitMask(15)) {
+        resultPositive ^= true;
+        b = (~b + 1);
+    }
     val_t r = a * b;
+    if (!resultPositive) {
+        r = (~r + 1);
+    }
+
     setRegister(dr, r);
-    if (r > 0) {
-        setProgramStatus(cond_p);
+    if (r & bitMask(15)) {
+        setProgramStatus(cond_n);
     } else if (r == 0) {
         setProgramStatus(cond_z);
     } else {
-        setProgramStatus(cond_n);
+        setProgramStatus(cond_p);
     }
 }
 
@@ -528,12 +546,12 @@ void Computer::not_op(val_t inst) {
     val_t r = ~a;
     setRegister(dr, r);
 
-    if (r > 0) {
-        setProgramStatus(cond_p);
+    if (r & bitMask(15)) {
+        setProgramStatus(cond_n);
     } else if (r == 0) {
         setProgramStatus(cond_z);
     } else {
-        setProgramStatus(cond_n);
+        setProgramStatus(cond_p);
     }
 }
 
@@ -557,8 +575,8 @@ void Computer::br(val_t inst) {
             executeBr(inst);
             return;
         }
-    } else if
-
+    }
+    // no op
 }
 
 void Computer::executeBr(val_t inst) {
@@ -631,12 +649,12 @@ void Computer::ld(val_t inst) {
 
     setRegister(dr, memVal);
 
-    if (memVal > 0) {
-        setProgramStatus(cond_p);
+    if (memVal & bitMask(15)) {
+        setProgramStatus(cond_n);
     } else if (memVal == 0) {
         setProgramStatus(cond_z);
     } else {
-        setProgramStatus(cond_n);
+        setProgramStatus(cond_p);
     }
 }
 
@@ -654,12 +672,12 @@ void Computer::ldi(val_t inst) {
 
     setRegister(dr, memVal);
 
-    if (memVal > 0) {
-        setProgramStatus(cond_p);
+    if (memVal & bitMask(15)) {
+        setProgramStatus(cond_n);
     } else if (memVal == 0) {
         setProgramStatus(cond_z);
     } else {
-        setProgramStatus(cond_n);
+        setProgramStatus(cond_p);
     }
 }
 
@@ -679,12 +697,12 @@ void Computer::ldr(val_t inst) {
 
     setRegister(dr, memVal);
 
-    if (memVal > 0) {
-        setProgramStatus(cond_p);
+    if (memVal & bitMask(15)) {
+        setProgramStatus(cond_n);
     } else if (memVal == 0) {
         setProgramStatus(cond_z);
     } else {
-        setProgramStatus(cond_n);
+        setProgramStatus(cond_p);
     }
 }
 
@@ -701,12 +719,12 @@ void Computer::lea(val_t inst) {
 
     setRegister(dr, val);
 
-    if (val > 0) {
-        setProgramStatus(cond_p);
+    if (val & bitMask(15)) {
+        setProgramStatus(cond_n);
     } else if (val == 0) {
         setProgramStatus(cond_z);
     } else {
-        setProgramStatus(cond_n);
+        setProgramStatus(cond_p);
     }
 }
 
