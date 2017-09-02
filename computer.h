@@ -169,6 +169,7 @@ private:
     void str(val_t inst);
     void trap(val_t inst);
 
+    void executeBr(val_t inst);
 };
 
 #endif // COMPUTER_H

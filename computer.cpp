@@ -541,18 +541,27 @@ void Computer::br(val_t inst) {
 
     if (bitMask(11) & inst) {
         // n
-        if (getProgramStatus() != cond_n)
+        if (getProgramStatus() == cond_n) {
+            executeBr(inst);
             return;
+        }
     } else if (bitMask(10) & inst) {
         // z
-        if (getProgramStatus() != cond_z)
+        if (getProgramStatus() == cond_z) {
+            executeBr(inst);
             return;
+        }
     } else if (bitMask(9) & inst) {
         // p
-        if (getProgramStatus() != cond_p)
+        if (getProgramStatus() == cond_p) {
+            executeBr(inst);
             return;
-    }
+        }
+    } else if
 
+}
+
+void Computer::executeBr(val_t inst) {
     // execute branch
     val_t offset = getOffset9(inst);
     mem_addr_t pc = getRegister(PC);
