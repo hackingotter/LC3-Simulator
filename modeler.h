@@ -26,7 +26,7 @@ class modeler : public QStandardItemModel
     Q_OBJECT
 
 public:
-    QUndoStack* noTry;
+
     QObject* paternal_Figure;
     bool* threadRunning;
     explicit modeler(QObject *parent = 0,bool* access= Q_NULLPTR);
@@ -39,7 +39,7 @@ public:
     // Basic functionality:
     QModelIndex index(int row, int column,
                       const QModelIndex &parent = QModelIndex()) const override;
-    void setQUndoStack(QUndoStack*);
+
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -54,7 +54,8 @@ public:
     bool setValue(int row,int value,int role);
     QObject* paternal();
     void update();
-
+    QString addr2Mnem(mem_addr_t addr) const;
+    QString name_or_addr(mem_addr_t target) const;
     QString mnemonicGen(mem_addr_t addr)const;
 signals:
     void dataChan(mem_addr_t);

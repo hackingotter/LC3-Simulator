@@ -93,14 +93,14 @@
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton_7">
+              <widget class="QPushButton" name="undoButton">
                <property name="text">
                 <string>Undo</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton_5">
+              <widget class="QPushButton" name="redoButton">
                <property name="text">
                 <string>Redo</string>
                </property>

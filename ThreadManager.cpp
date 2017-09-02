@@ -4,12 +4,12 @@
 
 ThreadManager::ThreadManager(QObject *parent) : QObject(parent)
 {
-    BATHTIMEBANNER("Initializing Thread")
+    qDebug("Initializing Thread");
 }
 
 void ThreadManager::activate(int runningMode)
 {
-    BATHTIME("Activating Thread with number " + QString().setNum(runningMode));
+    qDebug("Activating Thread with number " + QString().setNum(runningMode).toLocal8Bit());
     emit started(); // for safety reasons, we will say we started before we actually start
     old_Mem_State = Computer::getDefault()->getAllMemValues();
     old_Reg_State = Computer::getDefault()->getAllRegisters();
@@ -31,13 +31,13 @@ void ThreadManager::activate(int runningMode)
 
 void ThreadManager::done()
 {
-    BATHTIME("Checking for changes")
+    qDebug("Checking for changes");
     val_t* new_Mem_State = Computer::getDefault()->getAllMemValues();
     val_t* new_Reg_State = Computer::getDefault()->getAllRegisters();
     for(int i = 0;i<65535;i++)
     {
         if(old_Mem_State[i]!=new_Mem_State[i])
-        BATHTIME(QString(getHexString(i)))
+        qDebug(QString(getHexString(i)).toLocal8Bit());
     }
 
 

@@ -23,7 +23,7 @@ QPicture pi;
 QRect rekt;
 Hope::Hope(QWidget *parent):QLabel(parent,0)
 {
-    BATHTIME("Setting up screen")
+    qDebug("Setting up screen");
 
 //    model = guardin->get
     mag = new QImage(DISPLAY_WIDTH*DISPLAY_SCALE,DISPLAY_HEIGHT*DISPLAY_SCALE,QImage::Format_RGB32);
@@ -47,7 +47,7 @@ Hope::Hope(QWidget *parent):QLabel(parent,0)
 //    p.end();
     setPicture(pi);
     rekt = pi.boundingRect();
-    BATHTIME("Done finding picture size")
+    qDebug("Done finding picture size");
             QString* sizer = new QString();
 
 
@@ -61,8 +61,8 @@ Hope::Hope(QWidget *parent):QLabel(parent,0)
             qInfo(str->toLatin1());
 //    QPainter* paint();
     Hope::customCursor(0,0);
-    BATHTIME("hey")
-    BATHTIME(QString(styleSheet()).toLatin1().data());
+    qDebug("hey");
+    qDebug(QString(styleSheet()).toLatin1().data());
 
 }
 
@@ -172,7 +172,7 @@ void Hope::update()
 }
 void Hope::update(mem_addr_t addr)
 {
-    BATHTIME("Updating point");
+    qDebug("Updating point");
 
     QPainter qpp(&pi);
 //    mag.setPixel(ADDR2X(addr),ADDR2Y(addr),translater(getMemValue(addr)).rgb());
@@ -180,9 +180,9 @@ void Hope::update(mem_addr_t addr)
     setPoint(ADDR2X(addr),ADDR2Y(addr),translater(Computer::getDefault()->getMemValue(addr)).rgb(),mag);
 //    qpp.end();
     QPixmap pix = QPixmap::fromImage(*mag);
-    BATHTIME(QString().setNum(pix.height()));
+    qDebug(QString().setNum(pix.height()).toLocal8Bit());
     setPixmap(pix);
-    BATHTIME("done updating")
+    qDebug("done updating");
 }
 void Hope::setPoint(int x, int y,QRgb rgb, QImage*image)
 {

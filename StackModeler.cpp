@@ -5,12 +5,12 @@
 using namespace Stack_Modulos;
 StackModeler::StackModeler(QObject* parent,bool* access):modeler(parent,access)
 {
-    BATHTIMEBANNER("StackView Initialzing")
+    qDebug("StackView Initialzing");
     QStringList HeaderLabel;
     HeaderLabel.append("Addr");
     HeaderLabel.append("Offset");
     setHorizontalHeaderLabels(HeaderLabel);
-    BATHTIME("Current num of rows is" + QString().setNum(rowCount()));
+    qDebug("Current num of rows is" + QString().setNum(rowCount()).toLocal8Bit());
 }
 QVariant StackModeler::data(const QModelIndex &index,int role) const
 {
@@ -54,7 +54,7 @@ Qt::ItemFlags StackModeler::flags(const QModelIndex &index) const
 }
 void StackModeler::flip()
 {
-    BATHTIME("Flippin'")
+    qDebug("Flippin'");
     bigTop = new bool(!(*bigTop));
 }
 void StackModeler::setTopBig(bool ghost)

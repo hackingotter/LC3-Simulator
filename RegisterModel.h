@@ -38,7 +38,7 @@ class RegisterModel : public QStandardItemModel
     Q_OBJECT
 public:
 
-    QUndoStack* noTry;
+
     QList<QColor> *regColors;
 
     explicit RegisterModel(QObject* parent = 0,bool* excersize=Q_NULLPTR);
@@ -64,8 +64,6 @@ public:
     QString regNameColumnHelper(int row) const;
 
     QList<QColor>* getRegColors();
-
-    void setQUndoStack(QUndoStack* doOrUndo);
 
     void update();
 

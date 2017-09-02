@@ -5,7 +5,7 @@
 
 #include "ThreadManager.h"
 //#include "Simulator.h"
-
+#include "computer.h"
 bool Bridge::isRunning = false;
 
 
@@ -33,12 +33,12 @@ void Bridge::process()
 {
     if(Bridge::isRunning)
     {
-        BATHTIME("Already running")
+        qDebug("Already running");
                 return;
     }
     Bridge::isRunning = true;
-    BATHTIME(QString().setNum(runningMode))
-    BATHTIME(QString().setNum(Computer::getDefault()->getProgramStatus()))
+    qDebug(QString().setNum(runningMode).toLocal8Bit());
+    qDebug(QString().setNum(Computer::getDefault()->getProgramStatus()).toLocal8Bit());
     int *ok = new int(0);
     switch(runningMode)
     {
@@ -48,31 +48,31 @@ void Bridge::process()
 
         val_t target_PC = Computer::getDefault()->getRegister(PC)+1;
 
-        BATHTIME("Am I done? Starting at"+ QString().setNum(target_PC))
-        while((Computer::getDefault()->getRegister(PC)!= target_PC)&&(*ok!=1))
+        qDebug("Am I done? Starting at"+ QString().setNum(target_PC).toLocal8Bit());
+        while((Computer::getDefault()->getRegister(PC)!= target_PC)&&(*ok !=1))
         {
-            BATHTIME("Trying at "+ QString().setNum(Computer::getDefault()->getRegister(PC)))
+            qDebug("Trying at "+ QString().setNum(Computer::getDefault()->getRegister(PC)).toLocal8Bit());
             Computer::getDefault()->executeSingleInstruction();
-            BATHTIME("Executed with error of " +QString().setNum(*ok))
+            qDebug("Executed with error of " +QString().setNum(*ok).toLocal8Bit());
         }
-        BATHTIME("Done!")
+        qDebug("Done!");
         break;
     }
     case Step:
     {
-        BATHTIME("Steppin")
+        qDebug("Steppin");
 
         Computer::getDefault()->executeSingleInstruction();
-        BATHTIME(QString().setNum(*ok))
+        qDebug(QString().setNum(*ok).toLocal8Bit());
         break;
     }
-    default:BATHTIME("Welp")
+    default:qDebug("Welp");
 
     }
 
-    BATHTIME("Hiya")
+    qDebug("Hiya");
 
-    BATHTIME("AGAIN")
+    qDebug("AGAIN");
     emit finished();
     isRunning=false;
 }

@@ -105,7 +105,7 @@ public:
      * doubly_linkedlist combo
      * which enables the redoing and undoing of actions.
      */
-    QUndoStack* Undos;
+    HistoryHandler* Undos;
 
 
     /**
@@ -165,7 +165,7 @@ public slots:
 
     void on_StackViewInput_returnPressed();
 
-    void on_pushButton_7_pressed();
+
 
     void on_MemView2PCButton_pressed();
 
@@ -201,6 +201,8 @@ private slots:
     void on_Update_Temp_pressed();
     void on_IntoButton_pressed();
     void on_MemView1_destroyed();
+    void on_undoButton_pressed();
+    void on_redoButton_pressed();
 };
 
 #endif // MAINWINDOW_H

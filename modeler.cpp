@@ -8,6 +8,8 @@
 #include "HistoryHandler.h"
 #include "Bridge.h"
 #include <QString>
+#include "Utility.h"
+#include "opcodes.h"
 extern "C"
 {
 #include <string.h>
@@ -22,8 +24,7 @@ extern "C"
 using namespace Memory_Modulos;
 modeler::modeler(QObject *parent,bool* access): QStandardItemModel(parent),threadRunning(access)
 {
-    BATHTIME("THERE")
-            QStringList HeaderLabel;
+    QStringList HeaderLabel;
     //Since there is no real easy way of setting the headers, i fill it up with "EMPTY"
     //header items, then proceed to replace each
     for(int i = 0;i<NUMBER_OF_COLUMNS;i++)
@@ -66,10 +67,6 @@ QModelIndex modeler::index(int row, int column, const QModelIndex &parent) const
 }
 
 
-void modeler::setQUndoStack(QUndoStack* doOrUndo)
-{
-    noTry = doOrUndo;
-}
 
 int modeler::rowCount(const QModelIndex &parent) const
 {
@@ -138,7 +135,7 @@ QVariant modeler::data(const QModelIndex &index, int role) const
         }
 
         case MNEMCOLUMN:
-            return Utility::addr2Mnem(addr);
+            return QString(addr2Mnem(addr));
         case COMMCOLUMN:
             return Computer::getDefault()->getMemComment(addr);
         }
@@ -148,23 +145,23 @@ QVariant modeler::data(const QModelIndex &index, int role) const
 
 bool modeler::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    BATHTIME("Setting Data")
+    qDebug("Setting Data");
             bool success = true;//this will change when success isn't found
     mem_addr_t addr = index.row();
     int column = index.column();
-    BATHTIME("Am I a valid index?")
+    qDebug("Am I a valid index?");
             if(index.isValid())
     {
         switch(column)
         {
-        case BRCOLUMN  :BATHTIME("You just set a breakpoint")
-                    BATHTIME("TBI");
+        case BRCOLUMN  :qDebug("You just set a breakpoint");
+                    qDebug("TBI");
 
             Computer::getDefault()->setMemBreakPoint(addr,NULL);
             emit breakChanged(addr,nullptr);
             return true;
-        case ADDRCOLUMN:BATHTIME("There must be an error") return false;
-        case NAMECOLUMN:BATHTIME("You just set a Label")
+        case ADDRCOLUMN:qDebug("There must be an error"); return false;
+        case NAMECOLUMN:qDebug("You just set a Label");
             {
 
                 Computer::getDefault()->setMemLabelText(addr,value.toString());
@@ -173,32 +170,29 @@ bool modeler::setData(const QModelIndex &index, const QVariant &value, int role)
 
             return true;
         case VALUCOLUMN:
-            BATHTIME("You just set a Value")
+            qDebug("You just set a Value");
             {
-                BATHTIME(value.toString())
+
                         QString valString = value.toString();
-                BATHTIME(valString)
+
                         if(value.toString().startsWith("x")) valString = valString.remove(0,1);
-                BATHTIME(valString)
-                        bool ok = false;
+                                        bool ok = false;
                 val_t val = static_cast<val_t>(valString.toInt(&ok,16));
                 if(!ok)
                 {
-                    BATHTIME("NOPE")
+                    qDebug("NOPE");
                 }else
                 {
 
 
-                    BATHTIME("Requesting Change")
-                            noTry->push(new Action::changeMemValue(addr,val));
-                    BATHTIME("hey")
-                            //                        emit update();
-                            //                setMemValue(addr,val);
-                            //                emit valueChanged(addr,val);
+                    qDebug("Requesting Change");
+                            Computer::getDefault()->setMemValue(addr,val);
+                    qDebug("hey");
+
                 }
             }
             return true;
-        case COMMCOLUMN:BATHTIME("You just set a Comment")
+        case COMMCOLUMN:qDebug("You just set a Comment");
 
             {
                 QString newComment = value.toString();
@@ -206,7 +200,7 @@ bool modeler::setData(const QModelIndex &index, const QVariant &value, int role)
                 emit commentChanged(addr,newComment);
             }
             return true;
-        case MNEMCOLUMN:BATHTIME("You just set a mnemonic")BATHTIME("TBI");return true;
+        case MNEMCOLUMN:qDebug("You just set a mnemonic");qDebug("TBI");return true;
         }
 
 
@@ -253,7 +247,183 @@ QString modeler::mnemonicGen(mem_addr_t addr) const
     //    BATHTIME(getHexString(andOpCode>>12))
 
 
-    out = Utility::addr2Mnem(instruction);
+    out = addr2Mnem(instruction);
     return out;
 }
+QString modeler::addr2Mnem(mem_addr_t addr) const
+{
+
+    val_t val = Computer::getDefault()->getMemValue(addr);
+    addr +=1;
+    QString out;
+    int imm5        =(val&0x001F);
+    int reg11       =((val&0x0E00) >> 9);
+    int reg8        =((val&0x01E0) >> 6);
+    int reg2        =((val&0x0007) >> 0);
+    bool zero543    =(val&0x0038);
+    bool imm5YN     =(val&0x0020) >> 5;
+
+    //It is much easier to be able to handle them without needing to account for names
+    switch(val&0xF000)
+    {
+    case andOpCode  :out.append("AND ");break;
+    case addOpCode  :out.append("ADD ");break;
+    case brOpCode   :out.append("BR");break;
+    case jmpOpCode  :out.append("JMP ");break;
+    case jsrOpCode  :out.append("JSR");break;
+    case ldOpCode   :out.append("LD ");break;
+    case ldiOpCode  :out.append("LDI ");break;
+    case ldrOpCode  :out.append("LDR ");break;
+    case leaOpCode  :out.append("LEA ");break;
+    case notOpCode  :out.append("NOT ");break;
+    case rtiOpCode  :out.append("RTI ");break;
+    case stOpCode   :out.append("ST ");break;
+    case stiOpCode  :out.append("STI ");break;
+    case strOpCode  :out.append("STR ");break;
+    case trapOpCode :out.append("TRAP ");break;
+    }
+
+    switch(val& 0xF000)
+    {
+    case addOpCode:
+        if((val&0x0038) ==0x0010)
+        {
+            out = QString("SUB ");
+
+        }
+
+    case andOpCode:
+    {
+        if((((val&0x0020)&&(val&0x0008))||(val&0x0020))) out = BADOP;
+        else
+        {
+            out.append("R" + QSTRNUM(reg11) + ", R"+QSTRNUM(reg8));
+            if(imm5YN)
+            {
+                out.append(", #").append(QSTRNUM(imm5));
+            }
+            else
+            {
+                out.append(", R").append(QSTRNUM(reg2));
+            }
+        }
+        break;
+    }
+    case brOpCode :
+    {
+        if((val&0x0E00)==0x0E00)//if all three are set, just display BR
+        {}
+        else
+            if(val&0x0E00)
+            {
+                if(val&0x0800) out.append("n");
+                if(val&0x0400) out.append("z");
+                if(val&0x0200) out.append("p");
+            }
+        if((val&0x0E00)==0x0000)
+        {
+            out = BADOP;
+        }
+        else
+        {
+            mem_addr_t target = addr + val&0x00FF;
+            label_t* label = Computer::getDefault()->getMemLabel(target);
+            out.append(" ");
+            if(label!=nullptr)
+            {
+                out.append(label->name);
+            }
+            else
+            {
+                out.append(getHexString(target));
+            }
+        }
+        break;
+
+    }
+    case jmpOpCode:
+    {
+        if((val&0x0E3F))//if there are ones outside of the OpCode and BaseR
+            //Bad Op
+        {
+            out = BADOP;
+        }
+        else if(val&0x01C0)//if so, RET is the proper memn
+        {
+            out = "RET";
+        }
+        else
+        {
+            out = QString("JMP R%1").arg(reg8);
+        }
+
+        break;
+    }
+    case jsrOpCode:
+    {
+        qDebug("JSR");
+if(val&0x0800)//11th slot 1 means jsr
+        {
+
+            mem_addr_t target = addr + val&0x07FF;
+            out.append(" " + name_or_addr(target));
+        }
+        else if(!(val&0x0E3F))//or, it could be jsrr
+        {
+            out.append("R R"+QSTRNUM(reg8));
+        }
+        else
+        {
+            out = BADOP;
+        }
+        break;
+    }
+    case ldOpCode :
+    case ldiOpCode:
+    case leaOpCode:
+    case stOpCode :
+    case stiOpCode:
+    {
+        out.append("R" + QSTRNUM(reg11) + ", "+ name_or_addr(addr+val&0x00FF));
+        break;
+    }
+    case ldrOpCode:
+    case strOpCode:
+    {
+        out.append("R"+ QSTRNUM(reg11)+", R"+ QSTRNUM(reg8)+ ", "+QSTRNUM(val&0x003F));
+        break;
+    }
+    case rtiOpCode:
+    {if(val&0x0FFF) out = BADOP;break;}
+    case trapOpCode:
+    {
+        if(val&0x0F00)
+        {
+            out = BADOP;
+        }
+        else
+        {
+            name_or_addr(val&0x00FF);//this code could be wrong
+        }
+        break;
+    }
+    }
+    return out;
+}
+
+QString modeler::name_or_addr(mem_addr_t target) const
+{
+    label_t* label = Computer::getDefault()->getMemLabel(target);
+
+    if(label!=nullptr)
+    {
+       return QString(label->name);
+    }
+    else
+    {
+       return  getHexString(target);
+    }
+    return "";
+}
+
 

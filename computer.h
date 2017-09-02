@@ -14,9 +14,9 @@ public:
 
     static Computer* getDefault();
 
-    static QUndoStack* Undos;//will have to work out how to handle this when not in gui
+    HistoryHandler* Undos;//will have to work out how to handle this when not in gui
 
-    static setUndoStack(QUndoStack* stack);
+
     // registers
 
     /** Returns the contents of a register

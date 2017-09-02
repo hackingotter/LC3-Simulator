@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QThread>
 #include "Bridge.h"
-
+#include "computer.h"
 class ThreadManager : public QObject
 {
     Q_OBJECT

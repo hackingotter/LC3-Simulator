@@ -1,10 +1,148 @@
 #include "computer.h"
 #include "opcodes.h"
+#define INITFUNC(TEXT,STUFF) \
+{\
+    setText(TEXT);\
+    STUFF\
+}
 
+#define UNDOFUNC(STUFF)  virtual void undo()\
+{\
+    STUFF\
+}
+#define REDOFUNC(STUFF)  virtual void redo()\
+{\
+    STUFF\
+}
+
+namespace Action
+{
+
+
+class changeRegCondt: public QUndoCommand
+{
+public:
+    changeRegCondt(cond_t cond):newCondt(cond),oldCondt(Computer::getDefault()->getProgramStatus())
+    {
+
+
+        setText("set Condition");
+    }
+    UNDOFUNC
+    (
+        Computer::getDefault()->setProgramStatus(oldCondt);
+
+    )
+    REDOFUNC
+    (
+        Computer::getDefault()->setProgramStatus(newCondt);
+    )
+private:
+    cond_t newCondt;
+    cond_t oldCondt;
+
+};
+
+class changeRegValue: public QUndoCommand
+{
+public:
+    changeRegValue(reg_t reg, val_t val):regName(reg),oldValue(Computer::getDefault()->getRegister(reg)),newValue(val)
+    INITFUNC
+    (
+        "set Register",
+    )
+    UNDOFUNC
+    (
+        Computer::getDefault()->setRegister(regName,oldValue);
+    )
+    REDOFUNC
+    (
+        Computer::getDefault()->setRegister(regName,newValue);
+    )
+private:
+    reg_t regName;
+    val_t newValue;
+    val_t oldValue;
+};
+class changeMemValue: public QUndoCommand
+{
+public:
+    changeMemValue(mem_addr_t addr,val_t val):mem_addr(addr),oldValue(Computer::getDefault()->getMemValue(addr)),newValue(val)
+    INITFUNC
+    (
+        "set Memory",
+
+    )
+    UNDOFUNC
+    (
+        Computer::getDefault()->setMemValue(mem_addr,oldValue);
+    )
+    REDOFUNC
+    (
+        Computer::getDefault()->setMemValue(mem_addr,newValue);
+    )
+      virtual ~changeMemValue() {;}
+private:
+    mem_addr_t mem_addr;
+    val_t oldValue;
+    val_t newValue;
+};
+class changeMemLabel: public QUndoCommand
+{
+public:
+    changeMemLabel(mem_addr_t addr,label_t* newLabel):mem_addr(addr),oldLabelPtr(Computer::getDefault()->getMemLabel(addr)),newLabelPtr(newLabel)
+    INITFUNC
+    (
+        "set Label"
+      ,
+    )
+    UNDOFUNC
+    (
+        Computer::getDefault()->setMemLabel(mem_addr,oldLabelPtr);
+    )
+    REDOFUNC
+    (
+        Computer::getDefault()->setMemLabel(mem_addr,newLabelPtr);
+    )
+private:
+    mem_addr_t mem_addr;
+    label_t* oldLabelPtr;
+    label_t* newLabelPtr;
+};
+class changeMemBreak: public QUndoCommand
+{
+public:
+    changeMemBreak(mem_addr_t addr,breakpoint_t* breakPtr):mem_addr(addr),oldBreak(Computer::getDefault()->getMemBreakPoint(addr)),newBreak(breakPtr){setText("set Break");}
+    UNDOFUNC
+    (
+
+        Computer::getDefault()->setMemBreakPoint(mem_addr,oldBreak);
+    )
+    REDOFUNC
+    (
+        Computer::getDefault()->setMemBreakPoint(mem_addr,newBreak);
+    )
+private:
+    mem_addr_t mem_addr;
+    breakpoint_t* oldBreak;
+    breakpoint_t* newBreak;
+};
+
+class changeMemComment
+{
+public:
+    changeMemComment(mem_addr_t addr,QString newComment){
+        //todo
+    }
+};
+
+
+}
 
 Computer::Computer(QObject *parent) : QObject(parent)
 {
-
+Undos = new HistoryHandler();
+Undos->setUndoLimit(65535);
 }
 
 // default
@@ -17,11 +155,6 @@ Computer* Computer::getDefault() {
     }
     defaultComputer = new Computer();
     return defaultComputer;
-}
-
-void Computer::setUndoStack(QUndoStack* stack)
-{
-    Computer::Undos = stack;
 }
 
 // registers
@@ -102,7 +235,7 @@ void Computer::setProgramStatus(cond_t stat) {
         return;
         break;
     }
-    if(!Action::doing)Undos->push(new Action::changeRegCondt(stat));
+    Undos->push(new Action::changeRegCondt(stat));
     this->setRegister(PSR, curr);
 }
 
@@ -115,7 +248,9 @@ mem_loc_t Computer::getMemLocation(mem_addr_t addr)
 
 void Computer::setMemValue(mem_addr_t addr, val_t val)
 {
-    if(!Action::doing)Undos->push(new Action::changeMemValue(addr,val));
+    qDebug("setting memory value");
+    Undos->push(new Action::changeMemValue(addr,val));
+    qDebug("tes");
     _memory[addr].value = val;
 }
 
@@ -150,7 +285,7 @@ val_t* Computer::getAllMemValues()
 
 void Computer::setMemLabel(mem_addr_t addr,label_t* newLabel)
 {
-    if(!Action::doing)Undos->push(new Action::changeMemLabel(addr,newLabel));
+    Computer::Undos->push(new Action::changeMemLabel(addr,newLabel));
     _memory[addr].label=newLabel;
 }
 void Computer::setMemLabelText(mem_addr_t addr,QString labelString)
@@ -167,7 +302,7 @@ label_t* Computer::getMemLabel(mem_addr_t addr)
 }
 
 void Computer::setMemBreakPoint(mem_addr_t addr,breakpoint_t* breakpt){
-    if(!Action::doing)Undos->push(new Action::changeMemBreak(addr,breakpt));
+    Computer::Undos->push(new Action::changeMemBreak(addr,breakpt));
     _memory[addr].breakpt = breakpt;
 }
 
@@ -178,7 +313,7 @@ breakpoint_t* Computer::getMemBreakPoint(mem_addr_t addr)
 
 void Computer::setMemComment(mem_addr_t addr, QString comment)
 {
-    if(!Action::doing)Undos->push(new Action::changeMemComment(addr,comment));
+//    Undos->push(new Action::changeMemComment(addr,comment));
     _memory[addr].comment = comment;
 }
 
@@ -703,6 +838,10 @@ void Computer::executeSingleInstruction() {
 
 
 }
+
+
+
+
 
 
 

@@ -15,9 +15,10 @@ extern "C"{
 }
 #include "HistoryHandler.h"
 #include "Utility.h"
+#include "computer.h"
 RegisterModel::RegisterModel(QObject* parent,bool* excersize): QStandardItemModel(parent),threadRunning(excersize)
 {
-    BATHTIME("RegisterModel in progress")
+    qDebug("RegisterModel in progress");
     regColors =  new QList<QColor>();
 
 
@@ -137,19 +138,19 @@ bool RegisterModel::setData(const QModelIndex &index, const QVariant&value,int r
 {
      reg_t row = static_cast<reg_t>(index.row());
     int column = index.column();
-    BATHTIME("Setting data for Register Model")
+    qDebug("Setting data for Register Model");
     if(!index.isValid())
     {
         return false;
     }
     switch(column)
     {
-        case reg_color_column:BATHTIME("TBI");return false;
-        case reg_name_column :BATHTIME("Isn't possible"); return false;
+        case reg_color_column:qDebug("TBI");return false;
+        case reg_name_column :qDebug("Isn't possible"); return false;
         case reg_value_column:
         if(row<=9)
         {
-            BATHTIME("EDIT");
+            qDebug("EDIT");
 
             // TODO I uncommented this cause I have no idea what the plan with this was
         //noTry->push(new Action::changeRegValue(row,QVARIANT2VAL_T(value)));
@@ -201,10 +202,8 @@ void RegisterModel::update()
 QList<QColor>* RegisterModel::getRegColors(){
     return regColors;
 }
-void RegisterModel::setQUndoStack(QUndoStack* doOrUndo)
-{
-    noTry = doOrUndo;
-}
+
+
 
 
 

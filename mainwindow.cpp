@@ -35,7 +35,7 @@ QModelIndex  a =(VIEW)->model()->index(INPUT,0);\
 
 
 #define SETUPDISPLAY(UI,THIS)\
-    BATHTIME("Setting up the display")\
+    qDebug("Setting up the display");\
     disp = new Hope(THIS);\
     UI->verticalLayout_11->addWidget(disp,0,Qt::AlignCenter);\
     disp->autoFillBackground();\
@@ -76,17 +76,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 
 
-    BATHTIME(getBinString(0xA1B2));
-    BATHTIME("About to setup ui")
+
+    qDebug("About to setup ui");
     ui->setupUi(this);//this puts everything in place
 
     SETUPDISPLAY(ui,this)
     setupRegisterView();
     setupViews();
     Bridge::doWork();
-    BATHTIME("Connecting Disp")
+    qDebug("Connecting Disp");
     QObject::connect(disp,SIGNAL(mouseMoved(QString)),ui->statusBar,SLOT(showMessage(QString)));
-    BATHTIME("Connecting ")
+    qDebug("Connecting ");
     QObject::connect(ui->actionClear,SIGNAL(triggered()),disp,SLOT(clearScreen()));
     QObject::connect(ui->NextButton,SIGNAL(on_NextButton_pressed()),ui->RegisterView,SLOT(update_RegisterView()));
     readSettings();
@@ -97,17 +97,17 @@ MainWindow::~MainWindow()
 }
 void MainWindow::setUpUndoStack()
 {
-    Undos =  new QUndoStack();
+    Undos =  new HistoryHandler();
     Undos->setUndoLimit(65535);
 }
 
 void MainWindow::setupViews()
 {
-    BATHTIME("Setting Up Views")
-    BATHTIME("Now will be making the model");
+    qDebug("Setting Up Views");
+    qDebug("Now will be making the model");
     this->model = new modeler(this, threadRunning);
     this->StackModel = new StackModeler(this,threadRunning);
-    model->setQUndoStack(Undos);
+
 
 
 
@@ -128,12 +128,12 @@ void MainWindow::setupViews()
 
     ui->MemView1View->setVerticalScrollBar(new BetterScrollBar());
 
-    BATHTIME("Model Created");
+    qDebug("Model Created");
     /*
      * There is an assumption that hitting enter will cause an input to be entered.
      * These lines connect the three inputs for the views
      */
-    BATHTIME("Connecting View interfaces")
+    qDebug("Connecting View interfaces");
     {
         connect(ui->MemView1Input,SIGNAL(returnPressed()),ui->MemView1GotoButton,SLOT(click()));
         connect(ui->MemView2Input,SIGNAL(returnPressed()),ui->MemView2GotoButton,SLOT(click()));
@@ -142,8 +142,8 @@ void MainWindow::setupViews()
 
 
     }
-    BATHTIME("Done Connecting Views")
-    BATHTIME("Done Setting Up Views")
+    qDebug("Done Connecting Views");
+    qDebug("Done Setting Up Views");
 }
 
 
@@ -151,18 +151,18 @@ void MainWindow::setupViews()
 void MainWindow::setupMemView(QTableView* view)
 {
 
-    BATHTIME("Attaching the model to the views")
-    BATHTIME("Showing Grid")
+    qDebug("Attaching the model to the views");
+    qDebug("Showing Grid");
     view->showGrid();
-    BATHTIME("Setting Model")
+    qDebug("Setting Model");
     view->setModel(model);
-    BATHTIME("Resizing Columns")
-    BATHTIME("model has "+QString().setNum(model->columnCount()))
-         BATHTIME(QString().setNum(view->height()))
+    qDebug("Resizing Columns");
+    qDebug("model has "+QString().setNum(model->columnCount()).toLocal8Bit());
+         qDebug(QString().setNum(view->height()).toLocal8Bit());
     view->resizeColumnsToContents();
-    BATHTIME("Hiding vertical Header")
+    qDebug("Hiding vertical Header");
     view->verticalHeader()->hide();
-    BATHTIME("setting Column width")
+    qDebug("setting Column width");
     view->setColumnWidth(0,20);
     view->horizontalHeader()->setSectionResizeMode(0,QHeaderView::Fixed);
 
@@ -174,10 +174,10 @@ void MainWindow::setupMemView(QTableView* view)
 }
 void MainWindow::setupStackView(QTableView* view)
 {
-    BATHTIMEBANNER("Setting up Stack View")
-    BATHTIME("Showing Grid")
+    qDebug("Setting up Stack View");
+    qDebug("Showing Grid");
     view->showGrid();
-    BATHTIME("Setting Model")
+    qDebug("Setting Model");
     view->setModel(StackModel);
     view->resizeColumnsToContents();
     view->verticalHeader()->hide();
@@ -193,17 +193,16 @@ void MainWindow::setupStackView(QTableView* view)
 void MainWindow::setupRegisterView()
 {
     QTableView* view = ui->RegisterView;
-    BATHTIME("Initializing model")
+    qDebug("Initializing model");
     regModel = new RegisterModel(this,threadRunning);
-    regModel->setQUndoStack(Undos);
-    BATHTIME("Attaching the model to the views")
+    qDebug("Attaching the model to the views");
     view->setModel(regModel);
-    BATHTIME("Showing Grid")
+    qDebug("Showing Grid");
     view->showGrid();
     view->setColumnWidth(0,8);
     view->setColumnWidth(1,28);
     view->resizeColumnToContents(reg_value_column);
-    BATHTIME("Setting horizantal heading options")
+    qDebug("Setting horizantal heading options");
     {
         QHeaderView* hori = view->horizontalHeader();
         hori->hide();
@@ -211,7 +210,7 @@ void MainWindow::setupRegisterView()
         hori->setSectionResizeMode(reg_name_column,QHeaderView::Fixed);
         hori->setDefaultAlignment(Qt::AlignRight);
     }
-    BATHTIME("Setting vertical heading options")
+    qDebug("Setting vertical heading options");
     {
         QHeaderView* vert = view->verticalHeader();
         vert->hide();
@@ -254,14 +253,7 @@ void MainWindow::on_StackViewInput_returnPressed()
 {
     //This is just here so that the corressponding GotoButton can listen to it
 }
-void MainWindow::on_pushButton_7_pressed()
-{
-//    update();
-    BATHTIME("trying to undo")
-//    Undos->undo();
-            *threadRunning = !*threadRunning;
 
-}
 void MainWindow::on_MemView1PCButton_pressed()
 {
     SCROLLTO(ui->MemView1View,Computer::getDefault()->getRegister(PC))
@@ -296,7 +288,7 @@ void MainWindow::on_StackViewGotoButton_pressed()
 }
 void MainWindow::on_NextButton_pressed()
 {
-    BATHTIME("Executing Single instruction")
+    qDebug("Executing Single instruction");
 //    executeSingleInstruction();
     manager->activate(1);
     update();
@@ -304,7 +296,7 @@ void MainWindow::on_NextButton_pressed()
 }
 void MainWindow::update()
 {
-    BATHTIME(QString().setNum(Undos->index()))
+    qDebug(QString().setNum(Undos->index()).toLocal8Bit());
     disp->update();
     UPDATEVIEW(ui->MemView1View);
     UPDATEVIEW(ui->MemView2View);
@@ -349,9 +341,9 @@ void MainWindow::prepWork()
 
 void MainWindow::on_pushButton_4_pressed()
 {
-    BATHTIME(('0'+(*threadRunning)))
 
-    BATHTIME("Next")
+
+    qDebug("Next");
     manager->activate(Bridge::Next);
 
     update();
@@ -366,7 +358,7 @@ void MainWindow::on_Update_Temp_pressed()
 
 void MainWindow::on_IntoButton_pressed()
 {
-    BATHTIME("Step")
+    qDebug("Step");
     manager->activate(Bridge::Step);
 }
 
@@ -408,5 +400,15 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::on_MemView1_destroyed()
 {
-    BATHTIME("Hey")
+    qDebug("Hey");
+}
+
+void MainWindow::on_undoButton_pressed()
+{
+    Computer::getDefault()->Undos->undo();
+}
+
+void MainWindow::on_redoButton_pressed()
+{
+    Computer::getDefault()->Undos->redo();
 }
