@@ -70,5 +70,6 @@ SOURCES += \
     Simulator.cpp \
     util.cpp \
     computer.cpp \
-    utility.cpp
+    utility.cpp \
+    assembler.cpp
 
