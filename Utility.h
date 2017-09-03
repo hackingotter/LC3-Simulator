@@ -39,10 +39,5 @@ void systemInfoDebug();
 
 }
 #define BADOP "Bad Op"
-typedef enum doPriority{
-    subsysLevel=-1,//for during execution of single line
-    systLevel = 0,//for when the system does something
-    userLevel = 1,
 
-};
 #endif // UTILITY_H

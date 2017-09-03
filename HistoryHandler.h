@@ -15,8 +15,8 @@ public:
      bool doing;
 
     HistoryHandler();
-    void redo();
-    void undo();
+    void redo(int level = 0);
+    void undo(int level = 0);
     void update(){qDebug("Stack has been changed; update");};
     void push(QUndoCommand *cmd);
 };

@@ -19,7 +19,18 @@
 
 namespace Action
 {
+typedef enum doPriority{
+    subsysLevel=-1,//for during execution of single line
+    systLevel = 0,//for when the system does something
+    userLevel = 1,
 
+};
+class PrioritizedCommand: public QUndoCommand
+{
+public:
+    doPriority mode;
+
+};
 
 class changeRegCondt: public QUndoCommand
 {
@@ -80,7 +91,7 @@ public:
     (
         Computer::getDefault()->setMemValue(mem_addr,newValue);
     )
-      virtual ~changeMemValue() {;}
+       ~changeMemValue() {;}
 private:
     mem_addr_t mem_addr;
     val_t oldValue;

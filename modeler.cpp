@@ -113,7 +113,7 @@ QVariant modeler::data(const QModelIndex &index, int role) const
         }
         return QVariant();
     }
-    if (role == Qt::DisplayRole || role == Qt::EditRole)
+    if (role == Qt::DisplayRole)
     {
 
 
@@ -135,11 +135,14 @@ QVariant modeler::data(const QModelIndex &index, int role) const
         }
 
         case MNEMCOLUMN:
+            qDebug("ehlo");
             return QString(addr2Mnem(addr));
         case COMMCOLUMN:
             return Computer::getDefault()->getMemComment(addr);
         }
+
     }
+    if(role == Qt::EditRole)return QVariant();
     return QVariant();
 }
 
@@ -187,7 +190,7 @@ bool modeler::setData(const QModelIndex &index, const QVariant &value, int role)
 
                     qDebug("Requesting Change");
                             Computer::getDefault()->setMemValue(addr,val);
-                    qDebug("hey");
+                    qDebug("hey " + QString().setNum(val).toLocal8Bit());
 
                 }
             }
@@ -252,6 +255,7 @@ QString modeler::mnemonicGen(mem_addr_t addr) const
 }
 QString modeler::addr2Mnem(mem_addr_t addr) const
 {
+    qDebug(QString().setNum(addr).toLocal8Bit());
 
     val_t val = Computer::getDefault()->getMemValue(addr);
     addr +=1;
