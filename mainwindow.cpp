@@ -162,7 +162,7 @@ void MainWindow::setupMemView(QTableView* view)
     view->setModel(model);
     qDebug("Resizing Columns");
     qDebug("model has "+QString().setNum(model->columnCount()).toLocal8Bit());
-         qDebug(QString().setNum(view->height()).toLocal8Bit());
+    qDebug(QString().setNum(view->height()).toLocal8Bit());
     view->resizeColumnsToContents();
     qDebug("Hiding vertical Header");
     view->verticalHeader()->hide();
