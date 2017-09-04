@@ -138,7 +138,7 @@ bool RegisterModel::setData(const QModelIndex &index, const QVariant&value,int r
 {
      reg_t row = static_cast<reg_t>(index.row());
     int column = index.column();
-    qDebug("Setting data for Register Model");
+     qDebug("Setting data for Register Model");
     if(!index.isValid())
     {
         return false;

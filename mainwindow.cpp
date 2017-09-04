@@ -85,14 +85,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     setupViews();
     Bridge::doWork();
     qDebug("Connecting Disp");
+    HighlightScrollBar* j = new HighlightScrollBar(Qt::Vertical);
+
 
     QObject::connect(Computer::getDefault() ,SIGNAL(update()),disp,SLOT(update()));
-    QObject::connect(Computer::getDefault() ,SIGNAL(update()),this,SLOT(repaint()));
+    QObject::connect(Computer::getDefault() ,SIGNAL(update()),this,SLOT(update()));
     QObject::connect(disp,SIGNAL(mouseMoved(QString)),ui->statusBar,SLOT(showMessage(QString)));
     qDebug("Connecting ");
 
     QObject::connect(ui->actionClear,SIGNAL(triggered()),disp,SLOT(clearScreen()));
-    QObject::connect(ui->NextButton,SIGNAL(on_NextButton_pressed()),ui->RegisterView,SLOT(update_RegisterView()));
+
+    QObject::connect(ui->NextButton,SIGNAL(on_NextButton_pressed()),ui->RegisterView,SLOT(update()));
     readSettings();
 }
 MainWindow::~MainWindow()
@@ -130,7 +133,7 @@ void MainWindow::setupViews()
 //    MEMVIEWSETUP(ui->MemView2View,model);
 //    MEMVIEWSETUP(ui->MemView3View,model);
 
-    ui->MemView1View->setVerticalScrollBar(new BetterScrollBar());
+
 
     qDebug("Model Created");
     /*
@@ -164,12 +167,15 @@ void MainWindow::setupMemView(QTableView* view)
     qDebug("model has "+QString().setNum(model->columnCount()).toLocal8Bit());
     qDebug(QString().setNum(view->height()).toLocal8Bit());
     view->resizeColumnsToContents();
+    qDebug(QString().setNum(view->rowHeight(1)).toLocal8Bit());
     qDebug("Hiding vertical Header");
     view->verticalHeader()->hide();
     qDebug("setting Column width");
     view->setColumnWidth(0,20);
     view->horizontalHeader()->setSectionResizeMode(0,QHeaderView::Fixed);
-
+    HighlightScrollBar* j = new HighlightScrollBar(Qt::Vertical );
+    j->addHighlight(Highlight(Highlight::regpoint,500,Qt::black,Highlight::HighPriority));
+    view->setHorizontalScrollBar(j);
     view->horizontalHeader()->setSectionResizeMode(2,QHeaderView::Fixed);
 
     view->verticalHeader()->setDefaultSectionSize(20);
@@ -295,7 +301,7 @@ void MainWindow::on_NextButton_pressed()
     qDebug("Executing Single instruction");
 //    executeSingleInstruction();
     manager->activate(1);
-    update();
+//    update();
 
 }
 void MainWindow::update()

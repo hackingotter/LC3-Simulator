@@ -15,8 +15,6 @@ bool Bridge::isRunning = false;
 
 Bridge::Bridge(int protocol) : QObject(nullptr)
 {
-    old_Mem_State = Computer::getDefault()->getAllMemValues();
-    old_Reg_State = Computer::getDefault()->getAllRegisters();
     runningMode = protocol;
 }
 Bridge::~Bridge()

@@ -201,6 +201,7 @@ void Computer::setRegister(reg_t reg, val_t val) {
     //will implement an identification method
     Undos->push(new Action::changeRegValue(reg,val));
     registers[reg] = val;
+    emit update();
 }
 
 void Computer::setAllRegister(val_t vals[]) {
@@ -259,7 +260,7 @@ void Computer::setProgramStatus(cond_t stat) {
     }
     Undos->push(new Action::changeRegCondt(stat));
     this->setRegister(PSR, curr);
-
+    emit update();
 }
 
 // memory
@@ -417,7 +418,6 @@ mem_addr_t getTrap8(val_t inst) {
 val_t getImm5(val_t inst) {
     return inst & 0x001F;
 }
-
 
 void Computer::add(val_t inst) {
     reg_t dr = getRegister_9_10_11(inst);
@@ -824,7 +824,7 @@ void Computer::trap(val_t inst) {
 }
 
 void Computer::executeSingleInstruction() {
-
+    Undos->beginMacro("Single execution");
     mem_addr_t pcAddr = getRegister(PC);
     mem_loc_t instLoc = getMemLocation(pcAddr);
     val_t inst = instLoc.value;
@@ -887,7 +887,7 @@ void Computer::executeSingleInstruction() {
         break;
 
     }
-
+    Undos->endMacro();
 
 }
 

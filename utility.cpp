@@ -32,9 +32,21 @@ void systemInfoDebug()
 
 #define QVARIANT2VAL_T(QVARIANT) (static_cast<val_t>(QVARIANT.toString().toInt(nullptr,16)))
 
+int qColor2Int(QColor color)
+{
+    int r,g,b,a;
+    color.getRgb(&r,&g,&b,&a);
+    return ((((r<<8)+g)<<8)+b)<<8 + a;
+}
 
-
-
+QColor int2QColor(int color)
+{
+    int a = color&0xFF;
+    int b = (color>>8)&0xFF;
+    int g = (color>>16)&0xFF;
+    int r = (color>>24)&0xFF;
+    return  QColor(r,g,b,a);
+}
 
 
 

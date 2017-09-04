@@ -5,7 +5,7 @@
 #include <QSysInfo>
 //#include "Simulator.h"
 #include "Util.h"
-
+#include <QColor>
 #include <QDebug>
 
 #define RUBBERDUCKY true
@@ -35,8 +35,8 @@ static bool* doing;
 int QSTRING2INTBASE(QString source,int suggestedBase);
 
 void systemInfoDebug();
-
-
+int qColor2Int(QColor color);
+QColor int2QColor(int color);
 }
 #define BADOP "Bad Op"
 

@@ -135,7 +135,7 @@ QVariant modeler::data(const QModelIndex &index, int role) const
         }
 
         case MNEMCOLUMN:
-            qDebug("ehlo");
+//            qDebug("ehlo");
             return QString(addr2Mnem(addr));
         case COMMCOLUMN:
             return Computer::getDefault()->getMemComment(addr);
@@ -175,9 +175,7 @@ bool modeler::setData(const QModelIndex &index, const QVariant &value, int role)
         case VALUCOLUMN:
             qDebug("You just set a Value");
             {
-
                         QString valString = value.toString();
-
                         if(value.toString().startsWith("x")) valString = valString.remove(0,1);
                                         bool ok = false;
                 val_t val = static_cast<val_t>(valString.toInt(&ok,16));
@@ -255,7 +253,7 @@ QString modeler::mnemonicGen(mem_addr_t addr) const
 }
 QString modeler::addr2Mnem(mem_addr_t addr) const
 {
-    qDebug(QString().setNum(addr).toLocal8Bit());
+//    qDebug(QString().setNum(addr).toLocal8Bit());
 
     val_t val = Computer::getDefault()->getMemValue(addr);
     addr +=1;
@@ -333,11 +331,11 @@ QString modeler::addr2Mnem(mem_addr_t addr) const
             mem_addr_t target = addr + val&0x00FF;
             label_t* label = Computer::getDefault()->getMemLabel(target);
             out.append(" ");
-            if(label!=nullptr)
-            {
-                out.append(label->name);
-            }
-            else
+//            if(label->name!=nullptr)
+//            {
+//                out.append(label->name);
+//            }
+//            else
             {
                 out.append(getHexString(target));
             }

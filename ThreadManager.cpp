@@ -31,16 +31,6 @@ void ThreadManager::activate(int runningMode)
 
 void ThreadManager::done()
 {
-    qDebug("Checking for changes");
-    val_t* new_Mem_State = Computer::getDefault()->getAllMemValues();
-    val_t* new_Reg_State = Computer::getDefault()->getAllRegisters();
-    for(int i = 0;i<65535;i++)
-    {
-        if(old_Mem_State[i]!=new_Mem_State[i])
-        qDebug(QString(getHexString(i)).toLocal8Bit());
-    }
-
-
-
+    qDebug("Done");
     emit stopped();//now we are done, time to tell everyone else
 }
