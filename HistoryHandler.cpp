@@ -20,9 +20,7 @@ void HistoryHandler::redo()
 }
 void HistoryHandler::push(QUndoCommand *cmd)
 {
-    qDebug("crownign");
     if(doing)return;
-    qDebug("it's a girl");
     doing = true;
     QUndoStack::push(cmd);
     doing = false;

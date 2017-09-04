@@ -8,11 +8,11 @@
     STUFF\
 }
 
-#define UNDOFUNC(STUFF)  virtual void undo()\
+#define UNDOFUNC(STUFF)  void undo()\
 {\
     STUFF\
 }
-#define REDOFUNC(STUFF)  virtual void redo()\
+#define REDOFUNC(STUFF)  void redo()\
 {\
     STUFF\
 }
@@ -26,14 +26,11 @@ class changeRegCondt: public QUndoCommand
 public:
     changeRegCondt(cond_t cond):newCondt(cond),oldCondt(Computer::getDefault()->getProgramStatus())
     {
-
-
         setText("set Condition");
     }
     UNDOFUNC
     (
         Computer::getDefault()->setProgramStatus(oldCondt);
-
     )
     REDOFUNC
     (
@@ -129,13 +126,25 @@ private:
     breakpoint_t* oldBreak;
     breakpoint_t* newBreak;
 };
-
-class changeMemComment
+class changeMemComment:public QUndoCommand
 {
 public:
-    changeMemComment(mem_addr_t addr,QString newComment){
-        //todo
+    changeMemComment(mem_addr_t addr,QString newCom):mem_addr(addr),oldComment(Computer::getDefault()->getMemComment(addr)),newComment(newCom)
+    {
+
     }
+    UNDOFUNC
+    (
+        Computer::getDefault()->setMemComment(mem_addr,oldComment);
+    )
+    REDOFUNC
+    (
+        Computer::getDefault()->setMemComment(mem_addr,newComment);
+    )
+private:
+    mem_addr_t mem_addr;
+    QString oldComment;
+    QString newComment;
 };
 
 
@@ -239,6 +248,7 @@ void Computer::setProgramStatus(cond_t stat) {
     }
     Undos->push(new Action::changeRegCondt(stat));
     this->setRegister(PSR, curr);
+
 }
 
 // memory
@@ -254,6 +264,7 @@ void Computer::setMemValue(mem_addr_t addr, val_t val)
     Undos->push(new Action::changeMemValue(addr,val));
     qDebug("tes");
     _memory[addr].value = val;
+    emit update();
 }
 
 void Computer::setMemValuesBlock(mem_addr_t addr, size_t blockSize, val_t *vals)
@@ -296,6 +307,7 @@ void Computer::setMemLabelText(mem_addr_t addr,QString labelString)
     label->addr = addr;
     label->name = labelString;
     _memory[addr].label = label;
+    emit update();
 }
 
 label_t* Computer::getMemLabel(mem_addr_t addr)
@@ -306,6 +318,7 @@ label_t* Computer::getMemLabel(mem_addr_t addr)
 void Computer::setMemBreakPoint(mem_addr_t addr,breakpoint_t* breakpt){
     Computer::Undos->push(new Action::changeMemBreak(addr,breakpt));
     _memory[addr].breakpt = breakpt;
+    emit update();
 }
 
 breakpoint_t* Computer::getMemBreakPoint(mem_addr_t addr)
@@ -315,8 +328,9 @@ breakpoint_t* Computer::getMemBreakPoint(mem_addr_t addr)
 
 void Computer::setMemComment(mem_addr_t addr, QString comment)
 {
-//    Undos->push(new Action::changeMemComment(addr,comment));
+    Computer::Undos->push(new Action::changeMemComment(addr,comment));
     _memory[addr].comment = comment;
+    emit update();
 }
 
 QString Computer::getMemComment(mem_addr_t addr)

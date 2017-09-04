@@ -85,8 +85,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     setupViews();
     Bridge::doWork();
     qDebug("Connecting Disp");
+
+    QObject::connect(Computer::getDefault() ,SIGNAL(update()),disp,SLOT(update()));
+    QObject::connect(Computer::getDefault() ,SIGNAL(update()),this,SLOT(repaint()));
     QObject::connect(disp,SIGNAL(mouseMoved(QString)),ui->statusBar,SLOT(showMessage(QString)));
     qDebug("Connecting ");
+
     QObject::connect(ui->actionClear,SIGNAL(triggered()),disp,SLOT(clearScreen()));
     QObject::connect(ui->NextButton,SIGNAL(on_NextButton_pressed()),ui->RegisterView,SLOT(update_RegisterView()));
     readSettings();
@@ -170,7 +174,7 @@ void MainWindow::setupMemView(QTableView* view)
 
     view->verticalHeader()->setDefaultSectionSize(20);
     view->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-
+    QObject::connect(Computer::getDefault(),SIGNAL(update()),view,SLOT(repaint()));
 }
 void MainWindow::setupStackView(QTableView* view)
 {

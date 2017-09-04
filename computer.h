@@ -145,6 +145,7 @@ public:
 
      void executeSingleInstruction();
 signals:
+     void update();
 
 public slots:
 
