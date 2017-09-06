@@ -30,6 +30,22 @@ QModelIndex  a =(VIEW)->model()->index(INPUT,0);\
 
 #define MEMVIEWSETUPPERCENT 20
 
+#define HEX_COLUMN_WIDTH 55
+
+#define MEM_VIEW_BP_COL      0
+#define MEM_VIEW_ADR_COL     1
+#define MEM_VIEW_NAME_COL    2
+#define MEM_VIEW_VAL_COL     3
+#define MEM_VIEW_MNEM_COL    4
+#define MEM_VIEW_COMMENT_COL 5
+
+#define STACK_VIEW_ADR_COL      0
+#define STACK_VIEW_OFFSET_COL   1
+#define STACK_VIEW_NAME_COL     2
+#define STACK_VIEW_VAL_COL      3
+#define STACK_VIEW_MNEM_COL     4
+#define STACK_VIEW_COMMENT_COL  5
+
 #define UPDATEVIEW(TABLEVIEW) TABLEVIEW->hide();TABLEVIEW->show();
 
 
@@ -160,20 +176,28 @@ void MainWindow::setupMemView(QTableView* view)
     view->showGrid();
     qDebug("Setting Model");
     view->setModel(model);
-    qDebug("Resizing Columns");
-    qDebug("model has "+QString().setNum(model->columnCount()).toLocal8Bit());
-         qDebug(QString().setNum(view->height()).toLocal8Bit());
-    view->resizeColumnsToContents();
+    // this is inefficient and useless since we should set those in the design
+    //qDebug("Resizing Columns");
+    //qDebug("model has "+QString().setNum(model->columnCount()).toLocal8Bit());
+    //qDebug(QString().setNum(view->height()).toLocal8Bit());
+    //view->resizeColumnsToContents();
     qDebug("Hiding vertical Header");
     view->verticalHeader()->hide();
     qDebug("setting Column width");
-    view->setColumnWidth(0,20);
-    view->horizontalHeader()->setSectionResizeMode(0,QHeaderView::Fixed);
 
-    view->horizontalHeader()->setSectionResizeMode(2,QHeaderView::Fixed);
+    view->setColumnWidth(MEM_VIEW_BP_COL,30);
+    view->horizontalHeader()->setSectionResizeMode(MEM_VIEW_BP_COL,QHeaderView::Fixed);
 
+    view->setColumnWidth(MEM_VIEW_ADR_COL,HEX_COLUMN_WIDTH);
+    view->horizontalHeader()->setSectionResizeMode(MEM_VIEW_ADR_COL,QHeaderView::Fixed);
+
+    view->setColumnWidth(MEM_VIEW_VAL_COL,HEX_COLUMN_WIDTH);
+    view->horizontalHeader()->setSectionResizeMode(MEM_VIEW_VAL_COL,QHeaderView::Fixed);
+
+    // set row height and fix it
     view->verticalHeader()->setDefaultSectionSize(20);
     view->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+
     QObject::connect(Computer::getDefault(),SIGNAL(update()),view,SLOT(repaint()));
 }
 void MainWindow::setupStackView(QTableView* view)
@@ -183,14 +207,19 @@ void MainWindow::setupStackView(QTableView* view)
     view->showGrid();
     qDebug("Setting Model");
     view->setModel(StackModel);
-    view->resizeColumnsToContents();
+    //view->resizeColumnsToContents();
     view->verticalHeader()->hide();
-//    view->horizontalHeader()->setSectionResizeMode(0,QHeaderView::Fixed);
 
-//    view->horizontalHeader()->setSectionResizeMode(3,QHeaderView::Fixed);
+    view->setColumnWidth(STACK_VIEW_ADR_COL,HEX_COLUMN_WIDTH);
+    view->horizontalHeader()->setSectionResizeMode(MEM_VIEW_ADR_COL,QHeaderView::Fixed);
 
+    view->setColumnWidth(STACK_VIEW_VAL_COL,HEX_COLUMN_WIDTH);
+    view->horizontalHeader()->setSectionResizeMode(MEM_VIEW_VAL_COL,QHeaderView::Fixed);
+
+    // set row height and fix it
     view->verticalHeader()->setDefaultSectionSize(20);
     view->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+
     CONNECT(MainWindow::ui->actionFlip,triggered(),StackModel,flip());
 }
 
