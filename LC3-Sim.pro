@@ -50,7 +50,8 @@ HEADERS += \
     Util.h \
     GlobalTypes.h \
     computer.h \
-    opcodes.h
+    opcodes.h \
+    FileHandler.h
 
 SOURCES += \
     Bridge.cpp \
@@ -71,5 +72,10 @@ SOURCES += \
     util.cpp \
     computer.cpp \
     utility.cpp \
-    assembler.cpp
+    assembler.cpp \
+    FileHandler.cpp
+
+DISTFILES += \
+    Test.txt \
+    Test_copy.txt
 

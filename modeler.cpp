@@ -80,7 +80,6 @@ int modeler::columnCount(const QModelIndex &parent) const
 
 QVariant modeler::data(const QModelIndex &index, int role) const
 {
-
     int column = index.column();
     mem_addr_t addr = index.row();
     if(role == Qt::CheckStateRole)

@@ -9,7 +9,7 @@
 
 QString getHexString(uint16_t val)
 {
-    char* out = (char *)malloc(sizeof(char) * 6);
+    char* out = static_cast<char *>(malloc(sizeof(char) * 6));
     out[0]='x';
     out[1]=TO_HEX(((val&0xF000)>>12));
     out[2]=TO_HEX(((val&0x0F00)>>8));
@@ -23,9 +23,9 @@ QString getHexString(uint16_t val)
 QString getBinString(uint16_t val)
 {
     int i;
-    char* out = (char *)malloc(sizeof(char) * 18);
+    char* out = static_cast<char*>(malloc(sizeof(char) * 18));
     out[0] = 'b';
-    for(i=1;i<=16;i++)out[i] = TO_BIN(((val&(0b1<<(16-i)))>>(16-i)));
+    for(i=1;i<=16;i++)out[i] =static_cast<char>(TO_BIN(((val&(0b1<<(16-i)))>>(16-i))));
     out[17] = '\0';
     return QString(out);
 }

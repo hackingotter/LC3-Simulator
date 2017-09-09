@@ -35,8 +35,6 @@ void Bridge::process()
                 return;
     }
     Bridge::isRunning = true;
-    qDebug(QString().setNum(runningMode).toLocal8Bit());
-    qDebug(QString().setNum(Computer::getDefault()->getProgramStatus()).toLocal8Bit());
     int *ok = new int(0);
     switch(runningMode)
     {

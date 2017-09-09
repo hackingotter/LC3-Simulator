@@ -203,6 +203,7 @@ private slots:
     void on_MemView1_destroyed();
     void on_undoButton_pressed();
     void on_redoButton_pressed();
+    void on_consoleEnterButton_pressed();
 };
 
 #endif // MAINWINDOW_H

@@ -1,6 +1,7 @@
 #include "computer.h"
 #include "opcodes.h"
 #include "util.h"
+#include <QString>
 
 #define INITFUNC(TEXT,STUFF) \
 {\
@@ -15,6 +16,10 @@
 #define REDOFUNC(STUFF)  void redo()\
 {\
     STUFF\
+}
+#define SAVEFUNC(STUFF)  QString save()\
+{\
+return STUFF\
 }
 
 namespace Action
@@ -69,6 +74,11 @@ public:
     (
         Computer::getDefault()->setRegister(regName,newValue);
     )
+    SAVEFUNC
+    (
+    QString("(regValue,"+getHexString(regName)+", "+getHexString(oldValue)+", "+getHexString(newValue)+")\n");
+    )
+
 private:
     reg_t regName;
     val_t newValue;
@@ -90,6 +100,10 @@ public:
     REDOFUNC
     (
         Computer::getDefault()->setMemValue(mem_addr,newValue);
+    )
+    SAVEFUNC
+    (
+    QString("(memValue,"+getHexString(mem_addr)+", "+getHexString(oldValue)+", "+getHexString(newValue)+")\n");
     )
        ~changeMemValue() {;}
 private:
@@ -114,6 +128,10 @@ public:
     (
         Computer::getDefault()->setMemLabel(mem_addr,newLabelPtr);
     )
+    SAVEFUNC
+    (
+    "";
+    )
 private:
     mem_addr_t mem_addr;
     label_t* oldLabelPtr;
@@ -131,6 +149,11 @@ public:
     REDOFUNC
     (
         Computer::getDefault()->setMemBreakPoint(mem_addr,newBreak);
+    )
+    SAVEFUNC
+    (
+            //need to figure out how breakpoints work first!
+        QString("(changeMemBreak, "+getHexString(mem_addr)+")");
     )
 private:
     mem_addr_t mem_addr;
@@ -152,6 +175,11 @@ public:
     (
         Computer::getDefault()->setMemComment(mem_addr,newComment);
     )
+    SAVEFUNC
+    (
+    QString("(MemComment,"+oldComment+", "+newComment+")\n");
+    )
+
 private:
     mem_addr_t mem_addr;
     QString oldComment;
@@ -315,10 +343,12 @@ void Computer::setMemLabel(mem_addr_t addr,label_t* newLabel)
 }
 void Computer::setMemLabelText(mem_addr_t addr,QString labelString)
 {
+    qDebug("setting memLabel");
     label_t* label = (label_t*)malloc(sizeof (label_t));
     label->addr = addr;
     label->name = labelString;
-    _memory[addr].label = label;
+    setMemLabel(addr,label);
+    qDebug("all good here");
     emit update();
 }
 

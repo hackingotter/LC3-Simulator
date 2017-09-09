@@ -21,7 +21,9 @@
 #include <QFuture>
 #include "StackModeler.h"
 #include "DoUndo.h"
+#include "FileHandler.h"
 #include <QSettings>
+#include <QMessageBox>
 #define REGISTERVIEWNUMCOLUMN 2
 
 #define SCROLLTO(VIEW,INPUT)\
@@ -79,7 +81,17 @@ QModelIndex  a =(VIEW)->model()->index(INPUT,0);\
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
 
+    QFile* phil = new QFile("Test.txt");
 
+
+    if(!phil->open(QIODevice::ReadOnly)) {
+        QMessageBox::information(0, "error", phil->errorString());
+    }
+    QTextStream reads(phil);
+    while(!reads.atEnd())
+    {
+        qDebug(reads.readLine().toLocal8Bit());
+    }
     Computer::getDefault()->setProgramStatus(cond_z);
     Utility::systemInfoDebug();//Just some fun info
     setUpUndoStack();//QED
@@ -104,14 +116,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     HighlightScrollBar* j = new HighlightScrollBar(Qt::Vertical);
 
 
-    QObject::connect(Computer::getDefault() ,SIGNAL(update()),disp,SLOT(update()));
+//    QObject::connect(Computer::getDefault() ,SIGNAL(update()),disp,SLOT(update()));
     QObject::connect(Computer::getDefault() ,SIGNAL(update()),this,SLOT(update()));
     QObject::connect(disp,SIGNAL(mouseMoved(QString)),ui->statusBar,SLOT(showMessage(QString)));
     qDebug("Connecting ");
 
     QObject::connect(ui->actionClear,SIGNAL(triggered()),disp,SLOT(clearScreen()));
 
-    QObject::connect(ui->NextButton,SIGNAL(on_NextButton_pressed()),ui->RegisterView,SLOT(update()));
+//    QObject::connect(ui->NextButton,SIGNAL(on_NextButton_pressed()),ui->RegisterView,SLOT(update()));
     readSettings();
 }
 MainWindow::~MainWindow()
@@ -130,18 +142,9 @@ void MainWindow::setupViews()
     qDebug("Now will be making the model");
     this->model = new modeler(this, threadRunning);
     this->StackModel = new StackModeler(this,threadRunning);
-
-
-
-
     qInfo("Header made");
-
     qInfo("Size Set");
-
-
     QString str;
-
-
     setupMemView(ui->MemView1View);
     setupMemView(ui->MemView2View);
     setupMemView(ui->MemView3View);
@@ -179,22 +182,12 @@ void MainWindow::setupMemView(QTableView* view)
     view->showGrid();
     qDebug("Setting Model");
     view->setModel(model);
-<<<<<<< HEAD
-    qDebug("Resizing Columns");
-    qDebug("model has "+QString().setNum(model->columnCount()).toLocal8Bit());
-    qDebug(QString().setNum(view->height()).toLocal8Bit());
-    view->resizeColumnsToContents();
-    qDebug(QString().setNum(view->rowHeight(1)).toLocal8Bit());
-    qDebug("Hiding vertical Header");
-    view->verticalHeader()->hide();
-    qDebug("setting Column width");
-    view->setColumnWidth(0,20);
-    view->horizontalHeader()->setSectionResizeMode(0,QHeaderView::Fixed);
+
     HighlightScrollBar* j = new HighlightScrollBar(Qt::Vertical );
     j->addHighlight(Highlight(Highlight::regpoint,500,Qt::black,Highlight::HighPriority));
     view->setHorizontalScrollBar(j);
     view->horizontalHeader()->setSectionResizeMode(2,QHeaderView::Fixed);
-=======
+
     // this is inefficient and useless since we should set those in the design
     //qDebug("Resizing Columns");
     //qDebug("model has "+QString().setNum(model->columnCount()).toLocal8Bit());
@@ -212,19 +205,14 @@ void MainWindow::setupMemView(QTableView* view)
 
     view->setColumnWidth(MEM_VIEW_VAL_COL,HEX_COLUMN_WIDTH);
     view->horizontalHeader()->setSectionResizeMode(MEM_VIEW_VAL_COL,QHeaderView::Fixed);
->>>>>>> origin/master
 
-    // set row height and fix it
-    view->verticalHeader()->setDefaultSectionSize(20);
-    view->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-
-    QObject::connect(Computer::getDefault(),SIGNAL(update()),view,SLOT(repaint()));
+//    QObject::connect(Computer::getDefault(),SIGNAL(update()),view,SLOT(repaint()));
 }
 void MainWindow::setupStackView(QTableView* view)
 {
     qDebug("Setting up Stack View");
     qDebug("Showing Grid");
-    view->showGrid();
+
     qDebug("Setting Model");
     view->setModel(StackModel);
     //view->resizeColumnsToContents();
@@ -235,7 +223,7 @@ void MainWindow::setupStackView(QTableView* view)
 
     view->setColumnWidth(STACK_VIEW_VAL_COL,HEX_COLUMN_WIDTH);
     view->horizontalHeader()->setSectionResizeMode(MEM_VIEW_VAL_COL,QHeaderView::Fixed);
-
+    view->showGrid();
     // set row height and fix it
     view->verticalHeader()->setDefaultSectionSize(20);
     view->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
@@ -375,15 +363,18 @@ void MainWindow::on_pushButton_7_clicked()
 
 void MainWindow::gotoRunningMode()
 {
+    qDebug("Going to Running Mode");
     *threadRunning = true;
-
-ui->NextButton->setEnabled(false);
-emit update();
+    ui->NextButton->setEnabled(false);
+    disconnect(Computer::getDefault(),SIGNAL(update()),this,SLOT(update()));
+    emit update();
 }
 void MainWindow::gotoUserMode()
 {
+    qDebug("Going to User Mode");
     *threadRunning = false;
     ui->NextButton->setEnabled(true);
+    connect(Computer::getDefault(),SIGNAL(update()),this,SLOT(update()));
     emit update();
 }
 void MainWindow::prepWork()
@@ -464,4 +455,11 @@ void MainWindow::on_undoButton_pressed()
 void MainWindow::on_redoButton_pressed()
 {
     Computer::getDefault()->Undos->redo();
+}
+
+
+
+void MainWindow::on_consoleEnterButton_pressed()
+{
+    qDebug("I want to take the input");
 }
