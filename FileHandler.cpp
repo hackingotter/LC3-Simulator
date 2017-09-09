@@ -1,5 +1,6 @@
 #include "FileHandler.h"
 #include <QFile>
+#include <QFileDialog>
 #include <QTextStream>
 #include <QMessageBox>
 #include "Utility.h"
@@ -8,17 +9,32 @@ FileHandler::FileHandler(QObject *parent) : QObject(parent)
 qDebug("hello");
 
 }
-void FileHandler::trig()
+
+QByteArray FileHandler::read()
 {
-    QFile* phil = new QFile("Text.txt");
+    QByteArray data;
+    QFile file("in.txt");
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        return 0;
 
+    QTextStream in(&file);
+    // You could use readAll() here, too.
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+        data.append(line);
+    }
 
-    if(!phil->open(QIODevice::ReadOnly)) {
-//        QMessageBox::information(0, "error", phil.errorString());
-    }
-    QTextStream reads(phil);
-    while(!reads.atEnd())
-    {
-        qDebug(reads.readLine().toLocal8Bit());
-    }
+    file.close();
+    return data;
+}
+
+void FileHandler::write(QByteArray data)
+{
+    QFile file("out.txt");
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+        return;
+
+//    QTextStream out(&file);
+    file.write(data);
+    file.close();
 }

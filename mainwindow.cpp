@@ -24,6 +24,10 @@
 #include "FileHandler.h"
 #include <QSettings>
 #include <QMessageBox>
+#include <QFileDialog>
+#include <QDataStream>
+#include "Assembler.h"
+#include <QFile>
 #define REGISTERVIEWNUMCOLUMN 2
 
 #define SCROLLTO(VIEW,INPUT)\
@@ -81,18 +85,8 @@ QModelIndex  a =(VIEW)->model()->index(INPUT,0);\
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
 
-    QFile* phil = new QFile("Test.txt");
-
-
-    if(!phil->open(QIODevice::ReadOnly)) {
-        QMessageBox::information(0, "error", phil->errorString());
-    }
-    QTextStream reads(phil);
-    while(!reads.atEnd())
-    {
-        qDebug(reads.readLine().toLocal8Bit());
-    }
     Computer::getDefault()->setProgramStatus(cond_z);
+
     Utility::systemInfoDebug();//Just some fun info
     setUpUndoStack();//QED
     setupThreadManager();//QED
@@ -125,6 +119,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 //    QObject::connect(ui->NextButton,SIGNAL(on_NextButton_pressed()),ui->RegisterView,SLOT(update()));
     readSettings();
+
+//    Computer::getDefault()->loadProgramFile(QString("testing.asm").toLocal8Bit().data());
 }
 MainWindow::~MainWindow()
 {
@@ -422,6 +418,29 @@ void MainWindow::readSettings()
     ui->MemoryBox->resize(MemoryBoxWidth,MemoryBoxHeight);
 
     settings.endGroup();
+
+    Computer::getDefault()->Undos->beginMacro("Loading");
+    QFile file("Data.v");
+    if (file.open(QIODevice::ReadWrite))
+    {
+        QDataStream stream(&file);
+        val_t* memes = Computer::getDefault()->getAllMemValues();
+        for(int i = 0;i < 65535;i++)
+        {
+            char* re = new char();
+            stream.readRawData(re,2);
+            val_t va = *re;
+            qDebug((getHexString(i)+":"+getHexString(va)).toLocal8Bit());
+            Computer::getDefault()->setMemValueHidden(i,va);
+        }
+
+
+
+    }
+    file.close();
+
+    Computer::getDefault()->Undos->endMacro();
+
 }
 void MainWindow::saveSettings()
 {
@@ -435,6 +454,25 @@ void MainWindow::saveSettings()
     settings.setValue("Memory Splitter State",ui->MemorySplitter->saveState());
 //    settings.setValue("Undos",Undos->)
     settings.endGroup();
+
+    QFile file("Data.v");
+    if (file.open(QIODevice::ReadWrite))
+    {
+        QDataStream stream(&file);
+        val_t* memes = Computer::getDefault()->getAllMemValues();
+        for(int i = 0;i < 65535;i++)
+        {
+            stream << (memes[i]) ;
+        }
+
+
+    }
+    file.close();
+
+    qDebug("done saving");
+
+
+
 }
 void MainWindow::closeEvent(QCloseEvent *event)
 {

@@ -16,6 +16,7 @@ public:
 
     HistoryHandler* Undos;//will have to work out how to handle this when not in gui
 
+        void setMemValueHidden(mem_addr_t addr, val_t val);
 
     // registers
 

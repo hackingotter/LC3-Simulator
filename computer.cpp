@@ -300,11 +300,16 @@ mem_loc_t Computer::getMemLocation(mem_addr_t addr)
 
 void Computer::setMemValue(mem_addr_t addr, val_t val)
 {
-    qDebug("setting memory value");
+//    qDebug("setting memory value");
     Undos->push(new Action::changeMemValue(addr,val));
-    qDebug("tes");
+//    qDebug("tes");
     _memory[addr].value = val;
     emit update();
+}
+
+void Computer::setMemValueHidden(mem_addr_t addr, val_t val)
+{
+    _memory[addr].value = val;
 }
 
 void Computer::setMemValuesBlock(mem_addr_t addr, size_t blockSize, val_t *vals)
