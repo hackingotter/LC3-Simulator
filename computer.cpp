@@ -588,13 +588,15 @@ void Computer::br(val_t inst) {
             executeBr(inst);
             return;
         }
-    } else if (bitMask(10) & inst) {
+    }
+    if (bitMask(10) & inst) {
         // z
         if (getProgramStatus() == cond_z) {
             executeBr(inst);
             return;
         }
-    } else if (bitMask(9) & inst) {
+    }
+    if (bitMask(9) & inst) {
         // p
         if (getProgramStatus() == cond_p) {
             executeBr(inst);
