@@ -40,3 +40,4 @@ CMakeLists.txt.user*
 #QtCreator Bad Saves
 
 *.h.*
+*.h~
