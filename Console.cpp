@@ -11,7 +11,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+
+
 void printUsage();
+
 
 char * getConsoleLine() {
     char * line = (char*)malloc(100);

@@ -80,6 +80,7 @@ int modeler::columnCount(const QModelIndex &parent) const
 
 QVariant modeler::data(const QModelIndex &index, int role) const
 {
+
     int column = index.column();
     mem_addr_t addr = index.row();
     if(role == Qt::CheckStateRole)
@@ -327,14 +328,10 @@ QString modeler::addr2Mnem(mem_addr_t addr) const
         }
         else
         {
-            mem_addr_t target = addr + val&0x00FF;
+            mem_addr_t target = addr + val & 0x00FF;
             label_t* label = Computer::getDefault()->getMemLabel(target);
             out.append(" ");
-//            if(label->name!=nullptr)
-//            {
-//                out.append(label->name);
-//            }
-//            else
+            if(label != nullptr)
             {
                 out.append(getHexString(target));
             }
@@ -366,7 +363,7 @@ QString modeler::addr2Mnem(mem_addr_t addr) const
 if(val&0x0800)//11th slot 1 means jsr
         {
 
-            mem_addr_t target = addr + val&0x07FF;
+            mem_addr_t target = addr + val & 0x07FF;
             out.append(" " + name_or_addr(target));
         }
         else if(!(val&0x0E3F))//or, it could be jsrr

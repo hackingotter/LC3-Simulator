@@ -316,6 +316,10 @@ void Computer::setMemValuesBlock(mem_addr_t addr, size_t blockSize, val_t *vals)
 {
     //Implemented for compiler's compliance.
     // TODO
+
+    for (size_t i = 0; i < blockSize; i ++) {
+        setMemValue(addr + i,vals[i]);
+    }
 }
 
 val_t Computer::getMemValue(mem_addr_t addr)

@@ -289,7 +289,7 @@
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout">
               <property name="spacing">
-               <number>0</number>
+               <number>5</number>
               </property>
               <property name="sizeConstraint">
                <enum>QLayout::SetFixedSize</enum>
@@ -578,7 +578,7 @@ p, li { white-space: pre-wrap; }
         <item>
          <layout class="QHBoxLayout" name="StackViewInputBar">
           <property name="spacing">
-           <number>0</number>
+           <number>5</number>
           </property>
           <item>
            <widget class="QLineEdit" name="StackViewInput"/>
@@ -586,20 +586,20 @@ p, li { white-space: pre-wrap; }
           <item>
            <widget class="QPushButton" name="StackViewGotoButton">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
             <property name="minimumSize">
              <size>
-              <width>13</width>
+              <width>0</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>42</width>
+              <width>60</width>
               <height>16777215</height>
              </size>
             </property>
@@ -616,9 +616,15 @@ p, li { white-space: pre-wrap; }
           </item>
           <item>
            <widget class="QPushButton" name="StackViewSPButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="maximumSize">
              <size>
-              <width>24</width>
+              <width>50</width>
               <height>16777215</height>
              </size>
             </property>
