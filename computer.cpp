@@ -316,12 +316,21 @@ void Computer::setMemValuesBlock(mem_addr_t addr, size_t blockSize, val_t *vals)
 {
     //Implemented for compiler's compliance.
     // TODO
-
+    Undos->beginMacro("set Values Block");
     for (size_t i = 0; i < blockSize; i ++) {
         setMemValue(addr + i,vals[i]);
     }
+    Undos->endMacro();
 }
-
+void Computer::fillBlock(mem_addr_t begin, mem_addr_t end, val_t val)
+{
+    Undos->beginMacro("fill block");
+    for (mem_addr_t i = begin;i<end;i++)
+    {
+        setMemValue(i,val);
+    }
+    Undos->endMacro();
+}
 val_t Computer::getMemValue(mem_addr_t addr)
 {
     return _memory[addr].value;

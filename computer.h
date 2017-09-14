@@ -126,6 +126,8 @@ public:
      */
     void setMemValuesBlock(mem_addr_t addr, size_t blockSize, val_t *vals);
 
+
+    void fillBlock(mem_addr_t begin, mem_addr_t end, val_t val);
     /** sets the break pointer for the address
      * \param addr the address whose break point is being set
      * \param breakpt the break pointer being set

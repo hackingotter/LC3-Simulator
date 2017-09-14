@@ -7,11 +7,11 @@
 #include <QPainter>
 #include "Utility.h"
 
-template <class T>
-constexpr std::add_const_t<T> &asConst(T &t) noexcept
-{
-    return t;
-}
+//template <class T>
+//constexpr std::add_const_t<T> &asConst(T &t) noexcept
+//{
+//    return t;
+//}
 
 template <class T>
 void asConst(const T &&) = delete;
@@ -32,7 +32,7 @@ public:
 
     float m_visibleRange;
     float m_offset;
-    QHash<Highlight::Id, QVector<Highlight> > HighlightScrollBarOverlay::m_highlights;
+    QHash<Highlight::Id, QVector<Highlight> > m_highlights;
 
     bool m_cacheUpdateScheduled;
     QMap<int, Highlight> m_cache;
@@ -193,7 +193,7 @@ void HighlightScrollBarOverlay::updateCache()
     m_cache.clear();
     const QList<Highlight::Id> &categories = m_highlights.keys();
     for (const Highlight::Id &category : categories) {
-        for (const Highlight &highlight : asConst(m_highlights[category])) {
+        for (const Highlight &highlight : (m_highlights[category])) {
             Highlight oldHighlight = m_cache[highlight.position];
             if (highlight.priority > oldHighlight.priority)
                 m_cache[highlight.position] = highlight;
@@ -232,7 +232,7 @@ void HighlightScrollBarOverlay::paintEvent(QPaintEvent *paintEvent)
     int previousBottom = -1;
 
     QHash<int, QVector<QRect> > highlights;
-    for (Highlight currentHighlight : asConst(m_cache)) {
+    for (Highlight currentHighlight : (m_cache)) {
         // Calculate top and bottom
         int top = rect.top() + offset + verticalMargin
                 + float(currentHighlight.position) / range * rect.height();

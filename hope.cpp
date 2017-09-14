@@ -148,10 +148,7 @@ void Hope::clearScreen()
 }
 void Hope::fillScreen(val_t val)
 {
-    for(mem_addr_t i = VIDEO_ADDR;i<MEMSIZE;i++)
-    {
-        Computer::getDefault()->setMemValue(i,val);//TODO replace with setMemValuesBlock when done
-    }
+    Computer::getDefault()->fillBlock(VIDEO_ADDR,0xFE00,val);
     update();
 }
 void Hope::update()
