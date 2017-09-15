@@ -16,8 +16,11 @@ public:
 
     HistoryHandler* Undos;//will have to work out how to handle this when not in gui
 
-        void setMemValueHidden(mem_addr_t addr, val_t val);
+    QStack<int> updateMask;
 
+#define MASK {Computer::getDefault()->updateMask.push(1);qDebug("Masking");}
+#define UNMASK {Computer::getDefault()->updateMask.pop();qDebug("Unmasking");}
+#define SINGFORME(OPERA) {if(Computer::getDefault()->updateMask.length()==0){OPERA;qDebug("Higher");}}
     // registers
 
     /** Returns the contents of a register

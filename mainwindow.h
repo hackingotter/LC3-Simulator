@@ -153,9 +153,14 @@ public slots:
     void on_continueButton_clicked();
 
     void setupRegisterView();
+
     void setupStackView(QTableView* view);
 
     void setupThreadManager();
+
+    void setupMenuBar();
+
+    void handleFiles();
 
     void on_MemView1Input_returnPressed();
 

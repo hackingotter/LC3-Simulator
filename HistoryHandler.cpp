@@ -3,7 +3,7 @@
 HistoryHandler::HistoryHandler()
 {
 doing = false;
-};
+}
 void HistoryHandler::undo(int level)
 {
     if(HistoryHandler::doing)return;

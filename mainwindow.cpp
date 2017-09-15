@@ -36,7 +36,7 @@ QModelIndex  a =(VIEW)->model()->index(INPUT,0);\
 
 #define MEMVIEWSETUPPERCENT 20
 
-#define HEX_COLUMN_WIDTH 55
+#define HEX_COLUMN_WIDTH 60
 
 #define MEM_VIEW_BP_COL      0
 #define MEM_VIEW_ADR_COL     1
@@ -119,7 +119,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 //    QObject::connect(ui->NextButton,SIGNAL(on_NextButton_pressed()),ui->RegisterView,SLOT(update()));
     readSettings();
-
+    setupMenuBar();
 //    Computer::getDefault()->loadProgramFile(QString("testing.asm").toLocal8Bit().data());
 }
 MainWindow::~MainWindow()
@@ -169,6 +169,18 @@ void MainWindow::setupViews()
 }
 
 
+void MainWindow::setupMenuBar()
+{
+    CONNECT(MainWindow::ui->actionOpen,triggered(),this,handleFiles());
+
+}
+void MainWindow::handleFiles()
+{
+    Assembler Bill;
+    Bill.assembleFile(QFileDialog::getOpenFileName().toLocal8Bit().data(),"LC3Maybe.obj");
+    Computer::getDefault()->loadProgramFile("LC3Maybe.obj");
+    SINGFORME(emit update();)
+}
 
 void MainWindow::setupMemView(QTableView* view)
 {
@@ -225,6 +237,7 @@ void MainWindow::setupStackView(QTableView* view)
     view->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
 
     CONNECT(MainWindow::ui->actionFlip,triggered(),StackModel,flip());
+    CONNECT(StackModel,flip(),this,update());
 }
 
 void MainWindow::setupRegisterView()
@@ -362,16 +375,16 @@ void MainWindow::gotoRunningMode()
     qDebug("Going to Running Mode");
     *threadRunning = true;
     ui->NextButton->setEnabled(false);
-    disconnect(Computer::getDefault(),SIGNAL(update()),this,SLOT(update()));
-    emit update();
+    SINGFORME(emit update();)
+    MASK
 }
 void MainWindow::gotoUserMode()
 {
     qDebug("Going to User Mode");
     *threadRunning = false;
     ui->NextButton->setEnabled(true);
-    connect(Computer::getDefault(),SIGNAL(update()),this,SLOT(update()));
-    emit update();
+    UNMASK
+    SINGFORME(emit update();)
 }
 void MainWindow::prepWork()
 {
@@ -405,39 +418,16 @@ void MainWindow::on_IntoButton_pressed()
 void MainWindow::readSettings()
 {
     QSettings settings("Melberg & Ott","PennSim++");
-
     settings.beginGroup("MainWindow");
     int width = settings.value("Window Width",QVariant(1163)).toInt();
     int height= settings.value("Window Height",QVariant(694)).toInt();
-//    int memSplitterWidth = settings.value("Memory Splitter Width",QVariant(334)).toInt();
-
     int MemoryBoxHeight = settings.value("Memory Box Height",QVariant(635)).toInt();
     int MemoryBoxWidth  = settings.value("Memory Box Width" ,QVariant(354)).toInt();
     ui->MemorySplitter->restoreState(settings.value("Memory Splitter State").toByteArray());
     this->resize(width,height);
     ui->MemoryBox->resize(MemoryBoxWidth,MemoryBoxHeight);
-
+    setWindowState(static_cast<Qt::WindowState>(settings.value("Window State",QVariant(Qt::WindowMaximized)).toInt()));
     settings.endGroup();
-
-    Computer::getDefault()->Undos->beginMacro("Loading");
-    QFile file("Data.v");
-    if (file.open(QIODevice::ReadWrite))
-    {
-        QDataStream stream(&file);
-        val_t* memes = Computer::getDefault()->getAllMemValues();
-        for(int i = 0;i < 65535;i++)
-        {
-            char* re = new char();
-            stream.readRawData(re,2);
-            val_t va = *re;
-            qDebug((getHexString(i)+":"+getHexString(va)).toLocal8Bit());
-            Computer::getDefault()->setMemValueHidden(i,va);
-        }
-
-
-
-    }
-    file.close();
 
     Computer::getDefault()->Undos->endMacro();
 
@@ -448,26 +438,11 @@ void MainWindow::saveSettings()
     settings.beginGroup("MainWindow");
     settings.setValue("Window Height",this->height());
     settings.setValue("Window Width",this->width());
-//    settings.setValue("Memory Splitter Width",this->ui->)
     settings.setValue("Memory Box Height", ui->MemoryBox->height());
     settings.setValue("Memory Box Width",ui->MemoryBox->width());
     settings.setValue("Memory Splitter State",ui->MemorySplitter->saveState());
-//    settings.setValue("Undos",Undos->)
+    settings.setValue("Window State",static_cast<int>(windowState()));
     settings.endGroup();
-
-    QFile file("Data.v");
-    if (file.open(QIODevice::ReadWrite))
-    {
-        QDataStream stream(&file);
-        val_t* memes = Computer::getDefault()->getAllMemValues();
-        for(int i = 0;i < 65535;i++)
-        {
-            stream << (memes[i]) ;
-        }
-
-
-    }
-    file.close();
 
     qDebug("done saving");
 

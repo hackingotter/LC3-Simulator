@@ -149,7 +149,7 @@ void Hope::clearScreen()
 void Hope::fillScreen(val_t val)
 {
     Computer::getDefault()->fillBlock(VIDEO_ADDR,0xFE00,val);
-    update();
+
 }
 void Hope::update()
 {

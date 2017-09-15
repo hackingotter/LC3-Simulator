@@ -77,5 +77,6 @@ SOURCES += \
 
 DISTFILES += \
     Test.txt \
-    Test_copy.txt
+    Test_copy.txt \
+    lc3os.asm
 

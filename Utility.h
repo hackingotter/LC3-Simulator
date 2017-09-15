@@ -30,7 +30,6 @@
 
 namespace Utility {
 
-static bool* doing;
 
 int QSTRING2INTBASE(QString source,int suggestedBase);
 

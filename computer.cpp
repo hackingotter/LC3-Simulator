@@ -229,7 +229,7 @@ void Computer::setRegister(reg_t reg, val_t val) {
     //will implement an identification method
     Undos->push(new Action::changeRegValue(reg,val));
     registers[reg] = val;
-    emit update();
+    SINGFORME(emit update();)
 }
 
 void Computer::setAllRegister(val_t vals[]) {
@@ -238,6 +238,8 @@ void Computer::setAllRegister(val_t vals[]) {
     } else {
         memcpy(registers, vals, NUM_OF_REGS * sizeof(val_t));
     }
+    //needs to have a way of remebering
+    SINGFORME(emit update();)
 }
 
 
@@ -288,7 +290,7 @@ void Computer::setProgramStatus(cond_t stat) {
     }
     Undos->push(new Action::changeRegCondt(stat));
     this->setRegister(PSR, curr);
-    emit update();
+    SINGFORME(emit update();)
 }
 
 // memory
@@ -304,31 +306,33 @@ void Computer::setMemValue(mem_addr_t addr, val_t val)
     Undos->push(new Action::changeMemValue(addr,val));
 //    qDebug("tes");
     _memory[addr].value = val;
-    emit update();
+    SINGFORME(emit update();)
 }
 
-void Computer::setMemValueHidden(mem_addr_t addr, val_t val)
-{
-    _memory[addr].value = val;
-}
+
 
 void Computer::setMemValuesBlock(mem_addr_t addr, size_t blockSize, val_t *vals)
 {
     //Implemented for compiler's compliance.
     // TODO
     Undos->beginMacro("set Values Block");
+    MASK
     for (size_t i = 0; i < blockSize; i ++) {
         setMemValue(addr + i,vals[i]);
     }
+    UNMASK
     Undos->endMacro();
 }
 void Computer::fillBlock(mem_addr_t begin, mem_addr_t end, val_t val)
 {
     Undos->beginMacro("fill block");
+    MASK
     for (mem_addr_t i = begin;i<end;i++)
     {
         setMemValue(i,val);
     }
+    UNMASK
+    SINGFORME(emit update();)
     Undos->endMacro();
 }
 val_t Computer::getMemValue(mem_addr_t addr)
@@ -358,6 +362,7 @@ void Computer::setMemLabel(mem_addr_t addr,label_t* newLabel)
 {
     Computer::Undos->push(new Action::changeMemLabel(addr,newLabel));
     _memory[addr].label=newLabel;
+    SINGFORME(emit update();)
 }
 void Computer::setMemLabelText(mem_addr_t addr,QString labelString)
 {
@@ -365,9 +370,11 @@ void Computer::setMemLabelText(mem_addr_t addr,QString labelString)
     label_t* label = (label_t*)malloc(sizeof (label_t));
     label->addr = addr;
     label->name = labelString;
+    MASK
     setMemLabel(addr,label);
+    UNMASK
     qDebug("all good here");
-    emit update();
+    SINGFORME(emit update();)
 }
 
 label_t* Computer::getMemLabel(mem_addr_t addr)
@@ -378,7 +385,7 @@ label_t* Computer::getMemLabel(mem_addr_t addr)
 void Computer::setMemBreakPoint(mem_addr_t addr,breakpoint_t* breakpt){
     Computer::Undos->push(new Action::changeMemBreak(addr,breakpt));
     _memory[addr].breakpt = breakpt;
-    emit update();
+    SINGFORME(emit update();)
 }
 
 breakpoint_t* Computer::getMemBreakPoint(mem_addr_t addr)
@@ -390,7 +397,7 @@ void Computer::setMemComment(mem_addr_t addr, QString comment)
 {
     Computer::Undos->push(new Action::changeMemComment(addr,comment));
     _memory[addr].comment = comment;
-    emit update();
+    SINGFORME(emit update();)
 }
 
 QString Computer::getMemComment(mem_addr_t addr)

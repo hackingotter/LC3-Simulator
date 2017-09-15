@@ -3,7 +3,7 @@
 //
 
 #include "Assembler.h"
-
+#include <iostream>
 using namespace std;
 
 
@@ -84,7 +84,6 @@ void Assembler::assembleFile(const char *inFile, const char *outFile) {
 }
 
 uint16_t Assembler::processLine(string &line, RunType runType, uint16_t pc, ofstream &oStream) {
-
     std::smatch match;
 
     if (!regex_match(line, match, parserRegex)) {
@@ -140,6 +139,7 @@ uint16_t Assembler::processLine(string &line, RunType runType, uint16_t pc, ofst
         if (runType == MainRun) {
             writeWord(oStream, pc);
         }
+
     }
 
     // set label

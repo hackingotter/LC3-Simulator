@@ -6,6 +6,7 @@
 #include <fstream>
 #include <regex>
 #include <map>
+#include "Utility.h"
 
 #ifndef LC3_ASSAMBLER_ASSAMBLER_H
 #define LC3_ASSAMBLER_ASSAMBLER_H
