@@ -7,6 +7,7 @@
 #include <QPainter>
 #include "computer.h"
 #include "Utility.h"
+#include <math.h>
 
 //template <class T>
 //constexpr std::add_const_t<T> &asConst(T &t) noexcept
@@ -210,8 +211,6 @@ void HighlightScrollBarOverlay::adjustPosition()
 
 void HighlightScrollBarOverlay::paintEvent(QPaintEvent *paintEvent)
 {
-
-    qDebug("henlo");
     QWidget::paintEvent(paintEvent);
 
     updateCache();
@@ -220,6 +219,7 @@ void HighlightScrollBarOverlay::paintEvent(QPaintEvent *paintEvent)
         return;
 
     const QRect &rect = m_scrollBar->overlayRect();
+    if(rect.height()<=0)return;
 
     int previousColor = 0;
     Highlight::Priority previousPriority = Highlight::LowPriority;
@@ -263,9 +263,9 @@ void HighlightScrollBarOverlay::paintEvent(QPaintEvent *paintEvent)
                         highlights[previousColor].removeLast();
                 }
             }
-            highlights[Utility::qColor2Int(currentHighlight.colorNum)] << QRect(rect.left() + horizontalMargin, top,
+            highlights[currentHighlight.colorNum] << QRect(rect.left() + horizontalMargin, top,
                                                         resultWidth, bottom - top);
-            previousRect = &highlights[Utility::qColor2Int(currentHighlight.colorNum)].last();
+            previousRect = &highlights[currentHighlight.colorNum].last();
             previousColor = currentHighlight.colorNum;
             previousPriority = currentHighlight.priority;
         }
@@ -274,8 +274,9 @@ void HighlightScrollBarOverlay::paintEvent(QPaintEvent *paintEvent)
 
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, false);
+    QColor colors[] = {Qt::red,Qt::yellow,Qt::green,Qt::blue,Qt::black,Qt::gray,Qt::darkBlue};
     foreach (int themeColor, highlights.keys()) {
-        const QColor &color = Utility::int2QColor(themeColor);
+        const QColor &color = (colors[themeColor]);
         for (int i = 0, total = highlights[themeColor].size(); i < total; ++i) {
             const QRect rect = highlights[themeColor][i];
             painter.fillRect(rect, color);

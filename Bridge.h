@@ -8,8 +8,6 @@
 class Bridge :public QObject
 {
     Q_OBJECT
-    val_t* old_Mem_State;
-    val_t* old_Reg_State;
 int runningMode;
 public:
     enum Mode

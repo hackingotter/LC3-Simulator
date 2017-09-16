@@ -88,7 +88,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     Computer::getDefault()->setProgramStatus(cond_z);
 
     Utility::systemInfoDebug();//Just some fun info
-    setUpUndoStack();//QED
+
     setupThreadManager();//QED
 
 
@@ -119,15 +119,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     readSettings();
 //    setupMenuBar();
 //    Computer::getDefault()->loadProgramFile(QString("testing.asm").toLocal8Bit().data());
+    update();
 }
 MainWindow::~MainWindow()
 {
     delete ui;
-}
-void MainWindow::setUpUndoStack()
-{
-    Undos =  new HistoryHandler();
-    Undos->setUndoLimit(65535);
 }
 
 void MainWindow::setupViews()
@@ -139,6 +135,7 @@ void MainWindow::setupViews()
     qInfo("Header made");
     qInfo("Size Set");
     QString str;
+    Saturn = new ScrollBarHandler();
     setupMemView(ui->MemView1View);
     setupMemView(ui->MemView2View);
     setupMemView(ui->MemView3View);
@@ -188,10 +185,10 @@ void MainWindow::setupMemView(QTableView* view)
     view->showGrid();
     qDebug("Setting Model");
     view->setModel(model);
+    HighlightScrollBar* scroll = new HighlightScrollBar(Qt::Vertical,this);
+    Saturn->addScrollBar(scroll);
+    view->setVerticalScrollBar(scroll);
 
-    HighlightScrollBar* j = new HighlightScrollBar(Qt::Vertical,this);
-    j->addHighlight(Highlight(Highlight::regpoint,500,Qt::black,Highlight::HighPriority));
-    view->setVerticalScrollBar(j);
     view->horizontalHeader()->setSectionResizeMode(2,QHeaderView::Fixed);
 
     // this is inefficient and useless since we should set those in the design
@@ -344,13 +341,13 @@ void MainWindow::on_NextButton_pressed()
 }
 void MainWindow::update()
 {
-    qDebug(QString().setNum(Undos->index()).toLocal8Bit());
     disp->update();
     UPDATEVIEW(ui->MemView1View);
     UPDATEVIEW(ui->MemView2View);
     UPDATEVIEW(ui->MemView3View);
     UPDATEVIEW(ui->StackViewView);
     UPDATEVIEW(ui->RegisterView);
+    Saturn->update();
 }
 
 void MainWindow::threadTest(QString name)

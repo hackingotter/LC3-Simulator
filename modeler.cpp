@@ -142,14 +142,24 @@ QVariant modeler::data(const QModelIndex &index, int role) const
         }
 
     }
-    if(role == Qt::EditRole)return QVariant();
+    if(role == Qt::EditRole)
+    {
+        switch (column) {
+        case VALUCOLUMN:
+        {
+            return getHexString(Computer::getDefault()->getMemValue(addr));
+        }
+        default:
+            break;
+        }
+        return QVariant();
+    }
     return QVariant();
 }
 
 bool modeler::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     qDebug("Setting Data");
-            bool success = true;//this will change when success isn't found
     mem_addr_t addr = index.row();
     int column = index.column();
     qDebug("Am I a valid index?");

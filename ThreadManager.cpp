@@ -11,8 +11,6 @@ void ThreadManager::activate(int runningMode)
 {
     qDebug("Activating Thread with number " + QString().setNum(runningMode).toLocal8Bit());
     emit started(); // for safety reasons, we will say we started before we actually start
-    old_Mem_State = Computer::getDefault()->getAllMemValues();
-    old_Reg_State = Computer::getDefault()->getAllRegisters();
     Bridge* worker = new Bridge(runningMode);
     QThread *thread = new QThread();
     worker->moveToThread(thread);

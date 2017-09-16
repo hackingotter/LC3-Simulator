@@ -18,9 +18,11 @@ public:
 
     QStack<int> updateMask;
 
-#define MASK {Computer::getDefault()->updateMask.push(1);qDebug("Masking");}
-#define UNMASK {Computer::getDefault()->updateMask.pop();qDebug("Unmasking");}
-#define SINGFORME(OPERA) {if(Computer::getDefault()->updateMask.length()==0){OPERA;qDebug("Higher");}}
+    #define MASK {Computer::getDefault()->updateMask.push(1);qDebug("Masking");}
+
+    #define UNMASK {Computer::getDefault()->updateMask.pop();qDebug("Unmasking");}
+
+    #define SINGFORME(OPERA) {if(Computer::getDefault()->updateMask.length()==0){OPERA;qDebug("Higher");}}
     // registers
 
     /** Returns the contents of a register

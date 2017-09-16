@@ -15,6 +15,7 @@
 #include "Bridge.h"
 #include "ThreadManager.h"
 #include "StackModeler.h"
+#include "ScrollBarHandler.h"
 #define BRSLOT 0
 #define ADDRSLOT 1
 #define NAMESLOT 2
@@ -107,6 +108,7 @@ public:
      */
     HistoryHandler* Undos;
 
+    ScrollBarHandler* Saturn;
 
     /**
      * @brief threadRunning Describes the runningness of the sim thread 
@@ -116,6 +118,7 @@ public:
      * 
      */
     bool* threadRunning = new bool(false);//the thread isn't running on init
+
 
 
     MainWindow(QWidget *parent = 0);
@@ -182,7 +185,6 @@ public slots:
     static void  threadTest(QString);
 
     void update();
-    void setUpUndoStack();
 
     void on_pushButton_7_clicked();
 

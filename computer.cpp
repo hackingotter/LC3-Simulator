@@ -25,7 +25,6 @@ return STUFF\
 namespace Action
 {
 typedef enum doPriority{
-    subsysLevel=-1,//for during execution of single line
     systLevel = 0,//for when the system does something
     userLevel = 1,
 
@@ -41,9 +40,10 @@ class changeRegCondt: public QUndoCommand
 {
 public:
     changeRegCondt(cond_t cond):newCondt(cond),oldCondt(Computer::getDefault()->getProgramStatus())
-    {
-        setText("set Condition");
-    }
+    INITFUNC
+    (
+        "set Condition",
+    )
     UNDOFUNC
     (
         Computer::getDefault()->setProgramStatus(oldCondt);
@@ -91,7 +91,6 @@ public:
     INITFUNC
     (
         "set Memory",
-
     )
     UNDOFUNC
     (
@@ -117,8 +116,7 @@ public:
     changeMemLabel(mem_addr_t addr,label_t* newLabel):mem_addr(addr),oldLabelPtr(Computer::getDefault()->getMemLabel(addr)),newLabelPtr(newLabel)
     INITFUNC
     (
-        "set Label"
-      ,
+        "set Label",
     )
     UNDOFUNC
     (
@@ -140,10 +138,13 @@ private:
 class changeMemBreak: public QUndoCommand
 {
 public:
-    changeMemBreak(mem_addr_t addr,breakpoint_t* breakPtr):mem_addr(addr),oldBreak(Computer::getDefault()->getMemBreakPoint(addr)),newBreak(breakPtr){setText("set Break");}
+    changeMemBreak(mem_addr_t addr,breakpoint_t* breakPtr):mem_addr(addr),oldBreak(Computer::getDefault()->getMemBreakPoint(addr)),newBreak(breakPtr)
+    INITFUNC
+    (
+      "set Break",
+    )
     UNDOFUNC
     (
-
         Computer::getDefault()->setMemBreakPoint(mem_addr,oldBreak);
     )
     REDOFUNC
@@ -164,9 +165,10 @@ class changeMemComment:public QUndoCommand
 {
 public:
     changeMemComment(mem_addr_t addr,QString newCom):mem_addr(addr),oldComment(Computer::getDefault()->getMemComment(addr)),newComment(newCom)
-    {
-
-    }
+    INITFUNC
+    (
+        "Change Comment",
+    )
     UNDOFUNC
     (
         Computer::getDefault()->setMemComment(mem_addr,oldComment);
@@ -302,14 +304,10 @@ mem_loc_t Computer::getMemLocation(mem_addr_t addr)
 
 void Computer::setMemValue(mem_addr_t addr, val_t val)
 {
-//    qDebug("setting memory value");
     Undos->push(new Action::changeMemValue(addr,val));
-//    qDebug("tes");
     _memory[addr].value = val;
     SINGFORME(emit update();)
 }
-
-
 
 void Computer::setMemValuesBlock(mem_addr_t addr, size_t blockSize, val_t *vals)
 {
@@ -367,11 +365,11 @@ void Computer::setMemLabel(mem_addr_t addr,label_t* newLabel)
 void Computer::setMemLabelText(mem_addr_t addr,QString labelString)
 {
     qDebug("setting memLabel");
-    label_t* label = (label_t*)malloc(sizeof (label_t));
-    label->addr = addr;
-    label->name = labelString;
+    label_t label;//(label_t*)malloc(sizeof (label_t*));
+    label.addr = addr;
+    label.name = labelString;
     MASK
-    setMemLabel(addr,label);
+    setMemLabel(addr,&label);
     UNMASK
     qDebug("all good here");
     SINGFORME(emit update();)
@@ -882,6 +880,7 @@ void Computer::trap(val_t inst) {
 
 void Computer::executeSingleInstruction() {
     Undos->beginMacro("Single execution");
+    MASK
     mem_addr_t pcAddr = getRegister(PC);
     mem_loc_t instLoc = getMemLocation(pcAddr);
     val_t inst = instLoc.value;
@@ -944,6 +943,8 @@ void Computer::executeSingleInstruction() {
         break;
 
     }
+    UNMASK
+    SINGFORME(update();)
     Undos->endMacro();
 
 }

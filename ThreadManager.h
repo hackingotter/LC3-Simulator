@@ -16,8 +16,6 @@ public:
         Flag    = 2,
         Done    = 3
     };
-    val_t* old_Mem_State;
-    val_t* old_Reg_State;
     explicit ThreadManager(QObject *parent = 0);
 
 signals:

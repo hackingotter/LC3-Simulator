@@ -48,8 +48,6 @@ Hope::Hope(QWidget *parent):QLabel(parent,0)
     setPicture(pi);
     rekt = pi.boundingRect();
     qDebug("Done finding picture size");
-            QString* sizer = new QString();
-
 
     QPicture picture = QPicture();
 //    QSize cursorsize = new QCursor(Qt::CrossCursor)->bitmap()->size();

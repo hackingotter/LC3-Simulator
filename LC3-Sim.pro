@@ -51,7 +51,8 @@ HEADERS += \
     GlobalTypes.h \
     computer.h \
     opcodes.h \
-    FileHandler.h
+    FileHandler.h \
+    ScrollBarHandler.h
 
 SOURCES += \
     Bridge.cpp \
@@ -73,7 +74,8 @@ SOURCES += \
     computer.cpp \
     utility.cpp \
     assembler.cpp \
-    FileHandler.cpp
+    FileHandler.cpp \
+    ScrollBarHandler.cpp
 
 DISTFILES += \
     Test.txt \
