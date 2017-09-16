@@ -107,8 +107,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     setupViews();
     Bridge::doWork();
     qDebug("Connecting Disp");
-    HighlightScrollBar* j = new HighlightScrollBar(Qt::Vertical);
-
 
 //    QObject::connect(Computer::getDefault() ,SIGNAL(update()),disp,SLOT(update()));
     QObject::connect(Computer::getDefault() ,SIGNAL(update()),this,SLOT(update()));
@@ -119,7 +117,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 //    QObject::connect(ui->NextButton,SIGNAL(on_NextButton_pressed()),ui->RegisterView,SLOT(update()));
     readSettings();
-    setupMenuBar();
+//    setupMenuBar();
 //    Computer::getDefault()->loadProgramFile(QString("testing.asm").toLocal8Bit().data());
 }
 MainWindow::~MainWindow()
@@ -191,9 +189,9 @@ void MainWindow::setupMemView(QTableView* view)
     qDebug("Setting Model");
     view->setModel(model);
 
-    HighlightScrollBar* j = new HighlightScrollBar(Qt::Vertical );
+    HighlightScrollBar* j = new HighlightScrollBar(Qt::Vertical,this);
     j->addHighlight(Highlight(Highlight::regpoint,500,Qt::black,Highlight::HighPriority));
-    view->setHorizontalScrollBar(j);
+    view->setVerticalScrollBar(j);
     view->horizontalHeader()->setSectionResizeMode(2,QHeaderView::Fixed);
 
     // this is inefficient and useless since we should set those in the design
@@ -419,6 +417,7 @@ void MainWindow::readSettings()
 {
     QSettings settings("Melberg & Ott","PennSim++");
     settings.beginGroup("MainWindow");
+    qDebug("heylo");
     int width = settings.value("Window Width",QVariant(1163)).toInt();
     int height= settings.value("Window Height",QVariant(694)).toInt();
     int MemoryBoxHeight = settings.value("Memory Box Height",QVariant(635)).toInt();
@@ -428,8 +427,8 @@ void MainWindow::readSettings()
     ui->MemoryBox->resize(MemoryBoxWidth,MemoryBoxHeight);
     setWindowState(static_cast<Qt::WindowState>(settings.value("Window State",QVariant(Qt::WindowMaximized)).toInt()));
     settings.endGroup();
+    qDebug("theylo");
 
-    Computer::getDefault()->Undos->endMacro();
 
 }
 void MainWindow::saveSettings()

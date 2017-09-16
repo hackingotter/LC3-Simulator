@@ -5,6 +5,7 @@
 #include <QEvent>
 #include <QTimer>
 #include <QPainter>
+#include "computer.h"
 #include "Utility.h"
 
 //template <class T>
@@ -209,6 +210,8 @@ void HighlightScrollBarOverlay::adjustPosition()
 
 void HighlightScrollBarOverlay::paintEvent(QPaintEvent *paintEvent)
 {
+
+    qDebug("henlo");
     QWidget::paintEvent(paintEvent);
 
     updateCache();
@@ -218,7 +221,7 @@ void HighlightScrollBarOverlay::paintEvent(QPaintEvent *paintEvent)
 
     const QRect &rect = m_scrollBar->overlayRect();
 
-    QColor previousColor = Qt::yellow;
+    int previousColor = 0;
     Highlight::Priority previousPriority = Highlight::LowPriority;
     QRect *previousRect = 0;
 
@@ -238,7 +241,7 @@ void HighlightScrollBarOverlay::paintEvent(QPaintEvent *paintEvent)
                 + float(currentHighlight.position) / range * rect.height();
         const int bottom = top + resultHeight;
 
-        if (previousRect && previousColor == currentHighlight.color && previousBottom + 1 >= top) {
+        if (previousRect && previousColor == currentHighlight.colorNum && previousBottom + 1 >= top) {
             // If the previous highlight has the same color and is directly prior to this highlight
             // we just extend the previous highlight.
             previousRect->setBottom(bottom - 1);
@@ -257,13 +260,13 @@ void HighlightScrollBarOverlay::paintEvent(QPaintEvent *paintEvent)
                 } else {
                     previousRect->setBottom(top - 1); // move the end of the last highlight
                     if (previousRect->height() == 0) // if the result is an empty rect, remove it.
-                        highlights[Utility::qColor2Int(previousColor)].removeLast();
+                        highlights[previousColor].removeLast();
                 }
             }
-            highlights[Utility::qColor2Int(currentHighlight.color)] << QRect(rect.left() + horizontalMargin, top,
+            highlights[Utility::qColor2Int(currentHighlight.colorNum)] << QRect(rect.left() + horizontalMargin, top,
                                                         resultWidth, bottom - top);
-            previousRect = &highlights[Utility::qColor2Int(currentHighlight.color)].last();
-            previousColor = currentHighlight.color;
+            previousRect = &highlights[Utility::qColor2Int(currentHighlight.colorNum)].last();
+            previousColor = currentHighlight.colorNum;
             previousPriority = currentHighlight.priority;
         }
         previousBottom = previousRect->bottom();
@@ -281,10 +284,10 @@ void HighlightScrollBarOverlay::paintEvent(QPaintEvent *paintEvent)
 }
 
 Highlight::Highlight(Id category_, int position_,
-                     QColor color_, Highlight::Priority priority_)
+                     int colornum_, Highlight::Priority priority_)
     : category(category_)
     , position(position_)
-    , color(color_)
+    , colorNum(colornum_)
     , priority(priority_)
 {
 }

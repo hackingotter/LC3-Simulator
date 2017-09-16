@@ -40,7 +40,7 @@ public:
 
 
     QList<QColor> *regColors;
-
+    QList<bool> *regColorsCheck;
     explicit RegisterModel(QObject* parent = 0,bool* excersize=Q_NULLPTR);
 
     QVariant headerData(int section,Qt::Orientation orientation, int role = Qt::DisplayRole) const override;

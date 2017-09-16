@@ -30,13 +30,14 @@ struct Highlight
     };
 
 
-    Highlight(Id category, int position, QColor color, Priority priority);
+    Highlight(Id category, int position, int colorNum, Priority priority);
     Highlight() = default;
     Id category = breakpoint;
     int position = -1;
-    QColor color = Qt::yellow;
+    int colorNum = 0;
     Priority priority = Invalid;
 };
+
 
 class HighlightScrollBarOverlay;
 
