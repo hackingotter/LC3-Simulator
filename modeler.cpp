@@ -272,7 +272,7 @@ QString modeler::addr2Mnem(mem_addr_t addr) const
     int reg11       =((val&0x0E00) >> 9);
     int reg8        =((val&0x01E0) >> 6);
     int reg2        =((val&0x0007) >> 0);
-    bool zero543    =(val&0x0038);
+//    bool zero543    =(val&0x0038);
     bool imm5YN     =(val&0x0020) >> 5;
 
     //It is much easier to be able to handle them without needing to account for names
@@ -338,7 +338,7 @@ QString modeler::addr2Mnem(mem_addr_t addr) const
         }
         else
         {
-            mem_addr_t target = addr + val & 0x00FF;
+            mem_addr_t target = addr +( val & 0x00FF);
             label_t* label = Computer::getDefault()->getMemLabel(target);
             out.append(" ");
             if(label != nullptr)
@@ -373,7 +373,7 @@ QString modeler::addr2Mnem(mem_addr_t addr) const
 if(val&0x0800)//11th slot 1 means jsr
         {
 
-            mem_addr_t target = addr + val & 0x07FF;
+            mem_addr_t target = addr + (val & 0x07FF);
             out.append(" " + name_or_addr(target));
         }
         else if(!(val&0x0E3F))//or, it could be jsrr

@@ -1,22 +1,31 @@
 #include "HistoryHandler.h"
 #include "Utility.h"
+#include "QUndoStack"
 
 HistoryHandler::HistoryHandler()
 {
-doing = false;
+doing = 0;
 }
 void HistoryHandler::undo(int level)
 {
 //    if(dont)return;
-//    QUndoStack::undo();
+    doing = 1;
+    QUndoStack::undo();
+    qDebug(QString().setNum(count()).toLocal8Bit());
+    doing = 0;
 }
 void HistoryHandler::redo(int level)
 {
-//    if(Utility::remember)return;
-//    QUndoStack::redo();
+//    if(doing)return;
+    doing = 1;
+    QUndoStack::redo();
+    doing = 0;
 }
-void HistoryHandler::push(QUndoCommand *cmd)
+bool HistoryHandler::add(QUndoCommand *cmd)
 {
-//    if(Utility::remember)return;
-//    QUndoStack::push(cmd);
+qDebug(cmd->actionText().toLocal8Bit()+ " " +QString().setNum(this->index()).toLocal8Bit());
+if(doing==0)this->QUndoStack::push(cmd);
+qDebug("hy");
+return true;
 }
+

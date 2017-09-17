@@ -6,7 +6,7 @@
 #define INITFUNC(TEXT,STUFF) \
 {\
     setText(TEXT);\
-    STUFF\
+    STUFF;\
 }
 
 #define UNDOFUNC(STUFF)  void undo()\
@@ -16,7 +16,13 @@
 #define REDOFUNC(STUFF)  void redo()\
 {\
     STUFF\
-}
+    }
+//    if(next)\
+//    {\
+//    STUFF\
+//    }\
+//    next=!next;\
+//}
 #define SAVEFUNC(STUFF)  QString save()\
 {\
 return STUFF\
@@ -24,7 +30,7 @@ return STUFF\
 
 namespace Action
 {
-typedef enum doPriority{
+ enum doPriority{
     systLevel = 0,//for when the system does something
     userLevel = 1,
 
@@ -40,10 +46,11 @@ public:
 class changeRegCondt: public QUndoCommand
 {
 public:
-    changeRegCondt(cond_t cond):newCondt(cond),oldCondt(Computer::getDefault()->getProgramStatus())
+    changeRegCondt(cond_t ncond,cond_t ocond):newCondt(ncond),oldCondt(ocond)
     INITFUNC
     (
-        QString("Set Condition to "+QString().setNum(cond)),
+        QString("Set Condition to "+QString().setNum(ncond)),
+        setObsolete(newCondt == oldCondt);
     )
     UNDOFUNC
     (
@@ -62,10 +69,11 @@ private:
 class changeRegValue: public QUndoCommand
 {
 public:
-    changeRegValue(reg_t reg, val_t val):regName(reg),newValue(val),oldValue(Computer::getDefault()->getRegister(reg))
+    changeRegValue(reg_t reg,val_t oval, val_t nval):regName(reg),newValue(nval),oldValue(oval)
     INITFUNC
     (
         QString("Set "+ ((regName<8)?"R"+QString().setNum(regName):" other") + " to "+QString().setNum(newValue)),
+        setObsolete(newValue==oldValue);
     )
     UNDOFUNC
     (
@@ -88,10 +96,11 @@ private:
 class changeMemValue: public QUndoCommand
 {
 public:
-    changeMemValue(mem_addr_t addr,val_t val):mem_addr(addr),oldValue(Computer::getDefault()->getMemValue(addr)),newValue(val)
+    changeMemValue(mem_addr_t addr,val_t oval,val_t nval):mem_addr(addr),oldValue(oval),newValue(nval)
     INITFUNC
     (
         QString("Set " + getHexString(addr) + " to "+QString().setNum(newValue)),
+        setObsolete(newValue==oldValue);
     )
     UNDOFUNC
     (
@@ -100,6 +109,7 @@ public:
     REDOFUNC
     (
         Computer::getDefault()->setMemValue(mem_addr,newValue);
+
     )
     SAVEFUNC
     (
@@ -114,10 +124,11 @@ private:
 class changeMemLabel: public QUndoCommand
 {
 public:
-    changeMemLabel(mem_addr_t addr,label_t* newLabel):mem_addr(addr),oldLabelPtr(Computer::getDefault()->getMemLabel(addr)),newLabelPtr(newLabel)
+    changeMemLabel(mem_addr_t addr,label_t* oldLabel,label_t* newLabel):mem_addr(addr),oldLabelPtr(oldLabel),newLabelPtr(newLabel)
     INITFUNC
     (
         "set Label",
+        setObsolete(newLabelPtr == oldLabelPtr)
     )
     UNDOFUNC
     (
@@ -139,10 +150,11 @@ private:
 class changeMemBreak: public QUndoCommand
 {
 public:
-    changeMemBreak(mem_addr_t addr,breakpoint_t* breakPtr):mem_addr(addr),oldBreak(Computer::getDefault()->getMemBreakPoint(addr)),newBreak(breakPtr)
+    changeMemBreak(mem_addr_t addr,breakpoint_t* obreakPtr, breakpoint_t* nbreakPtr):mem_addr(addr),oldBreak(obreakPtr),newBreak(nbreakPtr)
     INITFUNC
     (
       "set Break",
+        setObsolete(newBreak==oldBreak);
     )
     UNDOFUNC
     (
@@ -165,10 +177,11 @@ private:
 class changeMemComment:public QUndoCommand
 {
 public:
-    changeMemComment(mem_addr_t addr,QString newCom):mem_addr(addr),oldComment(Computer::getDefault()->getMemComment(addr)),newComment(newCom)
+    changeMemComment(mem_addr_t addr,QString oldCom, QString newCom):mem_addr(addr),oldComment(oldCom),newComment(newCom)
     INITFUNC
     (
         "Changed Comment at " + getHexString(addr)+ "to " + newComment,
+        setObsolete(newComment==oldComment);
     )
     UNDOFUNC
     (
@@ -230,8 +243,10 @@ val_t* Computer::getAllRegisters() {
 
 void Computer::setRegister(reg_t reg, val_t val) {
     //will implement an identification method
-    Undos->push(new Action::changeRegValue(reg,val));
+    val_t oval = registers[reg];
     registers[reg] = val;
+    Undos->add(new Action::changeRegValue(reg,oval,val));
+
     SINGFORME(emit update();)
 }
 
@@ -291,9 +306,10 @@ void Computer::setProgramStatus(cond_t stat) {
         return;
         break;
     }
-    Undos->push(new Action::changeRegCondt(stat));
+
     this->setRegister(PSR, curr);
-    SINGFORME(emit update();)
+
+        SINGFORME(emit update();)
 }
 
 // memory
@@ -305,8 +321,10 @@ mem_loc_t Computer::getMemLocation(mem_addr_t addr)
 
 void Computer::setMemValue(mem_addr_t addr, val_t val)
 {
-    Undos->push(new Action::changeMemValue(addr,val));
+    val_t oval = _memory[addr].value;
     _memory[addr].value = val;
+    Undos->add(new Action::changeMemValue(addr,oval,val));
+
     SINGFORME(emit update();)
 }
 
@@ -359,8 +377,10 @@ val_t* Computer::getAllMemValues()
 
 void Computer::setMemLabel(mem_addr_t addr,label_t* newLabel)
 {
-    Computer::Undos->push(new Action::changeMemLabel(addr,newLabel));
+    label_t* oldLabel = _memory[addr].label;
     _memory[addr].label=newLabel;
+    Computer::Undos->add(new Action::changeMemLabel(addr,oldLabel,newLabel));
+
     SINGFORME(emit update();)
 }
 void Computer::setMemLabelText(mem_addr_t addr,QString labelString)
@@ -382,8 +402,10 @@ label_t* Computer::getMemLabel(mem_addr_t addr)
 }
 
 void Computer::setMemBreakPoint(mem_addr_t addr,breakpoint_t* breakpt){
-    Computer::Undos->push(new Action::changeMemBreak(addr,breakpt));
+    breakpoint_t* obreakptr =_memory[addr].breakpt;
     _memory[addr].breakpt = breakpt;
+    Computer::Undos->add(new Action::changeMemBreak(addr,obreakptr,breakpt));
+
     SINGFORME(emit update();)
 }
 
@@ -394,8 +416,11 @@ breakpoint_t* Computer::getMemBreakPoint(mem_addr_t addr)
 
 void Computer::setMemComment(mem_addr_t addr, QString comment)
 {
-    Computer::Undos->push(new Action::changeMemComment(addr,comment));
+    QString oldComment = _memory[addr].comment;
     _memory[addr].comment = comment;
+
+    Computer::Undos->add(new Action::changeMemComment(addr,oldComment,comment));
+
     SINGFORME(emit update();)
 }
 
@@ -411,7 +436,7 @@ size_t Computer::loadProgramFile(char* path) {
     FILE *file = fopen(path, "r");
 
     if (!file)
-        throw "ERROR: could not open file:" + path;
+        throw QString("ERROR: could not open file:" + QString(path)).toLocal8Bit();
 
     fseek(file, 0, SEEK_END);
     size_t fileLen = ftell(file);

@@ -16,14 +16,18 @@ public:
 
     HistoryHandler* Undos;//will have to work out how to handle this when not in gui
 
-    QStack<int> updateMask;
+    int updateMask;
 
 
-    #define MASK {Computer::getDefault()->updateMask.push(1);qDebug("Masking");}
+    #define MASK\
+    {\
+    Computer::getDefault()->updateMask++;\
+    qDebug("Masking" + QString().setNum(Computer::getDefault()->updateMask).toLocal8Bit());\
+    }
 
-    #define UNMASK {Computer::getDefault()->updateMask.pop();qDebug("Unmasking");}
+    #define UNMASK {(Computer::getDefault()->updateMask==0)?:Computer::getDefault()->updateMask--;qDebug("Unmasking"+ QString().setNum(Computer::getDefault()->updateMask).toLocal8Bit());}
 
-    #define SINGFORME(OPERA) {if(Computer::getDefault()->updateMask.length()==0){OPERA;qDebug("Higher");}}
+    #define SINGFORME(OPERA) {if(Computer::getDefault()->updateMask==0){OPERA;qDebug("Higher");}}
     // registers
 
     /** Returns the contents of a register
