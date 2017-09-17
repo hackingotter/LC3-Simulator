@@ -268,7 +268,7 @@
          <enum>QTabWidget::Rounded</enum>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>2</number>
         </property>
         <property name="elideMode">
          <enum>Qt::ElideRight</enum>
@@ -390,28 +390,7 @@
          </attribute>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
-           <widget class="QTableWidget" name="tableWidget_7">
-            <row>
-             <property name="text">
-              <string>Save 1</string>
-             </property>
-            </row>
-            <column>
-             <property name="text">
-              <string>Name</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>Time</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>Note</string>
-             </property>
-            </column>
-           </widget>
+           <layout class="QVBoxLayout" name="undoStackSpot"/>
           </item>
           <item>
            <layout class="QVBoxLayout" name="verticalLayout_5">

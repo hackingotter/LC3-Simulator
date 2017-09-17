@@ -18,6 +18,7 @@ public:
 
     QStack<int> updateMask;
 
+
     #define MASK {Computer::getDefault()->updateMask.push(1);qDebug("Masking");}
 
     #define UNMASK {Computer::getDefault()->updateMask.pop();qDebug("Unmasking");}

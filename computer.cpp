@@ -29,6 +29,7 @@ typedef enum doPriority{
     userLevel = 1,
 
 };
+static bool remember;
 class PrioritizedCommand: public QUndoCommand
 {
 public:
@@ -42,7 +43,7 @@ public:
     changeRegCondt(cond_t cond):newCondt(cond),oldCondt(Computer::getDefault()->getProgramStatus())
     INITFUNC
     (
-        "set Condition",
+        QString("Set Condition to "+QString().setNum(cond)),
     )
     UNDOFUNC
     (
@@ -61,10 +62,10 @@ private:
 class changeRegValue: public QUndoCommand
 {
 public:
-    changeRegValue(reg_t reg, val_t val):regName(reg),oldValue(Computer::getDefault()->getRegister(reg)),newValue(val)
+    changeRegValue(reg_t reg, val_t val):regName(reg),newValue(val),oldValue(Computer::getDefault()->getRegister(reg))
     INITFUNC
     (
-        "set Register",
+        QString("Set "+ ((regName<8)?"R"+QString().setNum(regName):" other") + " to "+QString().setNum(newValue)),
     )
     UNDOFUNC
     (
@@ -90,7 +91,7 @@ public:
     changeMemValue(mem_addr_t addr,val_t val):mem_addr(addr),oldValue(Computer::getDefault()->getMemValue(addr)),newValue(val)
     INITFUNC
     (
-        "set Memory",
+        QString("Set " + getHexString(addr) + " to "+QString().setNum(newValue)),
     )
     UNDOFUNC
     (
@@ -167,7 +168,7 @@ public:
     changeMemComment(mem_addr_t addr,QString newCom):mem_addr(addr),oldComment(Computer::getDefault()->getMemComment(addr)),newComment(newCom)
     INITFUNC
     (
-        "Change Comment",
+        "Changed Comment at " + getHexString(addr)+ "to " + newComment,
     )
     UNDOFUNC
     (
@@ -879,12 +880,12 @@ void Computer::trap(val_t inst) {
 }
 
 void Computer::executeSingleInstruction() {
-    Undos->beginMacro("Single execution");
+
     MASK
     mem_addr_t pcAddr = getRegister(PC);
     mem_loc_t instLoc = getMemLocation(pcAddr);
     val_t inst = instLoc.value;
-
+    Undos->beginMacro("Executing "+getHexString(pcAddr));
     setRegister(PC, pcAddr + 1);
     switch (inst & opMask) {
     case addOpCode:

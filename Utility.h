@@ -28,8 +28,9 @@
 
 #define CHARPTR2QSTRING(CHARPTR)(QString::fromLocal8Bit(CHARPTR))
 
-namespace Utility {
 
+namespace Utility {
+//static bool remember = false;
 
 int QSTRING2INTBASE(QString source,int suggestedBase);
 

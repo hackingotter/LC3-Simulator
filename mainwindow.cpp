@@ -27,6 +27,7 @@
 #include <QFileDialog>
 #include <QDataStream>
 #include "Assembler.h"
+#include <QUndoView>
 #include <QFile>
 #define REGISTERVIEWNUMCOLUMN 2
 
@@ -103,6 +104,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->setupUi(this);//this puts everything in place
 
     SETUPDISPLAY(ui,this)
+            setupMenuBar();
     setupRegisterView();
     setupViews();
     Bridge::doWork();
@@ -115,6 +117,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     QObject::connect(ui->actionClear,SIGNAL(triggered()),disp,SLOT(clearScreen()));
 
+    ui->undoStackSpot->addWidget(new QUndoView(Computer::getDefault()->Undos));
 //    QObject::connect(ui->NextButton,SIGNAL(on_NextButton_pressed()),ui->RegisterView,SLOT(update()));
     readSettings();
 //    setupMenuBar();

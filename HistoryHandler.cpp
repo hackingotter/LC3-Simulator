@@ -1,27 +1,22 @@
 #include "HistoryHandler.h"
 #include "Utility.h"
+
 HistoryHandler::HistoryHandler()
 {
 doing = false;
 }
 void HistoryHandler::undo(int level)
 {
-    if(HistoryHandler::doing)return;
-    doing = true;
-    QUndoStack::undo();
-    doing = false;
+//    if(dont)return;
+//    QUndoStack::undo();
 }
 void HistoryHandler::redo(int level)
 {
-    if(doing)return;
-    doing = true;
-    QUndoStack::redo();
-    doing = false;
+//    if(Utility::remember)return;
+//    QUndoStack::redo();
 }
 void HistoryHandler::push(QUndoCommand *cmd)
 {
-    if(doing)return;
-    doing = true;
-    QUndoStack::push(cmd);
-    doing = false;
+//    if(Utility::remember)return;
+//    QUndoStack::push(cmd);
 }
