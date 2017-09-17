@@ -410,7 +410,7 @@ size_t Computer::loadProgramFile(char* path) {
     FILE *file = fopen(path, "r");
 
     if (!file)
-        return 0;
+        throw "ERROR: could not open file:" + path;
 
     fseek(file, 0, SEEK_END);
     size_t fileLen = ftell(file);
@@ -423,6 +423,8 @@ size_t Computer::loadProgramFile(char* path) {
     fread(buffer, sizeof(val_t), fileLen/2 - 1, file);
 
     setMemValuesBlock(startingAddr, fileLen/2 - 1, buffer);
+
+    free(buffer);
 
     fclose(file);
 
