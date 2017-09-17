@@ -3,6 +3,8 @@
 #include "util.h"
 #include <QString>
 
+
+#define TRY2PUSH(OLD,NEW,DO) {if(NEW!=OLD)Computer::Undos->add(new Action::DO);}
 #define INITFUNC(TEXT,STUFF) \
 {\
     setText(TEXT);\
@@ -323,7 +325,7 @@ void Computer::setMemValue(mem_addr_t addr, val_t val)
 {
     val_t oval = _memory[addr].value;
     _memory[addr].value = val;
-    Undos->add(new Action::changeMemValue(addr,oval,val));
+    TRY2PUSH(oval,val,changeMemValue(addr,oval,val));
 
     SINGFORME(emit update();)
 }
@@ -379,7 +381,7 @@ void Computer::setMemLabel(mem_addr_t addr,label_t* newLabel)
 {
     label_t* oldLabel = _memory[addr].label;
     _memory[addr].label=newLabel;
-    Computer::Undos->add(new Action::changeMemLabel(addr,oldLabel,newLabel));
+    TRY2PUSH(oldLabel,newLabel,changeMemLabel(addr,oldLabel,newLabel));
 
     SINGFORME(emit update();)
 }
@@ -404,7 +406,7 @@ label_t* Computer::getMemLabel(mem_addr_t addr)
 void Computer::setMemBreakPoint(mem_addr_t addr,breakpoint_t* breakpt){
     breakpoint_t* obreakptr =_memory[addr].breakpt;
     _memory[addr].breakpt = breakpt;
-    Computer::Undos->add(new Action::changeMemBreak(addr,obreakptr,breakpt));
+    TRY2PUSH(obreakptr,breakpt,changeMemBreak(addr,obreakptr,breakpt));
 
     SINGFORME(emit update();)
 }

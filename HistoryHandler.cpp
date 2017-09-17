@@ -9,17 +9,17 @@ doing = 0;
 void HistoryHandler::undo(int level)
 {
 //    if(dont)return;
-    doing = 1;
+    doing++;
     QUndoStack::undo();
     qDebug(QString().setNum(count()).toLocal8Bit());
-    doing = 0;
+    doing--;
 }
 void HistoryHandler::redo(int level)
 {
 //    if(doing)return;
-    doing = 1;
+    doing++;
     QUndoStack::redo();
-    doing = 0;
+    doing--;
 }
 bool HistoryHandler::add(QUndoCommand *cmd)
 {
