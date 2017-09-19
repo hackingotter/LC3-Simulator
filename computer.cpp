@@ -10,12 +10,12 @@
 {\
     setText(TEXT);\
     STUFF;\
-}
+    }
 
 #define UNDOFUNC(STUFF)  void undo()\
 {\
     STUFF\
-}
+    }
 #define REDOFUNC(STUFF)  void redo()\
 {\
     STUFF\
@@ -28,12 +28,12 @@
 //}
 #define SAVEFUNC(STUFF)  QString save()\
 {\
-return STUFF\
-}
+    return STUFF\
+    }
 
 namespace Action
 {
- enum doPriority{
+enum doPriority{
     systLevel = 0,//for when the system does something
     userLevel = 1,
 
@@ -52,15 +52,15 @@ public:
     changeRegCondt(cond_t ncond,cond_t ocond):newCondt(ncond),oldCondt(ocond)
     {
         setText(QString("Set Condition to "+QString().setNum(ncond)));
-        setObsolete(newCondt == oldCondt);
+        QUndoCommand::setObsolete(newCondt == oldCondt);
     }
-void undo()
+    void undo()
     {
         Computer::getDefault()->setProgramStatus(oldCondt);
     }
 
-void redo()
-{
+    void redo()
+    {
         Computer::getDefault()->setProgramStatus(newCondt);
     }
 private:
@@ -74,11 +74,11 @@ class changeRegValue: public QUndoCommand
 public:
     changeRegValue(reg_t reg,val_t oval, val_t nval):regName(reg),newValue(nval),oldValue(oval)
     {
-     setText(    QString("Set "+ ((regName<8)?"R"+QString().setNum(regName):" other") + " to "+QString().setNum(newValue)));
-     setObsolete(newValue==oldValue);
+        setText(    QString("Set "+ ((regName<8)?"R"+QString().setNum(regName):" other") + " to "+QString().setNum(newValue)));
+        QUndoCommand::setObsolete(newValue==oldValue);
     }
     void undo()
-        {
+    {
         Computer::getDefault()->setRegister(regName,oldValue);
     }
     void redo()
@@ -96,12 +96,12 @@ class changeMemValue: public QUndoCommand
 public:
     changeMemValue(mem_addr_t addr,val_t oval,val_t nval):mem_addr(addr),oldValue(oval),newValue(nval)
     {
-     setText(
-        QString("Set " + getHexString(addr) + " to "+QString().setNum(newValue)));
-        setObsolete(newValue==oldValue);
+        setText(
+                    QString("Set " + getHexString(addr) + " to "+QString().setNum(newValue)));
+        QUndoCommand::setObsolete(newValue==oldValue);
     }
     void undo()
-        {
+    {
 
         Computer::getDefault()->setMemValue(mem_addr,oldValue);
     }
@@ -111,7 +111,7 @@ public:
 
     }
 
-       ~changeMemValue() {;}
+    ~changeMemValue() {;}
 private:
     mem_addr_t mem_addr;
     val_t oldValue;
@@ -122,11 +122,11 @@ class changeMemLabel: public QUndoCommand
 public:
     changeMemLabel(mem_addr_t addr,label_t* oldLabel,label_t* newLabel):mem_addr(addr),oldLabelPtr(oldLabel),newLabelPtr(newLabel)
     {
-     setText("set Label");
-        setObsolete((newLabelPtr->name == oldLabelPtr->name)&&(newLabelPtr->addr==oldLabelPtr->addr));
+        setText("set Label");
+        QUndoCommand::setObsolete((newLabelPtr->name == oldLabelPtr->name)&&(newLabelPtr->addr==oldLabelPtr->addr));
     }
-      void undo()
-          {
+    void undo()
+    {
         Computer::getDefault()->setMemLabel(mem_addr,oldLabelPtr);
     }
     void redo()
@@ -144,18 +144,18 @@ class changeMemBreak: public QUndoCommand
 public:
     changeMemBreak(mem_addr_t addr,breakpoint_t* obreakPtr, breakpoint_t* nbreakPtr):mem_addr(addr),oldBreak(obreakPtr),newBreak(nbreakPtr)
     {
-     setText("set Break");
-        setObsolete(newBreak==oldBreak);
+        setText("set Break");
+        QUndoCommand::setObsolete(newBreak==oldBreak);
     }
     void undo()
-        {
+    {
         Computer::getDefault()->setMemBreakPoint(mem_addr,oldBreak);
     }
     void redo()
     {
         Computer::getDefault()->setMemBreakPoint(mem_addr,newBreak);
     }
-        private:
+private:
     mem_addr_t mem_addr;
     breakpoint_t* oldBreak;
     breakpoint_t* newBreak;
@@ -165,11 +165,11 @@ class changeMemComment:public QUndoCommand
 public:
     changeMemComment(mem_addr_t addr,QString oldCom, QString newCom):mem_addr(addr),oldComment(oldCom),newComment(newCom)
     {
-     setText("Changed Comment at " + getHexString(addr)+ "to " + newComment);
-        setObsolete(newComment==oldComment);
+        setText("Changed Comment at " + getHexString(addr)+ "to " + newComment);
+        QUndoCommand::setObsolete(newComment==oldComment);
     }
     void undo()
-        {
+    {
         Computer::getDefault()->setMemComment(mem_addr,oldComment);
     }
     void redo()
@@ -187,8 +187,8 @@ private:
 
 Computer::Computer(QObject *parent) : QObject(parent)
 {
-Undos = new HistoryHandler();
-Undos->setUndoLimit(65535);
+    Undos = new HistoryHandler();
+    Undos->setUndoLimit(65535);
 }
 
 // default
@@ -289,7 +289,7 @@ void Computer::setProgramStatus(cond_t stat) {
 
     this->setRegister(PSR, curr);
 
-        SINGFORME(emit update();)
+    SINGFORME(emit update();)
 }
 
 // memory
@@ -310,26 +310,27 @@ void Computer::setMemValue(mem_addr_t addr, val_t val)
 
 void Computer::setMemValuesBlock(mem_addr_t addr, size_t blockSize, val_t *vals)
 {
-    //Undos->beginMacro("set Values Block");
-    //MASK
-    for (size_t i = 0; i < blockSize; i ++) {
-        val_t val = vals[i];
-        setMemValue(addr + i,val);
+    //Implemented for compiler's compliance.
+    // TODO
+    Undos->beginMacro("set Values Block");
+    MASK
+            for (size_t i = 0; i < blockSize; i ++) {
+        setMemValue(addr + i,vals[i]);
     }
-    //UNMASK
-    //Undos->endMacro();
+    UNMASK
+            Undos->endMacro();
 }
 void Computer::fillBlock(mem_addr_t begin, mem_addr_t end, val_t val)
 {
     Undos->beginMacro("fill block");
     MASK
-    for (mem_addr_t i = begin;i<end;i++)
+            for (mem_addr_t i = begin;i<end;i++)
     {
         setMemValue(i,val);
     }
     UNMASK
-    SINGFORME(emit update();)
-    Undos->endMacro();
+            SINGFORME(emit update();)
+            Undos->endMacro();
 }
 val_t Computer::getMemValue(mem_addr_t addr)
 {
@@ -371,15 +372,15 @@ void Computer::setMemLabelText(mem_addr_t addr,QString labelString)
     label->name = labelString;
 
     MASK
-    // free old label
-    label_t* oldLabel = getMemLabel(addr);
+            // free old label
+            label_t* oldLabel = getMemLabel(addr);
     if (oldLabel)
         free(oldLabel);
 
     // store new label
     setMemLabel(addr,label);
     UNMASK
-    qDebug("all good here");
+            qDebug("all good here");
     SINGFORME(emit update();)
 }
 
@@ -906,7 +907,7 @@ void Computer::trap(val_t inst) {
 void Computer::executeSingleInstruction() {
 
     MASK
-    mem_addr_t pcAddr = getRegister(PC);
+            mem_addr_t pcAddr = getRegister(PC);
     mem_loc_t instLoc = getMemLocation(pcAddr);
     val_t inst = instLoc.value;
     Undos->beginMacro("Executing "+getHexString(pcAddr));
@@ -969,8 +970,8 @@ void Computer::executeSingleInstruction() {
 
     }
     UNMASK
-    SINGFORME(update();)
-    Undos->endMacro();
+            SINGFORME(update();)
+            Undos->endMacro();
 
 }
 
