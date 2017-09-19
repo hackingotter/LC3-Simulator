@@ -80,5 +80,6 @@ SOURCES += \
 DISTFILES += \
     Test.txt \
     Test_copy.txt \
-    lc3os.asm
+    lc3os.asm \
+    Commitment
 
