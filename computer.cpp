@@ -2,6 +2,7 @@
 #include "opcodes.h"
 #include "util.h"
 #include <QString>
+#include <QUndoCommand>
 
 
 #define TRY2PUSH(OLD,NEW,DO) {if(NEW!=OLD)Computer::Undos->add(new Action::DO);}
@@ -309,15 +310,14 @@ void Computer::setMemValue(mem_addr_t addr, val_t val)
 
 void Computer::setMemValuesBlock(mem_addr_t addr, size_t blockSize, val_t *vals)
 {
-    //Implemented for compiler's compliance.
-    // TODO
-    Undos->beginMacro("set Values Block");
-    MASK
+    //Undos->beginMacro("set Values Block");
+    //MASK
     for (size_t i = 0; i < blockSize; i ++) {
-        setMemValue(addr + i,vals[i]);
+        val_t val = vals[i];
+        setMemValue(addr + i,val);
     }
-    UNMASK
-    Undos->endMacro();
+    //UNMASK
+    //Undos->endMacro();
 }
 void Computer::fillBlock(mem_addr_t begin, mem_addr_t end, val_t val)
 {
@@ -427,21 +427,31 @@ size_t Computer::loadProgramFile(char* path) {
 
     fseek(file, 0, SEEK_END);
     size_t fileLen = ftell(file);
+    size_t programSize = fileLen/2 - 1;
+
+    if (fileLen == 0) {
+        throw "ERROR: input file empty!";
+    }
+
     rewind(file);
 
     mem_addr_t startingAddr;
-    val_t *buffer = (val_t *)malloc((fileLen/2 - 1)*sizeof(val_t));
+    val_t *buffer = (val_t *)malloc(programSize*sizeof(val_t));
 
     fread(&startingAddr, sizeof(mem_addr_t), 1, file);
-    fread(buffer, sizeof(val_t), fileLen/2 - 1, file);
+    flipBytes(&startingAddr);
+    fread(buffer, sizeof(val_t), programSize, file);
+    for (int i = 0; i < programSize; i ++) {
+        flipBytes(&buffer[i]);
+    }
 
-    setMemValuesBlock(startingAddr, fileLen/2 - 1, buffer);
+    setMemValuesBlock(startingAddr, programSize, buffer);
 
     free(buffer);
 
     fclose(file);
 
-    return fileLen/2 - 1;
+    return programSize;
 }
 
 // execution

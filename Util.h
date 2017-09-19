@@ -17,4 +17,12 @@ QString getHexString(uint16_t val);
 
 QString getBinString(uint16_t val);
 
+/**
+ * Flips the bytes in a 16-bit value
+ * \brief flipBytes
+ * \param value
+ */
+void flipBytes(uint16_t *value);
+
+
 #endif /* Util_h */

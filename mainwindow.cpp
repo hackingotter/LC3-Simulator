@@ -176,7 +176,8 @@ void MainWindow::setupMenuBar()
 void MainWindow::handleFiles()
 {
     Assembler Bill;
-    Bill.assembleFile(QFileDialog::getOpenFileName().toLocal8Bit().data(),"LC3Maybe.obj");
+    QString inputPath = QFileDialog::getOpenFileName().toLocal8Bit().data();
+    Bill.assembleFile(inputPath.toLatin1().data(),"LC3Maybe.obj");
     Computer::getDefault()->loadProgramFile("LC3Maybe.obj");
     SINGFORME(emit update();)
 }

@@ -29,3 +29,11 @@ QString getBinString(uint16_t val)
     out[17] = '\0';
     return QString(out);
 }
+
+void flipBytes(uint16_t *value) {
+    auto *p = reinterpret_cast<char *>(value);
+
+    char tmp = p[0];
+    p[0] = p[1];
+    p[1] = tmp;
+}

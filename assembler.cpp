@@ -49,6 +49,7 @@ void Assembler::assembleFile(const char *inFile, const char *outFile) {
 
     for (int runNum = 1; runNum <= 2; runNum++) {
 
+        iStream.clear();
         iStream.seekg(0,ios::beg);
 
         if (!iStream.is_open()) {

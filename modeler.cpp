@@ -136,6 +136,7 @@ QVariant modeler::data(const QModelIndex &index, int role) const
 
         case MNEMCOLUMN:
 //            qDebug("ehlo");
+            return ""; // TODO this is not working. It get's stuck
             return QString(addr2Mnem(addr));
         case COMMCOLUMN:
             return Computer::getDefault()->getMemComment(addr);
