@@ -49,19 +49,19 @@ class changeRegCondt: public QUndoCommand
 {
 public:
     changeRegCondt(cond_t ncond,cond_t ocond):newCondt(ncond),oldCondt(ocond)
-    INITFUNC
-    (
-        QString("Set Condition to "+QString().setNum(ncond)),
+    {
+        setText(QString("Set Condition to "+QString().setNum(ncond)));
         setObsolete(newCondt == oldCondt);
-    )
-    UNDOFUNC
-    (
+    }
+void undo()
+    {
         Computer::getDefault()->setProgramStatus(oldCondt);
-    )
-    REDOFUNC
-    (
+    }
+
+void redo()
+{
         Computer::getDefault()->setProgramStatus(newCondt);
-    )
+    }
 private:
     cond_t newCondt;
     cond_t oldCondt;
@@ -72,23 +72,18 @@ class changeRegValue: public QUndoCommand
 {
 public:
     changeRegValue(reg_t reg,val_t oval, val_t nval):regName(reg),newValue(nval),oldValue(oval)
-    INITFUNC
-    (
-        QString("Set "+ ((regName<8)?"R"+QString().setNum(regName):" other") + " to "+QString().setNum(newValue)),
-        setObsolete(newValue==oldValue);
-    )
-    UNDOFUNC
-    (
+    {
+     setText(    QString("Set "+ ((regName<8)?"R"+QString().setNum(regName):" other") + " to "+QString().setNum(newValue)));
+     setObsolete(newValue==oldValue);
+    }
+    void undo()
+        {
         Computer::getDefault()->setRegister(regName,oldValue);
-    )
-    REDOFUNC
-    (
+    }
+    void redo()
+    {
         Computer::getDefault()->setRegister(regName,newValue);
-    )
-    SAVEFUNC
-    (
-    QString("(regValue,"+getHexString(regName)+", "+getHexString(oldValue)+", "+getHexString(newValue)+")\n");
-    )
+    }
 
 private:
     reg_t regName;
@@ -99,24 +94,22 @@ class changeMemValue: public QUndoCommand
 {
 public:
     changeMemValue(mem_addr_t addr,val_t oval,val_t nval):mem_addr(addr),oldValue(oval),newValue(nval)
-    INITFUNC
-    (
-        QString("Set " + getHexString(addr) + " to "+QString().setNum(newValue)),
+    {
+     setText(
+        QString("Set " + getHexString(addr) + " to "+QString().setNum(newValue)));
         setObsolete(newValue==oldValue);
-    )
-    UNDOFUNC
-    (
+    }
+    void undo()
+        {
+
         Computer::getDefault()->setMemValue(mem_addr,oldValue);
-    )
-    REDOFUNC
-    (
+    }
+    void redo()
+    {
         Computer::getDefault()->setMemValue(mem_addr,newValue);
 
-    )
-    SAVEFUNC
-    (
-    QString("(memValue,"+getHexString(mem_addr)+", "+getHexString(oldValue)+", "+getHexString(newValue)+")\n");
-    )
+    }
+
        ~changeMemValue() {;}
 private:
     mem_addr_t mem_addr;
@@ -127,23 +120,19 @@ class changeMemLabel: public QUndoCommand
 {
 public:
     changeMemLabel(mem_addr_t addr,label_t* oldLabel,label_t* newLabel):mem_addr(addr),oldLabelPtr(oldLabel),newLabelPtr(newLabel)
-    INITFUNC
-    (
-        "set Label",
-        setObsolete(newLabelPtr == oldLabelPtr)
-    )
-    UNDOFUNC
-    (
+    {
+     setText("set Label");
+        setObsolete(newLabelPtr == oldLabelPtr);
+    }
+      void undo()
+          {
         Computer::getDefault()->setMemLabel(mem_addr,oldLabelPtr);
-    )
-    REDOFUNC
-    (
+    }
+    void redo()
+    {
         Computer::getDefault()->setMemLabel(mem_addr,newLabelPtr);
-    )
-    SAVEFUNC
-    (
-    "";
-    )
+    }
+
 private:
     mem_addr_t mem_addr;
     label_t* oldLabelPtr;
@@ -153,25 +142,19 @@ class changeMemBreak: public QUndoCommand
 {
 public:
     changeMemBreak(mem_addr_t addr,breakpoint_t* obreakPtr, breakpoint_t* nbreakPtr):mem_addr(addr),oldBreak(obreakPtr),newBreak(nbreakPtr)
-    INITFUNC
-    (
-      "set Break",
+    {
+     setText("set Break");
         setObsolete(newBreak==oldBreak);
-    )
-    UNDOFUNC
-    (
+    }
+    void undo()
+        {
         Computer::getDefault()->setMemBreakPoint(mem_addr,oldBreak);
-    )
-    REDOFUNC
-    (
+    }
+    void redo()
+    {
         Computer::getDefault()->setMemBreakPoint(mem_addr,newBreak);
-    )
-    SAVEFUNC
-    (
-            //need to figure out how breakpoints work first!
-        QString("(changeMemBreak, "+getHexString(mem_addr)+")");
-    )
-private:
+    }
+        private:
     mem_addr_t mem_addr;
     breakpoint_t* oldBreak;
     breakpoint_t* newBreak;
@@ -180,24 +163,18 @@ class changeMemComment:public QUndoCommand
 {
 public:
     changeMemComment(mem_addr_t addr,QString oldCom, QString newCom):mem_addr(addr),oldComment(oldCom),newComment(newCom)
-    INITFUNC
-    (
-        "Changed Comment at " + getHexString(addr)+ "to " + newComment,
+    {
+     setText("Changed Comment at " + getHexString(addr)+ "to " + newComment);
         setObsolete(newComment==oldComment);
-    )
-    UNDOFUNC
-    (
+    }
+    void undo()
+        {
         Computer::getDefault()->setMemComment(mem_addr,oldComment);
-    )
-    REDOFUNC
-    (
+    }
+    void redo()
+    {
         Computer::getDefault()->setMemComment(mem_addr,newComment);
-    )
-    SAVEFUNC
-    (
-    QString("(MemComment,"+oldComment+", "+newComment+")\n");
-    )
-
+    }
 private:
     mem_addr_t mem_addr;
     QString oldComment;
