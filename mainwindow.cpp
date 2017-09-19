@@ -85,6 +85,7 @@ QModelIndex  a =(VIEW)->model()->index(INPUT,0);\
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
+    qDebug("Are you seeing this");
 
     Computer::getDefault()->setProgramStatus(cond_z);
 
