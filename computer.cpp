@@ -51,7 +51,7 @@ public:
     changeRegCondt(cond_t ncond,cond_t ocond):newCondt(ncond),oldCondt(ocond)
     {
         setText(QString("Set Condition to "+QString().setNum(ncond)));
-        //setObsolete(newCondt == oldCondt);
+        setObsolete(newCondt == oldCondt);
     }
 void undo()
     {
@@ -74,7 +74,7 @@ public:
     changeRegValue(reg_t reg,val_t oval, val_t nval):regName(reg),newValue(nval),oldValue(oval)
     {
      setText(    QString("Set "+ ((regName<8)?"R"+QString().setNum(regName):" other") + " to "+QString().setNum(newValue)));
-     //setObsolete(newValue==oldValue);
+     setObsolete(newValue==oldValue);
     }
     void undo()
         {
@@ -97,7 +97,7 @@ public:
     {
      setText(
         QString("Set " + getHexString(addr) + " to "+QString().setNum(newValue)));
-        //setObsolete(newValue==oldValue);
+        setObsolete(newValue==oldValue);
     }
     void undo()
         {
@@ -122,7 +122,7 @@ public:
     changeMemLabel(mem_addr_t addr,label_t* oldLabel,label_t* newLabel):mem_addr(addr),oldLabelPtr(oldLabel),newLabelPtr(newLabel)
     {
      setText("set Label");
-        //setObsolete(newLabelPtr == oldLabelPtr);
+        setObsolete((newLabelPtr->name == oldLabelPtr->name)&&(newLabelPtr->addr==oldLabelPtr->addr));
     }
       void undo()
           {
@@ -144,7 +144,7 @@ public:
     changeMemBreak(mem_addr_t addr,breakpoint_t* obreakPtr, breakpoint_t* nbreakPtr):mem_addr(addr),oldBreak(obreakPtr),newBreak(nbreakPtr)
     {
      setText("set Break");
-        //setObsolete(newBreak==oldBreak);
+        setObsolete(newBreak==oldBreak);
     }
     void undo()
         {
@@ -165,7 +165,7 @@ public:
     changeMemComment(mem_addr_t addr,QString oldCom, QString newCom):mem_addr(addr),oldComment(oldCom),newComment(newCom)
     {
      setText("Changed Comment at " + getHexString(addr)+ "to " + newComment);
-        //setObsolete(newComment==oldComment);
+        setObsolete(newComment==oldComment);
     }
     void undo()
         {
