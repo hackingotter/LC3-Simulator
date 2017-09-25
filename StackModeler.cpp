@@ -56,7 +56,7 @@ void StackModeler::flip()
 {
     qDebug("Flippin'");
     bigTop = new bool(!(*bigTop));
-    SINGFORME(emit update();)
+    IFNOMASK(emit update();)
 }
 void StackModeler::setTopBig(bool ghost)
 {

@@ -27,7 +27,7 @@ public:
 
     #define UNMASK {(Computer::getDefault()->updateMask==0)?:Computer::getDefault()->updateMask--;qDebug("Unmasking"+ QString().setNum(Computer::getDefault()->updateMask).toLocal8Bit());}
 
-    #define SINGFORME(OPERA) {if(Computer::getDefault()->updateMask==0){OPERA;qDebug("Higher");}}
+    #define IFNOMASK(EXECUTE) {if(Computer::getDefault()->updateMask==0){EXECUTE;qDebug("Higher");}}
     // registers
 
     /** Returns the contents of a register

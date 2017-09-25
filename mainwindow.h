@@ -164,6 +164,8 @@ public slots:
     void setupMenuBar();
 
     void handleFiles();
+    void loadFile(QString path = QString());
+    void assembleNLoadFile(QString path = QString());
 
     void on_MemView1Input_returnPressed();
 

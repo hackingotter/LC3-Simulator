@@ -424,7 +424,7 @@ QString modeler::name_or_addr(mem_addr_t target) const
 {
     label_t* label = Computer::getDefault()->getMemLabel(target);
 
-    if(label!=nullptr)
+    if(label->name!=nullptr)
     {
        return QString(label->name);
     }

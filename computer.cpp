@@ -213,7 +213,7 @@ val_t* Computer::getAllRegisters() {
     val_t *ret = (val_t*)malloc(NUM_OF_REGS * sizeof(val_t));
 
     if (!ret) {
-        throw "Malloc error";
+        throw("Malloc error");
         return ret;
     }
 
@@ -227,7 +227,7 @@ void Computer::setRegister(reg_t reg, val_t val) {
     registers[reg] = val;
     Undos->add(new Action::changeRegValue(reg,oval,val));
 
-    SINGFORME(emit update();)
+    IFNOMASK(emit update();)
 }
 
 void Computer::setAllRegister(val_t vals[]) {
@@ -237,7 +237,7 @@ void Computer::setAllRegister(val_t vals[]) {
         memcpy(registers, vals, NUM_OF_REGS * sizeof(val_t));
     }
     //needs to have a way of remebering
-    SINGFORME(emit update();)
+    IFNOMASK(emit update();)
 }
 
 
@@ -289,7 +289,7 @@ void Computer::setProgramStatus(cond_t stat) {
 
     this->setRegister(PSR, curr);
 
-    SINGFORME(emit update();)
+    IFNOMASK(emit update();)
 }
 
 // memory
@@ -305,7 +305,7 @@ void Computer::setMemValue(mem_addr_t addr, val_t val)
     _memory[addr].value = val;
     TRY2PUSH(oval,val,changeMemValue(addr,oval,val));
 
-    SINGFORME(emit update();)
+    IFNOMASK(emit update();)
 }
 
 void Computer::setMemValuesBlock(mem_addr_t addr, size_t blockSize, val_t *vals)
@@ -329,7 +329,7 @@ void Computer::fillBlock(mem_addr_t begin, mem_addr_t end, val_t val)
         setMemValue(i,val);
     }
     UNMASK
-            SINGFORME(emit update();)
+            IFNOMASK(emit update();)
             Undos->endMacro();
 }
 val_t Computer::getMemValue(mem_addr_t addr)
@@ -344,7 +344,7 @@ val_t* Computer::getAllMemValues()
 
     if (!ret)
     {
-        throw "Malloc error";
+        throw("Malloc error");
         return ret;
     }
     for(addr =0;addr<0xFFF;addr++)
@@ -361,13 +361,13 @@ void Computer::setMemLabel(mem_addr_t addr,label_t* newLabel)
     _memory[addr].label=newLabel;
     TRY2PUSH(oldLabel,newLabel,changeMemLabel(addr,oldLabel,newLabel));
 
-    SINGFORME(emit update();)
+    IFNOMASK(emit update();)
 }
 void Computer::setMemLabelText(mem_addr_t addr,QString labelString)
 {
     qDebug("setting memLabel");
     // allocate new label
-    label_t* label = (label_t*)malloc(sizeof (label_t*));
+    label_t* label = (label_t*)malloc(sizeof (label_t));
     label->addr = addr;
     label->name = labelString;
 
@@ -381,7 +381,7 @@ void Computer::setMemLabelText(mem_addr_t addr,QString labelString)
     setMemLabel(addr,label);
     UNMASK
             qDebug("all good here");
-    SINGFORME(emit update();)
+    IFNOMASK(emit update();)
 }
 
 label_t* Computer::getMemLabel(mem_addr_t addr)
@@ -394,7 +394,7 @@ void Computer::setMemBreakPoint(mem_addr_t addr,breakpoint_t* breakpt){
     _memory[addr].breakpt = breakpt;
     TRY2PUSH(obreakptr,breakpt,changeMemBreak(addr,obreakptr,breakpt));
 
-    SINGFORME(emit update();)
+    IFNOMASK(emit update();)
 }
 
 breakpoint_t* Computer::getMemBreakPoint(mem_addr_t addr)
@@ -409,7 +409,7 @@ void Computer::setMemComment(mem_addr_t addr, QString comment)
 
     Computer::Undos->add(new Action::changeMemComment(addr,oldComment,comment));
 
-    SINGFORME(emit update();)
+    IFNOMASK(emit update();)
 }
 
 QString Computer::getMemComment(mem_addr_t addr)
@@ -421,10 +421,13 @@ QString Computer::getMemComment(mem_addr_t addr)
 
 size_t Computer::loadProgramFile(char* path) {
 
+    qDebug("Nothing");
+    FILE *fie = fopen("C:\\Users\\Jedadiah\\Documents\\GitHub\\LC3-Sim\\Test.txt","r");
+
     FILE *file = fopen(path, "r");
 
     if (!file)
-        throw QString("ERROR: could not open file:" + QString(path)).toLocal8Bit();
+        throw "ERROR: could not open file";
 
     fseek(file, 0, SEEK_END);
     size_t fileLen = ftell(file);
@@ -517,7 +520,7 @@ void Computer::add(val_t inst) {
     } else {
         if ( (bitMask(3)) & inst ) {
             // bit 3 should be 0
-            throw "Invalid op (read as ADD/SUB): " + getHexString(inst) + "bit 3 should be 0";
+            throw("Invalid op (read as ADD/SUB): " + getHexString(inst) + "bit 3 should be 0");
         }
 
         reg_t sr2 = getRegister_0_1_2(inst);
@@ -970,7 +973,7 @@ void Computer::executeSingleInstruction() {
 
     }
     UNMASK
-            SINGFORME(update();)
+            IFNOMASK(update();)
             Undos->endMacro();
 
 }
