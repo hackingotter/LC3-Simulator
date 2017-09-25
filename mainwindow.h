@@ -165,6 +165,7 @@ public slots:
 
     void handleFiles();
     void loadFile(QString path = QString());
+    QString assembleFile(QString path);
     void assembleNLoadFile(QString path = QString());
 
     void on_MemView1Input_returnPressed();

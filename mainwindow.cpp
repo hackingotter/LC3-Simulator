@@ -207,12 +207,12 @@ void MainWindow::loadFile(QString path)
         }
         catch(const std::string& e)
         {
-        std::cout<<e<<endl;
+        std::cout<<e<<std::endl;
         success = false;
         }
         catch(...)
         {
-        std::cout<<"An unexpected error has occurred"<<endl;
+        std::cout<<"An unexpected error has occurred"<<std::endl;
         success = false;
         }
 
@@ -226,34 +226,38 @@ void MainWindow::loadFile(QString path)
 QString MainWindow::assembleFile(QString path)
 {
     QFileDialog* fileUI = new QFileDialog();
-    fileUI->setNameFilter(QString("Assmbly (*").append(ASSEMBLY_SUFFIX).append(")"));
+    fileUI->setNameFilter(QString("Assembly (*").append(ASSEMBLY_SUFFIX).append(")"));
     fileUI->setReadOnly(true);
     fileUI->setWindowTitle("Choose a file to assemble and load into memory");
 
 
     Assembler embler = Assembler();
-
+    
     if(path==QString())
     {
         qDebug("Looks like there was no file specified.  Time for the user to choose.");
-        path = fileUI->show();
+        path = fileUI->getOpenFileName();
+
     }
+    QString target = path;
     try
     {
-        embler.assembleFile(path.toLocal8Bit().data(),"Test.obj");
+        QString target = path;
+        target.replace(-3,3,OBJECT_SUFFIX);
+        embler.assembleFile(path.toLocal8Bit().data(),target.toLocal8Bit().data());
     }
     catch(const std::string& e)
     {
     std::cout<<e<<std::endl;
-    return;
+    return "";
     }
     catch(...)
     {
     std::cout<<"An unforseen error has occured"<<endl;
-    return;
+    return "";
     }
 
-    return "Test.obj";'
+    return "Test.obj";
 
 
 }
@@ -276,9 +280,7 @@ void MainWindow::assembleNLoadFile(QString path)
 
     QString shortPath = path;
     shortPath.remove(0,path.lastIndexOf("/"));
-    QString namePath = path;
-    namePath.chop(path.lastIndexOf(QChar('.'),-1));
-    namePath.append(".obj");
+    QString namePath = "test.obj";
     Computer::getDefault()->Undos->beginMacro("Assemble and Load "+shortPath);
     qDebug("assembling and loading");
 
@@ -296,9 +298,11 @@ void MainWindow::assembleNLoadFile(QString path)
     }
     catch(...)
     {
-    std::cout<<"An unforseen error has occured"<<endl;
+
+    std::cout<<"An unforseen error has occured"<<std::endl;
+    return;
     }
-    loadFile("tes.asm");
+    loadFile(namePath);
 //    embler.assembleFile();
 
 }

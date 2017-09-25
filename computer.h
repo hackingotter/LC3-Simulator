@@ -6,6 +6,18 @@
 #include "GlobalTypes.h"
 #include "HistoryHandler.h"
 #include <QUndoStack>
+
+
+#define MASK\
+{\
+Computer::getDefault()->updateMask++;\
+qDebug("Masking" + QString().setNum(Computer::getDefault()->updateMask).toLocal8Bit());\
+}
+
+#define UNMASK {(Computer::getDefault()->updateMask==0)?:Computer::getDefault()->updateMask--;qDebug("Unmasking"+ QString().setNum(Computer::getDefault()->updateMask).toLocal8Bit());}
+
+#define IFNOMASK(EXECUTE) {if(Computer::getDefault()->updateMask==0){EXECUTE;qDebug("Higher");}}
+
 class Computer : public QObject
 {
     Q_OBJECT
@@ -17,18 +29,6 @@ public:
     HistoryHandler* Undos;//will have to work out how to handle this when not in gui
 
     int updateMask;
-
-
-    #define MASK\
-    {\
-    Computer::getDefault()->updateMask++;\
-    qDebug("Masking" + QString().setNum(Computer::getDefault()->updateMask).toLocal8Bit());\
-    }
-
-    #define UNMASK {(Computer::getDefault()->updateMask==0)?:Computer::getDefault()->updateMask--;qDebug("Unmasking"+ QString().setNum(Computer::getDefault()->updateMask).toLocal8Bit());}
-
-    #define IFNOMASK(EXECUTE) {if(Computer::getDefault()->updateMask==0){EXECUTE;qDebug("Higher");}}
-    // registers
 
     /** Returns the contents of a register
      * \param reg The register whose value is requested.
@@ -52,6 +52,8 @@ public:
      */
     void setAllRegister(val_t vals[]);
 
+    // status
+
     /** Gets the PSR condition code
      * \return the condition of the PSR.
      */
@@ -62,7 +64,12 @@ public:
      */
     void setProgramStatus(cond_t stat);
 
+    // TODO
+    void setPriviliged(bool priv);
+    bool getPriviliged();
+
     // memory
+    // #########################
 
     /** Gets the mem location struct for the given address.
      * \param addr The address the user wants to access.

@@ -11,6 +11,7 @@ using namespace std;
 #define  andOpCode 0x5000
 #define   brOpCode 0x0000
 #define  jmpOpCode 0xC000
+#define jmptOpCode 0xC000 // same as jmp
 #define  jsrOpCode 0x4000
 #define jsrrOpCode 0x4000 //special version of jsr
 #define   ldOpCode 0x2000
@@ -19,6 +20,7 @@ using namespace std;
 #define  leaOpCode 0xE000
 #define  notOpCode 0x9000
 #define  retOpCode 0xC000 // same as jmp
+#define  rttOpCode 0xC000 // same as jmp
 #define  rtiOpCode 0x8000
 #define   stOpCode 0x3000
 #define  stiOpCode 0xB000
@@ -36,7 +38,7 @@ using namespace std;
 Assembler::Assembler() {
 
     parserRegex = regex(
-            R"abc([ \t]*((?!(?:ADD|SUB|AND|(?:BR[nzp]{0,3})|JMP|JSRR|JSR|LDI|LDR|LD|LEA|NOT|RET|RTI|STI|STR|ST|TRAP|MUL|GETC|OUT|IN|PUTSP|PUTS|HALT)(?:\W|$))\w*)?[ \t]*(?:(?:(ADD|SUB|AND|(?:BR[nzp]{0,3})|JMP|JSRR|JSR|LDI|LDR|LD|LEA|NOT|RET|RTI|STI|STR|ST|TRAP|MUL|\.FILL|\.STRINGZ|\.ORIG|\.END|\.BLKW|PUTS|GETC|OUT|IN|PUTSP|HALT)(?:\W|$))[ \t]*(?:r(\d),?)?[ \t]*(?:r(\d),?)?[ \t]*(?:(?:r(\d))|((?:#|x|b|o|-(?!-))?-?[0-9A-F]+\.?[0-9]*)|(\w*)|((?:".*")|(?:'.*')))?)?[ \t]*(?:;+([\S \t]*))?[ \t]*$)abc",
+            R"abc([ \t]*((?!(?:ADD|SUB|AND|(?:BR[nzp]{0,3})|JMP|JMPT|JSRR|JSR|LDI|LDR|LD|LEA|NOT|RET|RTT|RTI|STI|STR|ST|TRAP|MUL|GETC|OUT|IN|PUTSP|PUTS|HALT)(?:\W|$))\w*)?[ \t]*(?:(?:(ADD|SUB|AND|(?:BR[nzp]{0,3})|JMP|JMPT|JSRR|JSR|LDI|LDR|LD|LEA|NOT|RET|RTT|RTI|STI|STR|ST|TRAP|MUL|\.FILL|\.STRINGZ|\.ORIG|\.END|\.BLKW|PUTS|GETC|OUT|IN|PUTSP|HALT)(?:\W|$))[ \t]*(?:r(\d),?)?[ \t]*(?:r(\d),?)?[ \t]*(?:(?:r(\d))|((?:#|x|b|o|-(?!-))?-?[0-9A-F]+\.?[0-9]*)|(\w*)|((?:".*")|(?:'.*')))?)?[ \t]*(?:;+([\S \t]*))?[ \t]*$)abc",
             std::regex_constants::icase);
 
     labelDict = map<string, uint16_t> ();
@@ -246,7 +248,7 @@ uint16_t Assembler::getRegisters(string &instruction, int nOfRegs, string &first
             op |= regTwo;
         case 1:
             regOne = (uint16_t) stoi(firstReg);
-            if (instruction == "JMP" || instruction == "JSRR") {
+            if (instruction == "JMP" || instruction == "JMPT" || instruction == "JSRR") {
                 regOne <<= 6;
             } else {
                 regOne <<= 9;
@@ -416,6 +418,10 @@ uint16_t Assembler::getConstantBits(const string &instruction, int nOfRegs, NumO
         case 0:
             if (instruction == "RET") {
                 op |= 0x01C0;
+            } else if (instruction == "RTT") {
+                op |= 0x01C1;
+            } else if (instruction == "JMPT") {
+                op |= 0x0001;
             } else if (instruction == "JSR") {
                 op |= 0x0800;
             } else if (instruction.compare(0, 2, "BR") == 0) {
@@ -502,6 +508,9 @@ uint16_t Assembler::OpCodeForInstruction(string &op) {
     if (op == "JMP") {
         return jmpOpCode;
     }
+    if (op == "JMPT") {
+        return jmptOpCode;
+    }
     if (op == "JSR") {
         return jsrOpCode;
     }
@@ -528,6 +537,9 @@ uint16_t Assembler::OpCodeForInstruction(string &op) {
     }
     if (op == "RET") {
         return retOpCode;
+    }
+    if (op == "RTT") {
+        return rttOpCode;
     }
     if (op == "RTI") {
         return rtiOpCode;
@@ -579,13 +591,13 @@ void Assembler::writeWord(ostream &stream, uint16_t value) {
 void Assembler::determineArgumentsOfOp(const string &instruction, bool thirdRegEmpty, int &nOfRegs, NumOrLabel &nOrL) {
     // no args at all
     if (instruction == "RET" || instruction == "RTI" || instruction == ".END" || instruction == "PUTS" || instruction == "GETC" ||
-        instruction == "OUT" || instruction == "IN" || instruction == "PUTSP" || instruction == "HALT") {
+        instruction == "RTT" ||instruction == "OUT" || instruction == "IN" || instruction == "PUTSP" || instruction == "HALT") {
         nOfRegs = 0;
         nOrL = none;
     }
 
         // one register instructions
-    else if (instruction == "JMP" || instruction == "JSRR") {
+    else if (instruction == "JMP" || instruction == "JMPT" || instruction == "JSRR") {
         nOfRegs = 1;
         nOrL = none;
     }
