@@ -292,6 +292,22 @@ void Computer::setProgramStatus(cond_t stat) {
     SINGFORME(emit update();)
 }
 
+void Computer::setPriviliged(bool priv)
+{
+    val_t oldPSR = getRegister(PSR);
+    if (priv)
+        oldPSR |= 0x8000; // this will force bit 15 to 1 but maintain all others
+    else
+        oldPSR &= 0x7FFF; // this will force bit 15 to 0 but maintain all others
+
+    setRegister(PSR,oldPSR);
+}
+
+bool Computer::getPriviliged()
+{
+    return getRegister(PSR) & 0x8000; // bit 15 is privilige bit
+}
+
 // memory
 
 mem_loc_t Computer::getMemLocation(mem_addr_t addr)
@@ -699,10 +715,14 @@ void Computer::executeBr(val_t inst) {
 
 void Computer::jmp(val_t inst) {
 
-    if (inst & 0x0E3F) {
-        // bits 11-9 and 5-0 should be 0
-        // TODO invalid op error
-        return;
+    if (inst & bitMask(0)) {
+        // RTT exit priviliged mode
+        setPriviliged(false);
+    }
+
+    if (inst & 0x0E3E) {
+        // bits 11-9 and 5-1 should be 0
+        throw "INVALID OP: bits 11-9 & 5-1 should be 0 in JMP/RET/RTT";
     }
 
     reg_t baseReg = getRegister_6_7_8(inst);
@@ -894,11 +914,12 @@ void Computer::str(val_t inst) {
 void Computer::trap(val_t inst) {
     if (inst & 0x0F00) {
         // bits 11-8 should be 0
-        // TODO invalid op error
+        throw "INVALID OP ERROR: bits 11-8 should be 0 in TRAP";
         return;
     }
 
     setRegister(R7, getRegister(PC));
+    setPriviliged(true);
 
     val_t trapVect = getTrap8(inst);
     setRegister(PC, getMemValue(trapVect));
