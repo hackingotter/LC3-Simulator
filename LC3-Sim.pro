@@ -28,7 +28,8 @@ RESOURCES += \
 FORMS += \
     mainwindow.ui \
     frame.ui \
-    loading.ui
+    loading.ui \
+    dialog.ui
 
 HEADERS += \
     status.h \
@@ -81,5 +82,6 @@ DISTFILES += \
     Test.txt \
     Test_copy.txt \
     lc3os.asm \
-    Commitment
+    Commitment \
+    pennCompilertest.asm
 

@@ -340,7 +340,7 @@ QString modeler::addr2Mnem(mem_addr_t addr)const
         {
             val_t offset = val&0x01FF;
             if(val&0x0100) val|=0xFE00;
-            mem_addr_t target = addr +( val & 0x00FF);
+            mem_addr_t target = addr + offset;
             out.append(" ");
             out.append(name_or_addr(target));
         }

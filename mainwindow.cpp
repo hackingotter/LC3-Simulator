@@ -9,6 +9,7 @@
 #include "Util.h"
 #include "stdio.h"
 #include "hope.h"
+#include <QColorDialog>
 #include <QtConcurrent/QtConcurrentRun>
 #include <QStatusBar>
 #include <QProgressBar>
@@ -86,6 +87,7 @@ QModelIndex  a =(VIEW)->model()->index(INPUT,0);\
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
 
+    QColorDialog::getColor();
     Computer::getDefault()->setProgramStatus(cond_z);
 
     Utility::systemInfoDebug();//Just some fun info
@@ -105,9 +107,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->setupUi(this);//this puts everything in place
 
     SETUPDISPLAY(ui,this)
-            setupMenuBar();
+    setupMenuBar();
     setupRegisterView();
     setupViews();
+    setupControlButtons();
     Bridge::doWork();
     qDebug("Connecting Disp");
 
