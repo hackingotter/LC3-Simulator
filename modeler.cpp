@@ -421,7 +421,7 @@ QString modeler::addr2Mnem(mem_addr_t addr) const
     return out;
 }
 
-QString modeler::name_or_addr(mem_addr_t target)
+QString modeler::name_or_addr(mem_addr_t target) const
 {
     label_t* label = Computer::getDefault()->getMemLabel(target);
 

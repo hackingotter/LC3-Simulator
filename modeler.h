@@ -54,8 +54,8 @@ public:
     bool setValue(int row,int value,int role);
     QObject* paternal();
     void update();
-    QString addr2Mnem(mem_addr_t addr);
-    QString name_or_addr(mem_addr_t target);
+    QString addr2Mnem(mem_addr_t addr) const;
+    QString name_or_addr(mem_addr_t target) const;
     QString mnemonicGen(mem_addr_t addr)const;
 signals:
     void dataChan(mem_addr_t);
