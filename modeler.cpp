@@ -127,17 +127,16 @@ QVariant modeler::data(const QModelIndex &index, int role) const
             return getHexString(Computer::getDefault()->getMemValue(addr));
         case NAMECOLUMN:
         {
-            if (Computer::getDefault()->getMemLabel(addr)!= nullptr)
-            {
-//                return (Computer::getDefault()->getMemLabel(addr)->name);// todo fix
-            }
-            return "";
+
+            label_t* l = Computer::getDefault()->getMemLabel(addr);
+            if (l)
+                return (l->name);
+            return "N/A";
+
         }
 
         case MNEMCOLUMN:
-//            qDebug("ehlo");
-//            return ""; // TODO this is not working. It get's stuck
-            return QString(addr2Mnem(addr));
+            return this->addr2Mnem(addr);
         case COMMCOLUMN:
             return Computer::getDefault()->getMemComment(addr);
         }
@@ -164,53 +163,53 @@ bool modeler::setData(const QModelIndex &index, const QVariant &value, int role)
     mem_addr_t addr = index.row();
     int column = index.column();
     qDebug("Am I a valid index?");
-            if(index.isValid())
+    if(index.isValid())
     {
         switch(column)
         {
         case BRCOLUMN  :qDebug("You just set a breakpoint");
-                    qDebug("TBI");
+            qDebug("TBI");
 
             Computer::getDefault()->setMemBreakPoint(addr,NULL);
             emit breakChanged(addr,nullptr);
             return true;
         case ADDRCOLUMN:qDebug("There must be an error"); return false;
         case NAMECOLUMN:qDebug("You just set a Label");
-            {
+        {
 
-                Computer::getDefault()->setMemLabelText(addr,value.toString());
-            }
+            Computer::getDefault()->setMemLabelText(addr,value.toString());
+        }
 
 
             return true;
         case VALUCOLUMN:
             qDebug("You just set a Value");
+        {
+            QString valString = value.toString();
+            if(value.toString().startsWith("x")) valString = valString.remove(0,1);
+            bool ok = false;
+            val_t val = static_cast<val_t>(valString.toInt(&ok,16));
+            if(!ok)
             {
-                        QString valString = value.toString();
-                        if(value.toString().startsWith("x")) valString = valString.remove(0,1);
-                                        bool ok = false;
-                val_t val = static_cast<val_t>(valString.toInt(&ok,16));
-                if(!ok)
-                {
-                    qDebug("NOPE");
-                }else
-                {
+                qDebug("NOPE");
+            }else
+            {
 
 
-                    qDebug("Requesting Change");
-                            Computer::getDefault()->setMemValue(addr,val);
-                    qDebug("hey " + QString().setNum(val).toLocal8Bit());
+                qDebug("Requesting Change");
+                Computer::getDefault()->setMemValue(addr,val);
+                qDebug("hey " + QString().setNum(val).toLocal8Bit());
 
-                }
             }
+        }
             return true;
         case COMMCOLUMN:qDebug("You just set a Comment");
 
-            {
-                QString newComment = value.toString();
-                Computer::getDefault()->setMemComment(addr,newComment);
-                emit commentChanged(addr,newComment);
-            }
+        {
+            QString newComment = value.toString();
+            Computer::getDefault()->setMemComment(addr,newComment);
+            emit commentChanged(addr,newComment);
+        }
             return true;
         case MNEMCOLUMN:qDebug("You just set a mnemonic");qDebug("TBI");return true;
         }
@@ -251,7 +250,7 @@ void modeler::update()
 {
 
 }
-QString modeler::mnemonicGen(mem_addr_t addr) const
+QString modeler::mnemonicGen(mem_addr_t addr)const
 {
     QString out;
     val_t instruction = Computer::getDefault()->getMemValue(addr);
@@ -262,9 +261,9 @@ QString modeler::mnemonicGen(mem_addr_t addr) const
     out = addr2Mnem(instruction);
     return out;
 }
-QString modeler::addr2Mnem(mem_addr_t addr) const
+QString modeler::addr2Mnem(mem_addr_t addr)const
 {
-//    qDebug(QString().setNum(addr).toLocal8Bit());
+    //    qDebug(QString().setNum(addr).toLocal8Bit());
 
     val_t val = Computer::getDefault()->getMemValue(addr);
     addr +=1;
@@ -273,7 +272,7 @@ QString modeler::addr2Mnem(mem_addr_t addr) const
     int reg11       =((val&0x0E00) >> 9);
     int reg8        =((val&0x01E0) >> 6);
     int reg2        =((val&0x0007) >> 0);
-//    bool zero543    =(val&0x0038);
+    //    bool zero543    =(val&0x0038);
     bool imm5YN     =(val&0x0020) >> 5;
 
     //It is much easier to be able to handle them without needing to account for names
@@ -369,7 +368,7 @@ QString modeler::addr2Mnem(mem_addr_t addr) const
     case jsrOpCode:
     {
         qDebug("JSR");
-if(val&0x0800)//11th slot 1 means jsr
+        if(val&0x0800)//11th slot 1 means jsr
         {
             val_t offset = val& 0x07FF;
 
@@ -416,7 +415,7 @@ if(val&0x0800)//11th slot 1 means jsr
         }
         else
         {
-            name_or_addr(val&0x00FF);//this code could be wrong
+            name_or_addr(val&0x00FF);//TODO this code could be wrong
         }
         break;
     }
@@ -428,13 +427,13 @@ QString modeler::name_or_addr(mem_addr_t target) const
 {
     label_t* label = Computer::getDefault()->getMemLabel(target);
 
-    if(label->name!=nullptr)
+    if(label!= nullptr)
     {
-       return (label->name);
+        return QString(label->name);
     }
     else
     {
-       return  getHexString(target);
+        return  getHexString(target);
     }
     return "";
 }

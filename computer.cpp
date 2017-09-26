@@ -189,6 +189,8 @@ Computer::Computer(QObject *parent) : QObject(parent)
 {
     Undos = new HistoryHandler();
     Undos->setUndoLimit(65535);
+
+    memset(_memory,0,0x10000); // clear all memory
 }
 
 // default
@@ -374,7 +376,7 @@ val_t* Computer::getAllMemValues()
 void Computer::setMemLabel(mem_addr_t addr,label_t* newLabel)
 {
     label_t* oldLabel = _memory[addr].label;
-    _memory[addr].label=newLabel;
+    _memory[addr].label = newLabel;
     TRY2PUSH(oldLabel,newLabel,changeMemLabel(addr,oldLabel,newLabel));
 
     IFNOMASK(emit update();)
@@ -388,8 +390,8 @@ void Computer::setMemLabelText(mem_addr_t addr,QString labelString)
     label->name = labelString;
 
     MASK
-            // free old label
-            label_t* oldLabel = getMemLabel(addr);
+    // free old label
+    label_t* oldLabel = getMemLabel(addr);
     if (oldLabel)
         free(oldLabel);
 
@@ -430,6 +432,7 @@ void Computer::setMemComment(mem_addr_t addr, QString comment)
 
 QString Computer::getMemComment(mem_addr_t addr)
 {
+    return "To be figured out. Issues with value vs. reference";
     return _memory[addr].comment;
 }
 
