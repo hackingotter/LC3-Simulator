@@ -1035,8 +1035,6 @@ p, li { white-space: pre-wrap; }
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionOpen"/>
-    <addaction name="actionSave"/>
    </widget>
    <widget class="QMenu" name="menuOptions">
     <property name="title">
@@ -1098,17 +1096,6 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
   </widget>
-  <action name="actionOpen">
-   <property name="text">
-    <string>Open File</string>
-   </property>
-   <property name="toolTip">
-    <string>Open a file to be simulated</string>
-   </property>
-   <property name="shortcut">
-    <string>Alt+F</string>
-   </property>
-  </action>
   <action name="actionSave">
    <property name="text">
     <string>Save File</string>
@@ -1175,6 +1162,47 @@ p, li { white-space: pre-wrap; }
   <action name="actionFill">
    <property name="text">
     <string>Fill</string>
+   </property>
+  </action>
+  <action name="actionLoad_2">
+   <property name="text">
+    <string>Load</string>
+   </property>
+  </action>
+  <action name="actionLoad_3">
+   <property name="text">
+    <string>Load</string>
+   </property>
+  </action>
+  <action name="actionLoad_File">
+   <property name="text">
+    <string>Load</string>
+   </property>
+   <property name="toolTip">
+    <string>Loads a file</string>
+   </property>
+  </action>
+  <action name="actionAssemble_and_Load">
+   <property name="text">
+    <string>Assemble and Load</string>
+   </property>
+   <property name="toolTip">
+    <string>Assembles and then loads a file</string>
+   </property>
+  </action>
+  <action name="actionLoad_File_Menu_Option">
+   <property name="text">
+    <string>Load File</string>
+   </property>
+  </action>
+  <action name="actionAssemble_Load">
+   <property name="text">
+    <string>Assemble + Load</string>
+   </property>
+  </action>
+  <action name="actionAssemble">
+   <property name="text">
+    <string>Assemble</string>
    </property>
   </action>
  </widget>

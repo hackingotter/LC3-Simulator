@@ -85,7 +85,6 @@ QModelIndex  a =(VIEW)->model()->index(INPUT,0);\
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
-    qDebug("Are you seeing this");
 
     Computer::getDefault()->setProgramStatus(cond_z);
 
@@ -96,6 +95,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     QFuture<void> f1 = QtConcurrent::run(threadTest,QString("1"));
     f1.waitForFinished();
+
 
 
 
@@ -124,6 +124,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 //    setupMenuBar();
 //    Computer::getDefault()->loadProgramFile(QString("testing.asm").toLocal8Bit().data());
     update();
+
+
+
 }
 MainWindow::~MainWindow()
 {
@@ -170,7 +173,137 @@ void MainWindow::setupViews()
 
 void MainWindow::setupMenuBar()
 {
-    CONNECT(MainWindow::ui->actionOpen,triggered(),this,handleFiles());
+    QAction* actionLoad_File = new QAction("Load File",this);
+    QAction* actionAssemble_File = new QAction("Assemble File",this);
+    QAction* actionAssemble_Load_File = new QAction("Assemble and Load File",this);
+    QAction* actionSave_File = new QAction("Save File",this);
+    QAction* actionSave_File_As= new QAction("Save File As ...");
+
+    QList<QAction*> fileActions;
+    fileActions <<actionLoad_File<<actionAssemble_File<<actionAssemble_Load_File<<actionSave_File<<actionSave_File_As;
+    ui->menuFile->addActions(fileActions);
+    CONNECT(actionLoad_File,triggered(),this,loadFile());
+    CONNECT(actionAssemble_Load_File,triggered(),this, assembleNLoadFile());
+
+//    MainWindow::ui-
+
+}
+void MainWindow::loadFile(QString path)
+{
+    bool success = true;
+    Computer::getDefault()->Undos->beginMacro("Load "+ path);
+    qDebug("Attempting to load a program");
+    if(path==QString())
+    {
+        qDebug("Looks like there was no file specified.  Time for the user to choose.");
+        path = QFileDialog::getOpenFileName(this,"Select a file to load");
+    }
+    if(path!=QString())
+    {
+        qDebug("Attempting to use that choice " +path.toLocal8Bit());
+        try
+        {
+            Computer::getDefault()->loadProgramFile(path.toLocal8Bit().data());
+        }
+        catch(const std::string& e)
+        {
+        std::cout<<e<<std::endl;
+        success = false;
+        }
+        catch(...)
+        {
+        std::cout<<"An unexpected error has occurred"<<std::endl;
+        success = false;
+        }
+
+    }
+    else
+    {
+        qDebug("Seems that the user chose not to choose");
+    }
+    Computer::getDefault()->Undos->endMacro();
+}
+QString MainWindow::assembleFile(QString path)
+{
+    QFileDialog* fileUI = new QFileDialog();
+    fileUI->setNameFilter(QString("Assembly (*").append(ASSEMBLY_SUFFIX).append(")"));
+    fileUI->setReadOnly(true);
+    fileUI->setWindowTitle("Choose a file to assemble and load into memory");
+
+
+    Assembler embler = Assembler();
+    
+    if(path==QString())
+    {
+        qDebug("Looks like there was no file specified.  Time for the user to choose.");
+        path = fileUI->getOpenFileName();
+
+    }
+    QString target = path;
+    try
+    {
+        QString target = path;
+        target.replace(-3,3,OBJECT_SUFFIX);
+        embler.assembleFile(path.toLocal8Bit().data(),target.toLocal8Bit().data());
+    }
+    catch(const std::string& e)
+    {
+    std::cout<<e<<std::endl;
+    return "";
+    }
+    catch(...)
+    {
+    std::cout<<"An unforseen error has occured"<<endl;
+    return "";
+    }
+
+    return "Test.obj";
+
+
+}
+void MainWindow::assembleNLoadFile(QString path)
+{
+
+    QFileDialog* fileUI = new QFileDialog();
+    fileUI->setNameFilter(QString("Assmbly (*").append(ASSEMBLY_SUFFIX).append(")"));
+    fileUI->setReadOnly(true);
+    fileUI->setWindowTitle("Choose a file to assemble and load into memory");
+
+
+    Assembler embler = Assembler();
+
+    if(path==QString())
+    {
+        qDebug("Looks like there was no file specified.  Time for the user to choose.");
+        path = fileUI->getOpenFileName();
+    }
+
+    QString shortPath = path;
+    shortPath.remove(0,path.lastIndexOf("/"));
+    QString namePath = "test.obj";
+    Computer::getDefault()->Undos->beginMacro("Assemble and Load "+shortPath);
+    qDebug("assembling and loading");
+
+
+    qDebug("Trying " + path.toLocal8Bit());
+
+    try
+    {
+        embler.assembleFile(path.toLocal8Bit().data(),namePath.toLocal8Bit().data());
+    }
+    catch(const std::string& e)
+    {
+    std::cout<<e<<std::endl;
+    return;
+    }
+    catch(...)
+    {
+
+    std::cout<<"An unforseen error has occured"<<std::endl;
+    return;
+    }
+    loadFile(namePath);
+//    embler.assembleFile();
 
 }
 void MainWindow::handleFiles()
@@ -179,7 +312,7 @@ void MainWindow::handleFiles()
     QString inputPath = QFileDialog::getOpenFileName().toLocal8Bit().data();
     Bill.assembleFile(inputPath.toLatin1().data(),"LC3Maybe.obj");
     Computer::getDefault()->loadProgramFile("LC3Maybe.obj");
-    SINGFORME(emit update();)
+    IFNOMASK(emit update();)
 }
 
 void MainWindow::setupMemView(QTableView* view)
@@ -375,7 +508,7 @@ void MainWindow::gotoRunningMode()
     qDebug("Going to Running Mode");
     *threadRunning = true;
     ui->NextButton->setEnabled(false);
-    SINGFORME(emit update();)
+    IFNOMASK(emit update();)
     MASK
 }
 void MainWindow::gotoUserMode()
@@ -384,7 +517,7 @@ void MainWindow::gotoUserMode()
     *threadRunning = false;
     ui->NextButton->setEnabled(true);
     UNMASK
-    SINGFORME(emit update();)
+    IFNOMASK(emit update();)
 }
 void MainWindow::prepWork()
 {

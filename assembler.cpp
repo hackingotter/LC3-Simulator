@@ -90,7 +90,7 @@ uint16_t Assembler::processLine(string &line, RunType runType, uint16_t pc, ofst
     std::smatch match;
 
     if (!regex_match(line, match, parserRegex)) {
-        throw "Could not parse line: " + line;
+        throw "Could not parse line: " + getHexString(pc).toStdString()+ ":"+ line;
     }
 
     std::string label = match[1];

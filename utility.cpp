@@ -4,6 +4,10 @@
 namespace Utility {
 
 
+
+
+
+
 int QSTRING2INTBASE(QString source,int suggestedBase)
 {
     qDebug("Looks like we are changing a QString to a Int ");

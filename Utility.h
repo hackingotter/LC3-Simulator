@@ -11,7 +11,11 @@
 #define RUBBERDUCKY true
 #define BUBBLES true
 
+#define ASSEMBLY_SUFFIX ".asm"
 
+#define OBJECT_SUFFIX ".obj"
+
+#define SYMBOL_SUFFIX ".sym"
 
 
 

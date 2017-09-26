@@ -7,6 +7,7 @@
 #include "HistoryHandler.h"
 #include <QUndoStack>
 
+
 #define MASK\
 {\
 Computer::getDefault()->updateMask++;\
@@ -15,8 +16,7 @@ qDebug("Masking" + QString().setNum(Computer::getDefault()->updateMask).toLocal8
 
 #define UNMASK {(Computer::getDefault()->updateMask==0)?:Computer::getDefault()->updateMask--;qDebug("Unmasking"+ QString().setNum(Computer::getDefault()->updateMask).toLocal8Bit());}
 
-#define SINGFORME(OPERA) {if(Computer::getDefault()->updateMask==0){OPERA;qDebug("Higher");}}
-
+#define IFNOMASK(EXECUTE) {if(Computer::getDefault()->updateMask==0){EXECUTE;qDebug("Higher");}}
 
 class Computer : public QObject
 {
@@ -29,9 +29,6 @@ public:
     HistoryHandler* Undos;//will have to work out how to handle this when not in gui
 
     int updateMask;
-
-
-   // registers
 
     /** Returns the contents of a register
      * \param reg The register whose value is requested.
