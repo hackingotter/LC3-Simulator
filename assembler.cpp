@@ -86,6 +86,11 @@ void Assembler::assembleFile(const char *inFile, const char *outFile) {
     oStream.close();
 }
 
+std::map<string, uint16_t> Assembler::labelDictCopy()
+{
+    return new std::map<string, uint16_t>(labelDict);
+}
+
 uint16_t Assembler::processLine(string &line, RunType runType, uint16_t pc, ofstream &oStream) {
     std::smatch match;
 
