@@ -58,7 +58,7 @@ typedef enum reg_t {
     R7 = 7,
     SPR = 7,
     PC = 8,
-    MPR = 9,//Memory Protection Register
+    MPR = 9,//Memory Protection Register: actually in memory!!!!
     PSR = 10
 } reg_t;
 
@@ -67,20 +67,27 @@ typedef enum reg_t {
 
 /** type used for labels.
  */
-typedef struct {
+typedef struct label_t {
     QString name; /** the labels name string. */
     mem_addr_t addr; /** the address the label is at. */
+    label_t() : name(QString()), addr(0) {}
 } label_t;
 
 
 /** type used to get memory.
  */
-typedef struct {
+typedef struct mem_loc_t {
     mem_addr_t addr; /** the address of the location */
     val_t value; /** the value stored at that location */
     label_t *label; /** a pointer to the label for that position. might be null. */
     breakpoint_t *breakpt; /** a pointer to the breakpoint set at that position. might be null. */
     QString comment; /** a pointer to a possible comment string. might be null. */
+    mem_loc_t() :
+        addr(0),
+        value(0),
+        label(nullptr),
+        breakpt(nullptr),
+        comment(QString()) {}
 } mem_loc_t;
 
 

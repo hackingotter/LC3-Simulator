@@ -131,7 +131,7 @@ QVariant modeler::data(const QModelIndex &index, int role) const
             label_t* l = Computer::getDefault()->getMemLabel(addr);
             if (l)
                 return (l->name);
-            return "N/A";
+            return QString();
 
         }
 

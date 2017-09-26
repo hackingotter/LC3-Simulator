@@ -123,7 +123,9 @@ public:
     changeMemLabel(mem_addr_t addr,label_t* oldLabel,label_t* newLabel):mem_addr(addr),oldLabelPtr(oldLabel),newLabelPtr(newLabel)
     {
         setText("set Label");
-        QUndoCommand::setObsolete((newLabelPtr->name == oldLabelPtr->name)&&(newLabelPtr->addr==oldLabelPtr->addr));
+        QUndoCommand::setObsolete(oldLabelPtr && // null check
+                    (newLabelPtr->name == oldLabelPtr->name) &&
+                    (newLabelPtr->addr==oldLabelPtr->addr));
     }
     void undo()
     {
@@ -189,8 +191,6 @@ Computer::Computer(QObject *parent) : QObject(parent)
 {
     Undos = new HistoryHandler();
     Undos->setUndoLimit(65535);
-
-    memset(_memory,0,0x10000); // clear all memory
 }
 
 // default
@@ -385,7 +385,7 @@ void Computer::setMemLabelText(mem_addr_t addr,QString labelString)
 {
     qDebug("setting memLabel");
     // allocate new label
-    label_t* label = (label_t*)malloc(sizeof (label_t));
+    label_t* label = new label_t();
     label->addr = addr;
     label->name = labelString;
 
@@ -423,6 +423,7 @@ breakpoint_t* Computer::getMemBreakPoint(mem_addr_t addr)
 void Computer::setMemComment(mem_addr_t addr, QString comment)
 {
     QString oldComment = _memory[addr].comment;
+    bool b = oldComment.isNull();
     _memory[addr].comment = comment;
 
     Computer::Undos->add(new Action::changeMemComment(addr,oldComment,comment));
@@ -432,7 +433,7 @@ void Computer::setMemComment(mem_addr_t addr, QString comment)
 
 QString Computer::getMemComment(mem_addr_t addr)
 {
-    return "To be figured out. Issues with value vs. reference";
+    //return "To be figured out. Issues with value vs. reference";
     return _memory[addr].comment;
 }
 
