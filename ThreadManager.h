@@ -21,6 +21,7 @@ public:
 signals:
     void started();
     void stopped();
+    void requestHalt();
 public slots:
     void activate(int runningMode = 0);
 private slots:

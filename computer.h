@@ -8,7 +8,7 @@
 #include <QUndoStack>
 
 
-#define MASK\
+#define MASK \
 {\
 Computer::getDefault()->updateMask++;\
 qDebug("Masking" + QString().setNum(Computer::getDefault()->updateMask).toLocal8Bit());\

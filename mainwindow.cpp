@@ -188,6 +188,10 @@ void MainWindow::setupMenuBar()
 //    MainWindow::ui-
 
 }
+void MainWindow::setupControlButtons()
+{
+CONNECT(ui->haltButton,pressed(),manager,requestHalt());
+}
 void MainWindow::loadFile(QString path)
 {
     bool success = true;

@@ -136,7 +136,7 @@ QVariant modeler::data(const QModelIndex &index, int role) const
 
         case MNEMCOLUMN:
 //            qDebug("ehlo");
-            return ""; // TODO this is not working. It get's stuck
+//            return ""; // TODO this is not working. It get's stuck
             return QString(addr2Mnem(addr));
         case COMMCOLUMN:
             return Computer::getDefault()->getMemComment(addr);
@@ -339,13 +339,11 @@ QString modeler::addr2Mnem(mem_addr_t addr) const
         }
         else
         {
+            val_t offset = val&0x01FF;
+            if(val&0x0100) val|=0xFE00;
             mem_addr_t target = addr +( val & 0x00FF);
-            label_t* label = Computer::getDefault()->getMemLabel(target);
             out.append(" ");
-            if(label != nullptr)
-            {
-                out.append(getHexString(target));
-            }
+            out.append(name_or_addr(target));
         }
         break;
 
@@ -373,7 +371,9 @@ QString modeler::addr2Mnem(mem_addr_t addr) const
         qDebug("JSR");
 if(val&0x0800)//11th slot 1 means jsr
         {
+            val_t offset = val& 0x07FF;
 
+            if(offset&0x400)offset |= 0xF400;
             mem_addr_t target = addr + (val & 0x07FF);
             out.append(" " + name_or_addr(target));
         }
@@ -393,7 +393,11 @@ if(val&0x0800)//11th slot 1 means jsr
     case stOpCode :
     case stiOpCode:
     {
-        out.append("R" + QSTRNUM(reg11) + ", "+ name_or_addr(addr+val&0x00FF));
+        val_t offset = val&0x01FF;
+        if(val&0x0100) val|=0xFE00;
+
+        val_t target = addr+offset;
+        out.append("R" + QSTRNUM(reg11) + ", "+ name_or_addr(target));
         break;
     }
     case ldrOpCode:
@@ -426,7 +430,7 @@ QString modeler::name_or_addr(mem_addr_t target) const
 
     if(label->name!=nullptr)
     {
-       return QString(label->name);
+       return (label->name);
     }
     else
     {

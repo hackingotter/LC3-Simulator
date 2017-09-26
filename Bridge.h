@@ -23,12 +23,14 @@ public:
     static void doWork();
 public slots:
     void process();
+    void beginHalt();
 signals:
     void finished();
     void error(QString err);
 
 private:
     static bool isRunning;
+    static bool isHalting;
 
 };
 

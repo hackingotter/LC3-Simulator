@@ -8,7 +8,7 @@
 #include "computer.h"
 bool Bridge::isRunning = false;
 
-
+bool Bridge::isHalting = false;
 
 
 
@@ -35,6 +35,7 @@ void Bridge::process()
                 return;
     }
     Bridge::isRunning = true;
+
     int *ok = new int(0);
     switch(runningMode)
     {
@@ -45,12 +46,13 @@ void Bridge::process()
         val_t target_PC = Computer::getDefault()->getRegister(PC)+1;
 
         qDebug("Am I done? Starting at"+ QString().setNum(target_PC).toLocal8Bit());
-        while((Computer::getDefault()->getRegister(PC)!= target_PC)&&(*ok !=1))
+        while((Computer::getDefault()->getRegister(PC)!= target_PC)&&(*ok !=1)&&!Bridge::isHalting)
         {
             qDebug("Trying at "+ QString().setNum(Computer::getDefault()->getRegister(PC)).toLocal8Bit());
             Computer::getDefault()->executeSingleInstruction();
             qDebug("Executed with error of " +QString().setNum(*ok).toLocal8Bit());
         }
+        Bridge::isHalting = false;
         qDebug("Done!");
         break;
     }
@@ -71,6 +73,10 @@ void Bridge::process()
     qDebug("AGAIN");
     emit finished();
     isRunning=false;
+}
+void Bridge::beginHalt()
+{
+    Bridge::isHalting = true;
 }
 
 

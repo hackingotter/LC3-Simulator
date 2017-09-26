@@ -149,7 +149,7 @@ public slots:
 
     void setupMemView(QTableView* view);
 
-
+    void setupControlButtons();
 
     void on_MemView1PCButton_pressed();
 
@@ -202,6 +202,7 @@ public slots:
     void closeEvent(QCloseEvent *event);
 signals:
     void requestUndo();
+    void requestHalt();
 public slots:
     void gotoRunningMode();
     void gotoUserMode();

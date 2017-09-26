@@ -20,7 +20,7 @@ void ThreadManager::activate(int runningMode)
     QObject::connect(worker, SIGNAL(finished()), thread, SLOT(quit()));
     QObject::connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
     QObject::connect(worker, SIGNAL(finished()), this,   SLOT(done()));
-
+    QObject::connect(this, SIGNAL(requestHalt()), worker, SLOT(beginHalt()));
     //The next line makes it so that the thread deletes itself without crashes
     QObject::connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
 

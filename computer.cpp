@@ -992,8 +992,9 @@ void Computer::executeSingleInstruction() {
 
     }
     UNMASK
+
             IFNOMASK(update();)
-            Undos->endMacro();
+           Undos->endMacro();
 
 }
 
