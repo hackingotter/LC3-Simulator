@@ -298,16 +298,16 @@ void Computer::setPriviliged(bool priv)
 {
     val_t oldPSR = getRegister(PSR);
     if (priv)
-        oldPSR |= 0x8000; // this will force bit 15 to 1 but maintain all others
-    else
         oldPSR &= 0x7FFF; // this will force bit 15 to 0 but maintain all others
+    else
+        oldPSR |= 0x8000; // this will force bit 15 to 1 but maintain all others
 
     setRegister(PSR,oldPSR);
 }
 
 bool Computer::getPriviliged()
 {
-    return getRegister(PSR) & 0x8000; // bit 15 is privilige bit
+    return !(getRegister(PSR) & 0x8000); // bit 15 is privilige bit (0 means privelege)
 }
 
 // memory
