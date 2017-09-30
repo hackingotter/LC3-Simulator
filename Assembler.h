@@ -27,11 +27,12 @@ typedef enum {
 
 class Assembler {
 
-    std::regex parserRegex;
+private:
+
+
+    const std::regex parserRegex;
 
     std::map<std::string, uint16_t> labelDict;
-
-std::map<std::string, uint16_t> labelDictCopy();
 
     double parseNumber(std::string num);
 
@@ -68,6 +69,8 @@ public:
     Assembler();
 
     void assembleFile(const char *inFile, const char *outFile);
+
+    std::map<std::string, uint16_t>* labelDictCopy();
 
 };
 
