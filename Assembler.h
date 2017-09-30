@@ -31,7 +31,7 @@ class Assembler {
 
     std::map<std::string, uint16_t> labelDict;
 
-
+std::map<std::string, uint16_t> labelDictCopy();
 
     double parseNumber(std::string num);
 

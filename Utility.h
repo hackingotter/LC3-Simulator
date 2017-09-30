@@ -39,6 +39,7 @@ namespace Utility {
 int QSTRING2INTBASE(QString source,int suggestedBase);
 
 void systemInfoDebug();
+
 int qColor2Int(QColor color);
 QColor int2QColor(int color);
 }

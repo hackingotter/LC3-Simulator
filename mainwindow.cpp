@@ -86,8 +86,6 @@ QModelIndex  a =(VIEW)->model()->index(INPUT,0);\
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
-
-    QColorDialog::getColor();
     Computer::getDefault()->setProgramStatus(cond_z);
 
     Utility::systemInfoDebug();//Just some fun info
