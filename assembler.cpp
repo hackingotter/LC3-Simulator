@@ -4,6 +4,7 @@
 
 #include "Assembler.h"
 #include <iostream>
+#include "GlobalTypes.h"
 using namespace std;
 
 
@@ -37,10 +38,13 @@ using namespace std;
 
 Assembler::Assembler() : parserRegex(regex(
                                          R"abc([ \t]*((?!(?:ADD|SUB|AND|(?:BR[nzp]{0,3})|JMP|JMPT|JSRR|JSR|LDI|LDR|LD|LEA|NOT|RET|RTT|RTI|STI|STR|ST|TRAP|MUL|GETC|OUT|IN|PUTSP|PUTS|HALT)(?:\W|$))\w*)?[ \t]*(?:(?:(ADD|SUB|AND|(?:BR[nzp]{0,3})|JMP|JMPT|JSRR|JSR|LDI|LDR|LD|LEA|NOT|RET|RTT|RTI|STI|STR|ST|TRAP|MUL|\.FILL|\.STRINGZ|\.ORIG|\.END|\.BLKW|PUTS|GETC|OUT|IN|PUTSP|HALT)(?:\W|$))[ \t]*(?:r(\d),?)?[ \t]*(?:r(\d),?)?[ \t]*(?:(?:r(\d))|((?:#|x|b|o|-(?!-))?-?[0-9A-F]+\.?[0-9]*)|(\w*)|((?:".*")|(?:'.*')))?)?[ \t]*(?:;+([\S \t]*))?[ \t]*$)abc",
-                                         std::regex_constants::icase)) {
+                                         std::regex_constants::icase)),
+                         programLength(0),
+                         startingAddress(0xFFFF),
+                         endingAddress(0)
+{
 
-    labelDict = map<string, uint16_t> ();
-
+    labelDict = map<QString, uint16_t> ();
 }
 
 void Assembler::assembleFile(const char *inFile, const char *outFile) {
@@ -84,9 +88,43 @@ void Assembler::assembleFile(const char *inFile, const char *outFile) {
     oStream.close();
 }
 
-std::map<string, uint16_t>* Assembler::labelDictCopy()
+std::map<QString, uint16_t>* Assembler::labelDictCopy()
 {
-    return new std::map<string, uint16_t>(labelDict);
+    return new std::map<QString, uint16_t>(labelDict);
+}
+
+QString Assembler::labelForAddress(mem_addr_t addr)
+{
+    QString label = QString();
+
+    foreach (const auto n, labelDict) {
+
+        if (n.second == addr) {
+            label.append( n.first + " ");
+        }
+    }
+
+    return label;
+}
+
+void Assembler::passLabelsToComputer(Computer *comp)
+{
+    if (startingAddress == 0xFFFF) {
+        return;
+    }
+
+    if (!comp)
+        throw "Argument exception: comp";
+
+    for (mem_addr_t addr = startingAddress; addr <= endingAddress; addr ++) {
+        QString text = labelForAddress(addr);
+
+        if (text.isEmpty()) {
+            comp->setMemLabel(addr,NULL);
+        } else {
+            comp->setMemLabelText(addr,text);
+        }
+    }
 }
 
 uint16_t Assembler::processLine(string &line, RunType runType, uint16_t pc, ofstream &oStream) {
@@ -135,12 +173,14 @@ uint16_t Assembler::processLine(string &line, RunType runType, uint16_t pc, ofst
 
     // .END
     if (instruction == ".END") {
+        endingAddress = pc;
         return pc;
     }
 
     // .ORIG
     if (instruction == ".ORIG") {
         pc = (uint16_t) parseNumber(opNumber);
+        startingAddress = pc;
         cout << "Origin set to x" << hex << pc << endl;
         if (runType == MainRun) {
             writeWord(oStream, pc);
@@ -150,7 +190,7 @@ uint16_t Assembler::processLine(string &line, RunType runType, uint16_t pc, ofst
 
     // set label
     if (runType == PreRun && !label.empty()) {
-        labelDict[label] = pc;
+        labelDict[QString::fromStdString(label)] = pc;
     }
 
     // if no op -> skip
@@ -229,7 +269,7 @@ void Assembler::writeFill(ofstream &oStream, const string &opNumber, const strin
         }
     } else {
         // label
-        uint16_t labelPos = labelDict[opLabel];
+        uint16_t labelPos = labelDict[QString::fromStdString(opLabel)];
         writeWord(oStream, labelPos);
     }
 }
@@ -383,7 +423,7 @@ uint16_t Assembler::getNumberOrOffset(const string &instruction, NumOrLabel nOrL
             offset = (int16_t) parseNumber(opNumber);
         } else {
             try {
-                uint16_t labelAddr = labelDict[opLabel];
+                uint16_t labelAddr = labelDict[QString::fromStdString(opLabel)];
                 if (labelAddr == 0)
                     throw "Empty label exception";
                 offset = labelAddr - pc;
