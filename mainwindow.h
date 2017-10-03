@@ -164,7 +164,7 @@ public slots:
     void setupMenuBar();
 
     void handleFiles();
-    void loadFile(QString path = QString());
+    bool loadFile(QString path = QString());
     QString assembleFile(QString path);
     void assembleNLoadFile(QString path = QString());
 

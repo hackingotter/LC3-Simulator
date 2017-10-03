@@ -128,7 +128,7 @@ public:
     void setMemLabel(mem_addr_t addr, label_t* label);
 
     // TODO comment
-    void setMemLabelText(std::pair<std::string, uint16_t>& pair);
+
     /** sets a given label pair
      * \param addr
      * \param labelName

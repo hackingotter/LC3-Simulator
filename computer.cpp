@@ -378,10 +378,7 @@ void Computer::setMemLabel(mem_addr_t addr,label_t* newLabel)
 
     IFNOMASK(emit update();)
 }
-void Computer::setMemLabelText(std::pair<std::string, uint16_t>& pair)
-{
-    setMemLabelText(pair.second,QString().fromStdString(pair.first));
-}
+
 void Computer::setMemLabelText(mem_addr_t addr,QString labelString)
 {
     qDebug("setting memLabel");

@@ -181,6 +181,10 @@ void MainWindow::setupMenuBar()
     QAction* actionSave_File = new QAction("Save File",this);
     QAction* actionSave_File_As= new QAction("Save File As ...");
 
+
+    actionAssemble_Load_File->setShortcut(QKeySequence(tr("Ctrl+D")));
+
+
     QList<QAction*> fileActions;
     fileActions <<actionLoad_File<<actionAssemble_File<<actionAssemble_Load_File<<actionSave_File<<actionSave_File_As;
     ui->menuFile->addActions(fileActions);
@@ -194,9 +198,9 @@ void MainWindow::setupControlButtons()
 {
 CONNECT(ui->haltButton,pressed(),manager,requestHalt());
 }
-void MainWindow::loadFile(QString path)
+bool MainWindow::loadFile(QString path)
 {
-    bool success = true;
+    bool success = false;
     Computer::getDefault()->Undos->beginMacro("Load "+ path);
     qDebug("Attempting to load a program");
     if(path==QString())
@@ -229,6 +233,7 @@ void MainWindow::loadFile(QString path)
     }
     Computer::getDefault()->Undos->endMacro();
     if(!success) Computer::getDefault()->Undos->undo();
+    return success;
 }
 QString MainWindow::assembleFile(QString path)
 {
@@ -314,13 +319,13 @@ void MainWindow::assembleNLoadFile(QString path)
     return;
     }
 
-    std::map<std::string, uint16_t>* dict = embler.labelDictCopy();
-
-    for(std::pair<std::string, uint16_t> entry : *dict)
+    embler.passLabelsToComputer(Computer::getDefault());
+    if(loadFile(namePath))
     {
-        Computer::getDefault()->setMemLabelText(entry);
+        qDebug("successfully loaded");
+
     }
-    loadFile(namePath);
+
     Computer::getDefault()->Undos->endMacro();
 //    embler.assembleFile();
 
