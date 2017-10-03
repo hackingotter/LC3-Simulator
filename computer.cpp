@@ -19,13 +19,8 @@
 #define REDOFUNC(STUFF)  void redo()\
 {\
     STUFF\
-    }
-//    if(next)\
-//    {\
-//    STUFF\
-//    }\
-//    next=!next;\
-//}
+}
+
 #define SAVEFUNC(STUFF)  QString save()\
 {\
     return STUFF\
@@ -298,16 +293,16 @@ void Computer::setPriviliged(bool priv)
 {
     val_t oldPSR = getRegister(PSR);
     if (priv)
-        oldPSR &= 0x7FFF; // this will force bit 15 to 0 but maintain all others
-    else
         oldPSR |= 0x8000; // this will force bit 15 to 1 but maintain all others
+    else
+        oldPSR &= 0x7FFF; // this will force bit 15 to 0 but maintain all others
 
     setRegister(PSR,oldPSR);
 }
 
 bool Computer::getPriviliged()
 {
-    return !(getRegister(PSR) & 0x8000); // bit 15 is privilige bit (0 means privelege)
+    return getRegister(PSR) & 0x8000; // bit 15 is privilige bit
 }
 
 // memory
@@ -316,6 +311,8 @@ mem_loc_t Computer::getMemLocation(mem_addr_t addr)
 {
     return _memory[addr];
 }
+
+
 
 void Computer::setMemValue(mem_addr_t addr, val_t val)
 {
@@ -380,6 +377,10 @@ void Computer::setMemLabel(mem_addr_t addr,label_t* newLabel)
     TRY2PUSH(oldLabel,newLabel,changeMemLabel(addr,oldLabel,newLabel));
 
     IFNOMASK(emit update();)
+}
+void Computer::setMemLabelText(std::pair<std::string, uint16_t>& pair)
+{
+    setMemLabelText(pair.second,QString().fromStdString(pair.first));
 }
 void Computer::setMemLabelText(mem_addr_t addr,QString labelString)
 {

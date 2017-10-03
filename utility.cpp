@@ -51,6 +51,39 @@ QColor int2QColor(int color)
     int r = (color>>24)&0xFF;
     return  QColor(r,g,b,a);
 }
+val_t unifiedInput2Val(QString input)
+{
+    qDebug(input.toLocal8Bit());
+    val_t out;
+    bool* ok;
+    int index = 0;
+    if(input.at(index)=='0')//pre prefix 0x, 0b, etc
+    {
+        index++;
+    }
+
+    if(input.at(index) == 'b'){
+
+        input.remove(0,index);
+        qDebug(input.toLocal8Bit());
+
+    }else if(input.at(index) == 'o')
+    {
+        qDebug(input.toLocal8Bit());
+    } else if(input.at(index) == 'x')
+    {
+
+        input.remove(0,index);
+        qDebug(input.toLocal8Bit());
+        out = input.toInt(ok,16);
+        if(*ok)
+        {
+            return out;
+        }
+    }
+
+    return 0;
+    }
 
 
 

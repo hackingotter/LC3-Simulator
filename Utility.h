@@ -42,6 +42,8 @@ void systemInfoDebug();
 
 int qColor2Int(QColor color);
 QColor int2QColor(int color);
+
+val_t unifiedInput2Val(QString input);
 }
 #define BADOP "Bad Op"
 

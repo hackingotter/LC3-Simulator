@@ -158,7 +158,7 @@ bool RegisterModel::setData(const QModelIndex &index, const QVariant&value,int r
 
             // TODO I uncommented this cause I have no idea what the plan with this was
         //noTry->push(new Action::changeRegValue(row,QVARIANT2VAL_T(value)));
-                Computer::getDefault()->setRegister(row,static_cast<val_t>(value.toString().toInt(nullptr,16)));
+                Computer::getDefault()->setRegister(row,Utility::unifiedInput2Val(value.toString()));
 
 //            BATHTIME(CHARPTR2QSTRING(getHexString(getRegister(row))))
 //            emit dataChanged(index,index,QVector<int>() <<role);

@@ -29,6 +29,7 @@
 #include <QDataStream>
 #include "Assembler.h"
 #include <QUndoView>
+#include <map>
 #include <QFile>
 #define REGISTERVIEWNUMCOLUMN 2
 
@@ -227,6 +228,7 @@ void MainWindow::loadFile(QString path)
         qDebug("Seems that the user chose not to choose");
     }
     Computer::getDefault()->Undos->endMacro();
+    if(!success) Computer::getDefault()->Undos->undo();
 }
 QString MainWindow::assembleFile(QString path)
 {
@@ -299,15 +301,27 @@ void MainWindow::assembleNLoadFile(QString path)
     catch(const std::string& e)
     {
     std::cout<<e<<std::endl;
+    Computer::getDefault()->Undos->endMacro();
+    Computer::getDefault()->Undos->undo();//no need in saving this
     return;
     }
     catch(...)
     {
 
     std::cout<<"An unforseen error has occured"<<std::endl;
+    Computer::getDefault()->Undos->endMacro();
+    Computer::getDefault()->Undos->undo();//no need in saving this
     return;
     }
+
+    std::map<std::string, uint16_t>* dict = embler.labelDictCopy();
+
+    for(std::pair<std::string, uint16_t> entry : *dict)
+    {
+        Computer::getDefault()->setMemLabelText(entry);
+    }
     loadFile(namePath);
+    Computer::getDefault()->Undos->endMacro();
 //    embler.assembleFile();
 
 }
@@ -332,7 +346,7 @@ void MainWindow::setupMemView(QTableView* view)
     Saturn->addScrollBar(scroll);
     view->setVerticalScrollBar(scroll);
 
-    view->horizontalHeader()->setSectionResizeMode(2,QHeaderView::Fixed);
+
 
     // this is inefficient and useless since we should set those in the design
     //qDebug("Resizing Columns");
@@ -349,8 +363,12 @@ void MainWindow::setupMemView(QTableView* view)
     view->setColumnWidth(MEM_VIEW_ADR_COL,HEX_COLUMN_WIDTH);
     view->horizontalHeader()->setSectionResizeMode(MEM_VIEW_ADR_COL,QHeaderView::Fixed);
 
+    view->setColumnWidth(MEM_VIEW_NAME_COL,HEX_COLUMN_WIDTH);
+
     view->setColumnWidth(MEM_VIEW_VAL_COL,HEX_COLUMN_WIDTH);
     view->horizontalHeader()->setSectionResizeMode(MEM_VIEW_VAL_COL,QHeaderView::Fixed);
+
+
 
 //    QObject::connect(Computer::getDefault(),SIGNAL(update()),view,SLOT(repaint()));
 }
@@ -388,7 +406,7 @@ void MainWindow::setupRegisterView()
     qDebug("Showing Grid");
     view->showGrid();
     view->setColumnWidth(0,8);
-    view->setColumnWidth(1,28);
+    view->setColumnWidth(1,43);
     view->resizeColumnToContents(reg_value_column);
     qDebug("Setting horizantal heading options");
     {
