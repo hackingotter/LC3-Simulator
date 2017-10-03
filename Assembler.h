@@ -7,6 +7,9 @@
 #include <regex>
 #include <map>
 #include "Utility.h"
+#include "GlobalTypes.h"
+#include "computer.h"
+#include <QString>
 
 #ifndef LC3_ASSAMBLER_ASSAMBLER_H
 #define LC3_ASSAMBLER_ASSAMBLER_H
@@ -32,7 +35,18 @@ private:
 
     const std::regex parserRegex;
 
-    std::map<std::string, uint16_t> labelDict;
+
+    std::map<QString, uint16_t> labelDict;
+    /** How many lines the program has.
+     * /brief programLength
+     */
+    uint16_t programLength;
+    /** starting address fo the program being assembled
+     */
+    val_t startingAddress;
+    /** ending address fo the program being assembled
+     */
+    val_t endingAddress;
 
     double parseNumber(std::string num);
 
@@ -70,8 +84,20 @@ public:
 
     void assembleFile(const char *inFile, const char *outFile);
 
-    std::map<std::string, uint16_t>* labelDictCopy();
+    std::map<QString, uint16_t>* labelDictCopy();
 
+    /** Returns all the labels for an address as a space separated string
+     * /brief labelForAddress
+     * /param addr
+     * /return
+     */
+    QString labelForAddress(mem_addr_t addr);
+
+    /** Passes all labels from the assambled file to a computer. Replaces all existing labels in the range of the assembled file
+     * /brief passLabelsToComputer
+     * /param comp
+     */
+    void passLabelsToComputer(Computer* comp);
 };
 
 
