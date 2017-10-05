@@ -82,6 +82,7 @@ void Assembler::assembleFile(const char *inFile, const char *outFile) {
         while (std::getline(iStream, line)) {
             pc = processLine(line, runType, pc, oStream);
         }
+        endingAddress = pc;
     }
 
     iStream.close();
@@ -173,7 +174,6 @@ uint16_t Assembler::processLine(string &line, RunType runType, uint16_t pc, ofst
 
     // .END
     if (instruction == ".END") {
-        endingAddress = pc;
         return pc;
     }
 
