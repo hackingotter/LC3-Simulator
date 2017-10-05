@@ -41,7 +41,8 @@ Assembler::Assembler() : parserRegex(regex(
                                          std::regex_constants::icase)),
                          programLength(0),
                          startingAddress(0xFFFF),
-                         endingAddress(0)
+                         endingAddress(0),
+                         hitDotEND(false)
 {
 
     labelDict = map<QString, uint16_t> ();
@@ -79,7 +80,8 @@ void Assembler::assembleFile(const char *inFile, const char *outFile) {
                 break;
         }
 
-        while (std::getline(iStream, line)) {
+        hitDotEND = false;
+        while (std::getline(iStream, line) && !hitDotEND) {
             pc = processLine(line, runType, pc, oStream);
         }
         endingAddress = pc;
@@ -174,6 +176,7 @@ uint16_t Assembler::processLine(string &line, RunType runType, uint16_t pc, ofst
 
     // .END
     if (instruction == ".END") {
+        hitDotEND = true;
         return pc;
     }
 
