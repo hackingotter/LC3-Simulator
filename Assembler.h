@@ -47,6 +47,10 @@ private:
     /** ending address fo the program being assembled
      */
     val_t endingAddress;
+    /** used during assembly runs. set to true when .END is encountered
+     * \brief hitDotEND
+     */
+    bool hitDotEND;
 
     double parseNumber(std::string num);
 
