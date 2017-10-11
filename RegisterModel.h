@@ -67,6 +67,7 @@ public:
 
     void update();
 
+
 signals:
     void requestRegisterEdit(reg_t,val_t,int);
     void regEdit(reg_t,val_t) const;

@@ -85,7 +85,7 @@ QVariant modeler::data(const QModelIndex &index, int role) const
     mem_addr_t addr = index.row();
     if(role == Qt::CheckStateRole)
     {
-        if(column == BRCOLUMN) return 0;
+        if(column == BRCOLUMN) return (int)*(Computer::getDefault()->getMemBreakPoint(addr));
         return  QVariant();
     }
     //    if(role == Qt::TextAlignmentRole){
@@ -185,22 +185,11 @@ bool modeler::setData(const QModelIndex &index, const QVariant &value, int role)
         case VALUCOLUMN:
             qDebug("You just set a Value");
         {
-            QString valString = value.toString();
-            if(value.toString().startsWith("x")) valString = valString.remove(0,1);
-            bool ok = false;
-            val_t val = static_cast<val_t>(valString.toInt(&ok,16));
-            if(!ok)
-            {
-                qDebug("NOPE");
-            }else
-            {
+
+                Computer::getDefault()->setMemValue(addr,Utility::unifiedInput2Val(value.toString()));
 
 
-                qDebug("Requesting Change");
-                Computer::getDefault()->setMemValue(addr,val);
-                qDebug("hey " + QString().setNum(val).toLocal8Bit());
 
-            }
         }
             return true;
         case COMMCOLUMN:qDebug("You just set a Comment");

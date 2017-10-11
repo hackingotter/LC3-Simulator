@@ -125,6 +125,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     readSettings();
 //    setupMenuBar();
 //    Computer::getDefault()->loadProgramFile(QString("testing.asm").toLocal8Bit().data());
+
     update();
 
 
@@ -318,8 +319,14 @@ void MainWindow::assembleNLoadFile(QString path)
     Computer::getDefault()->Undos->undo();//no need in saving this
     return;
     }
-
+    try{
     embler.passLabelsToComputer(Computer::getDefault());
+    }
+    catch(const std::string& e)
+    {
+        std::cout<<e<<endl;
+        return;
+    }
     if(loadFile(namePath))
     {
         qDebug("successfully loaded");
@@ -404,6 +411,7 @@ void MainWindow::setupStackView(QTableView* view)
 void MainWindow::setupRegisterView()
 {
     QTableView* view = ui->RegisterView;
+
     qDebug("Initializing model");
     regModel = new RegisterModel(this,threadRunning);
     qDebug("Attaching the model to the views");
@@ -479,22 +487,23 @@ void MainWindow::on_MemView3PCButton_pressed()
 }
 void MainWindow::on_MemView1GotoButton_pressed()
 {
-    SCROLLTO(ui->MemView1View,ui->MemView1Input->text().toInt(NULL,16))
+    SCROLLTO(ui->MemView1View,Utility::unifiedInput2Val(ui->MemView1Input->text())
+             )
     CLEAR(ui->MemView1Input)
 }
 void MainWindow::on_MemView2GotoButton_pressed()
 {
-    SCROLLTO(ui->MemView2View,ui->MemView2Input->text().toInt(NULL,16))
+    SCROLLTO(ui->MemView2View,Utility::unifiedInput2Val(ui->MemView2Input->text()))
     CLEAR(ui->MemView2Input)
 }
 void MainWindow::on_MemView3GotoButton_pressed()
 {
-    SCROLLTO(ui->MemView3View,ui->MemView3Input->text().toInt(NULL,16))
+    SCROLLTO(ui->MemView3View,Utility::unifiedInput2Val(ui->MemView3Input->text()))
     CLEAR(ui->MemView3Input)
 }
 void MainWindow::on_StackViewGotoButton_pressed()
 {
-    SCROLLTO(ui->StackViewView,ui->StackViewInput->text().toInt(NULL, 16))
+    SCROLLTO(ui->StackViewView,Utility::unifiedInput2Val(ui->StackViewInput->text()))
     CLEAR(ui->StackViewInput)
 }
 void MainWindow::on_NextButton_pressed()

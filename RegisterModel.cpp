@@ -206,6 +206,73 @@ void RegisterModel::update()
 QList<QColor>* RegisterModel::getRegColors(){
     return regColors;
 }
+cond_t RegisterModel::handle_CC_RegisterView_Input(QString in)
+{
+    qDebug("Handling Conditional");
+    QString lowered = in.toLower();
+    qDebug("Checking if it is a register");
+    if(lowered.startsWith("r"))
+    {
+        qDebug("It might be");
+        if(lowered.length()==2)
+        {
+            qDebug("It looks like it");
+            QString ch = lowered.at(1);
+            int reg_num;
+            ch.number(reg_num,16);
+            if(reg_num<9)
+            {
+                qDebug("It really is!");
+                val_t val = Computer::getDefault()->getRegister(static_cast<reg_t>(reg_num));
+                if(val<0)return cond_n;
+                if(val>0)return cond_p;
+                if(val==0)return cond_z;
+            }
+            qDebug("Nope");
+        }
+        qDebug("Nadda");
+    }
+    //Handle negative
+    PSR_HANDLER(lowered,"n"     ,   cond_n)
+    PSR_HANDLER(lowered,"negative" ,cond_n)
+    PSR_HANDLER(lowered,":("    ,   cond_n)
+    PSR_HANDLER(lowered,": ("   ,   cond_n)
+    PSR_HANDLER(lowered,":-("   ,   cond_n)
+    PSR_HANDLER(lowered,"neg"   ,   cond_n)
+    PSR_HANDLER(lowered,"en"    ,   cond_n)
+    PSR_HANDLER(lowered,"nn"    ,   cond_n)
+    PSR_HANDLER(lowered,"nnn"   ,   cond_n)
+    PSR_HANDLER(lowered,"-"     ,   cond_n)
+    //Handle positive
+    PSR_HANDLER(lowered,"p"     ,   cond_p)
+    PSR_HANDLER(lowered,"positive" ,cond_p)
+    PSR_HANDLER(lowered,":)"    ,   cond_p)
+    PSR_HANDLER(lowered,": )"   ,   cond_p)
+    PSR_HANDLER(lowered,":-)"   ,   cond_p)
+    PSR_HANDLER(lowered,"pos"   ,   cond_p)
+    PSR_HANDLER(lowered,"po"    ,   cond_p)
+    PSR_HANDLER(lowered,"pp"    ,   cond_p)
+    PSR_HANDLER(lowered,"ppp"   ,   cond_p)
+    PSR_HANDLER(lowered,"+"     ,   cond_p)
+    //Handle zero
+    PSR_HANDLER(lowered,"z"     ,   cond_z)
+    PSR_HANDLER(lowered,"zero"  ,   cond_z)
+    PSR_HANDLER(lowered,":|"    ,   cond_z)
+    PSR_HANDLER(lowered,": |"   ,   cond_z)
+    PSR_HANDLER(lowered,":-|"   ,   cond_z)
+    PSR_HANDLER(lowered,"zer"   ,   cond_z)
+    PSR_HANDLER(lowered,"ze"    ,   cond_z)
+    PSR_HANDLER(lowered,"zz"    ,   cond_z)
+    PSR_HANDLER(lowered,"zzz"   ,   cond_z)
+    PSR_HANDLER(lowered,""      ,   cond_z)
+
+
+    if(lowered.toInt()>0)return     cond_p;
+    if(lowered.toInt()<0)return     cond_n;
+
+
+    return cond_z;
+}
 
 
 
