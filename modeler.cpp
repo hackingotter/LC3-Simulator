@@ -83,10 +83,15 @@ QVariant modeler::data(const QModelIndex &index, int role) const
 
     int column = index.column();
     mem_addr_t addr = index.row();
+
     if(role == Qt::CheckStateRole)
     {
-        if(column == BRCOLUMN) return (int)*(Computer::getDefault()->getMemBreakPoint(addr));
-        return  QVariant();
+        if(column == BRCOLUMN)
+        {
+            breakpoint_t va = Computer::getDefault()->getMemBreakPoint(addr);
+            return QVariant(va != nullptr);
+        }
+            return  QVariant();
     }
     //    if(role == Qt::TextAlignmentRole){
     //        switch (column) {
@@ -169,8 +174,14 @@ bool modeler::setData(const QModelIndex &index, const QVariant &value, int role)
         {
         case BRCOLUMN  :qDebug("You just set a breakpoint");
             qDebug("TBI");
-
-            Computer::getDefault()->setMemBreakPoint(addr,NULL);
+            if(Computer::getDefault()->getMemBreakPoint(addr) == nullptr)
+            {
+            Computer::getDefault()->setMemBreakPoint(addr,(void **)((void *)1));
+            }
+            else
+            {
+               Computer::getDefault()->setMemBreakPoint(addr,(void **)(nullptr));
+            }
             emit breakChanged(addr,nullptr);
             return true;
         case ADDRCOLUMN:qDebug("There must be an error"); return false;
