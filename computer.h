@@ -18,6 +18,16 @@ qDebug("Masking" + QString().setNum(Computer::getDefault()->updateMask).toLocal8
 
 #define IFNOMASK(EXECUTE) {if(Computer::getDefault()->updateMask==0){EXECUTE;qDebug("Higher");}}
 
+#define KBSR 0xFE00
+#define KBDR 0xFE02
+#define DSR  0xFE04
+#define DDR  0xFE06
+#define TMR  0xFE08
+#define TMI  0xFE0A
+#define MPR  0xFE12
+#define MCR  0xFFFE
+#define MCC  0xFFFF
+
 class Computer : public QObject
 {
     Q_OBJECT
@@ -67,6 +77,10 @@ public:
     // TODO
     void setPriviliged(bool priv);
     bool getPriviliged();
+
+
+    bool isRunning();
+    void setRunning(bool run);
 
     // memory
     // #########################
@@ -169,6 +183,13 @@ public:
     size_t loadProgramFile(char* path);
 
      void executeSingleInstruction();
+
+     // starts execution the program until the MCR is set to stop
+     void startExecution();
+
+     // executes until pc = addr or the MCR is set to stop
+     void executeUntilAddress(mem_addr_t addr);
+
 signals:
      void update();
 
@@ -196,6 +217,8 @@ private:
     void trap(val_t inst);
 
     void executeBr(val_t inst);
+
+    void executeCycle();
 };
 
 #endif // COMPUTER_H

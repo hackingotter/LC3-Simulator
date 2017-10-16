@@ -305,6 +305,22 @@ bool Computer::getPriviliged()
     return getRegister(PSR) & 0x8000; // bit 15 is privilige bit
 }
 
+bool Computer::isRunning()
+{
+    return getMemValue(MCR) & bitMask(15); // bit 15 of the MCR is clock enabled
+}
+
+void Computer::setRunning(bool run)
+{
+    val_t mcr = getMemValue(MCR);
+    if (run) {
+        mcr |= 0x8000; // set bit 15
+    } else {
+        mcr &= 0x7FFF; // unset bit 15
+    }
+    setMemValue(MCR,mcr);
+}
+
 // memory
 
 mem_loc_t Computer::getMemLocation(mem_addr_t addr)
@@ -716,6 +732,71 @@ void Computer::executeBr(val_t inst) {
     setRegister(PC,pc);
 }
 
+void Computer::executeCycle()
+{
+    mem_addr_t pcAddr = getRegister(PC);
+    mem_loc_t instLoc = getMemLocation(pcAddr);
+    val_t inst = instLoc.value;
+    Undos->beginMacro("Executing "+getHexString(pcAddr));
+    setRegister(PC, pcAddr + 1);
+    switch (inst & opMask) {
+    case addOpCode:
+        add(inst);
+        break;
+    case  andOpCode:
+        and_op(inst);
+        break;
+    case mulOpCode:
+        mul(inst);
+        break;
+    case notOpCode:
+        not_op(inst);
+        break;
+    case brOpCode:
+        br(inst);
+        break;
+    case jmpOpCode:
+        jmp(inst);
+        break;
+    case jsrOpCode:
+        jsr(inst);
+        break;
+    case ldOpCode:
+        ld(inst);
+        break;
+    case ldiOpCode:
+        ldi(inst);
+        break;
+    case ldrOpCode:
+        ldr(inst);
+        break;
+    case leaOpCode:
+        lea(inst);
+        break;
+        //case retOpCode:
+        //ret(inst);
+        //break;
+        // done as a jump
+    case rtiOpCode:
+        rti(inst);
+        break;
+    case stOpCode:
+        st(inst);
+        break;
+    case stiOpCode:
+        sti(inst);
+        break;
+    case strOpCode:
+        str(inst);
+        break;
+    case trapOpCode:
+        trap(inst);
+        break;
+    default:
+        break;
+    }
+}
+
 void Computer::jmp(val_t inst) {
 
     if (inst & bitMask(0)) {
@@ -931,73 +1012,38 @@ void Computer::trap(val_t inst) {
 void Computer::executeSingleInstruction() {
 
     MASK
-            mem_addr_t pcAddr = getRegister(PC);
-    mem_loc_t instLoc = getMemLocation(pcAddr);
-    val_t inst = instLoc.value;
-    Undos->beginMacro("Executing "+getHexString(pcAddr));
-    setRegister(PC, pcAddr + 1);
-    switch (inst & opMask) {
-    case addOpCode:
-        add(inst);
-        break;
-    case  andOpCode:
-        and_op(inst);
-        break;
-    case mulOpCode:
-        mul(inst);
-        break;
-    case notOpCode:
-        not_op(inst);
-        break;
-    case brOpCode:
-        br(inst);
-        break;
-    case jmpOpCode:
-        jmp(inst);
-        break;
-    case jsrOpCode:
-        jsr(inst);
-        break;
-    case ldOpCode:
-        ld(inst);
-        break;
-    case ldiOpCode:
-        ldi(inst);
-        break;
-    case ldrOpCode:
-        ldr(inst);
-        break;
-    case leaOpCode:
-        lea(inst);
-        break;
-        //case retOpCode:
-        //ret(inst);
-        //break;
-        // done as a jump
-    case rtiOpCode:
-        rti(inst);
-        break;
-    case stOpCode:
-        st(inst);
-        break;
-    case stiOpCode:
-        sti(inst);
-        break;
-    case strOpCode:
-        str(inst);
-        break;
-    case trapOpCode:
-        trap(inst);
-        break;
-    default:
-        break;
 
-    }
+    setRunning(true);
+
+    executeCycle();
+
+    setRunning(false);
+
     UNMASK
 
             IFNOMASK(update();)
            Undos->endMacro();
 
+}
+
+void Computer::startExecution()
+{
+    setRunning(true);
+
+    while (isRunning()) {
+        executeCycle();
+    }
+}
+
+void Computer::executeUntilAddress(mem_addr_t addr)
+{
+    setRunning(true);
+
+    while (isRunning() && getRegister(PC) != addr) {
+        executeCycle();
+    }
+
+    setRunning(false);
 }
 
 

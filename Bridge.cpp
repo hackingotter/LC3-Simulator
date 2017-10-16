@@ -41,9 +41,14 @@ void Bridge::process()
     {
     case Next:
     {
-
-
         val_t target_PC = Computer::getDefault()->getRegister(PC)+1;
+
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        // I added a function called executeUntilAddress() that does this.
+        // Logic like this belongs into the computer
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+        // TODO update
 
         qDebug("Am I done? Starting at"+ QString().setNum(target_PC).toLocal8Bit());
         while((Computer::getDefault()->getRegister(PC)!= target_PC)&&(*ok !=1)&&!Bridge::isHalting)
