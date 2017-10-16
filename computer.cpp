@@ -1,6 +1,6 @@
 #include "computer.h"
 #include "opcodes.h"
-#include "util.h"
+#include "Util.h"
 #include <QString>
 #include <QUndoCommand>
 

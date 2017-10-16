@@ -321,6 +321,7 @@ void MainWindow::assembleNLoadFile(QString path)
     }
     try{
     embler.passLabelsToComputer(Computer::getDefault());
+    embler.passCommentsToComputer(Computer::getDefault());
     }
     catch(const std::string& e)
     {

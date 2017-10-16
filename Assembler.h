@@ -37,6 +37,13 @@ private:
 
 
     std::map<QString, uint16_t> labelDict;
+    std::map<mem_addr_t, QString> commentDict;
+
+    /** used to annotate comments from lines that do not have instructions
+     * \brief annotatedComment
+     */
+    QString annotatedComment;
+
     /** How many lines the program has.
      * /brief programLength
      */
@@ -102,6 +109,19 @@ public:
      * /param comp
      */
     void passLabelsToComputer(Computer* comp);
+
+    /** Returns all the comments for an address as a space separated string
+     * /brief commentForAddress
+     * /param addr
+     * /return
+     */
+    QString commentForAddress(mem_addr_t addr);
+
+    /** Passes all comments from the assambled file to a computer. Replaces all existing labels in the range of the assembled file
+     * /brief passCommentsToComputer
+     * /param comp
+     */
+    void passCommentsToComputer(Computer* comp);
 };
 
 

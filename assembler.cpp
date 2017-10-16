@@ -42,10 +42,12 @@ Assembler::Assembler() : parserRegex(regex(
                          programLength(0),
                          startingAddress(0xFFFF),
                          endingAddress(0),
+                         annotatedComment(QString()),
                          hitDotEND(false)
 {
 
     labelDict = map<QString, uint16_t> ();
+    commentDict = map<mem_addr_t, QString> ();
 }
 
 void Assembler::assembleFile(const char *inFile, const char *outFile) {
@@ -85,6 +87,7 @@ void Assembler::assembleFile(const char *inFile, const char *outFile) {
             pc = processLine(line, runType, pc, oStream);
         }
         endingAddress = pc;
+        programLength = endingAddress - startingAddress;
     }
 
     iStream.close();
@@ -127,6 +130,24 @@ void Assembler::passLabelsToComputer(Computer *comp)
         } else {
             comp->setMemLabelText(addr,text);
         }
+    }
+}
+
+QString Assembler::commentForAddress(mem_addr_t addr)
+{
+    auto match = commentDict.find(addr);
+
+    if (match != commentDict.end()) {
+        return commentDict[addr];
+    } else {
+        return QString();
+    }
+}
+
+void Assembler::passCommentsToComputer(Computer *comp)
+{
+    foreach (const auto n, commentDict) {
+        comp->setMemComment(n.first,n.second);
     }
 }
 
@@ -198,8 +219,14 @@ uint16_t Assembler::processLine(string &line, RunType runType, uint16_t pc, ofst
 
     // if no op -> skip
     if (!instruction.empty()) {
+        QString comm = annotatedComment.append(QString::fromStdString(comment));
+        commentDict[pc] = comm;
+        annotatedComment = QString();
+
         pc = writeInstruction(runType, instruction, firstReg, secondReg, thirdReg, opNumber, opLabel, opString,
                               nOfRegs, nOrL, oStream, pc);
+    } else {
+        annotatedComment.append(QString::fromStdString(comment + "\n"));
     }
 
     return pc;
