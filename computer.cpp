@@ -186,6 +186,10 @@ Computer::Computer(QObject *parent) : QObject(parent)
 {
     Undos = new HistoryHandler();
     Undos->setUndoLimit(65535);
+
+    savedSSP = 0;
+    savedUSP = 0;
+    activeStack = supervisorStack;
 }
 
 // default
@@ -292,10 +296,13 @@ void Computer::setProgramStatus(cond_t stat) {
 void Computer::setPriviliged(bool priv)
 {
     val_t oldPSR = getRegister(PSR);
-    if (priv)
+    if (priv) {
+        setActiveStack(supervisorStack);
         oldPSR |= 0x8000; // this will force bit 15 to 1 but maintain all others
-    else
+    } else {
+        setActiveStack(userStack);
         oldPSR &= 0x7FFF; // this will force bit 15 to 0 but maintain all others
+    }
 
     setRegister(PSR,oldPSR);
 }
@@ -303,6 +310,24 @@ void Computer::setPriviliged(bool priv)
 bool Computer::getPriviliged()
 {
     return getRegister(PSR) & 0x8000; // bit 15 is privilige bit
+}
+
+void Computer::setActiveStack(stack_type s)
+{
+    if (s == activeStack) return;
+
+    if (s == userStack) {
+        savedSSP = getRegister(R6);
+        setRegister(R6,savedUSP);
+    } else {
+        savedUSP = getRegister(R6);
+        setRegister(R6,savedSSP);
+    }
+}
+
+stack_type Computer::getActiveStackType()
+{
+    return activeStack;
 }
 
 bool Computer::isRunning()
