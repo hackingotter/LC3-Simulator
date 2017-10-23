@@ -880,6 +880,7 @@ void Computer::ld(val_t inst) {
     }
 
     mem_addr_t addr = getRegister(PC) + offset;
+    checkMemAccess(addr);
     val_t memVal = getMemValue(addr);
 
     setRegister(dr, memVal);
@@ -902,7 +903,9 @@ void Computer::ldi(val_t inst) {
     }
 
     mem_addr_t addr = getRegister(PC) + offset;
+    checkMemAccess(addr);
     mem_addr_t innerAddr = getMemValue(addr);
+    checkMemAccess(addr);
     val_t memVal = getMemValue(innerAddr);
 
     setRegister(dr, memVal);
@@ -928,6 +931,7 @@ void Computer::ldr(val_t inst) {
     }
 
     mem_addr_t addr = baseAddr + offset;
+    checkMemAccess(addr);
     val_t memVal = getMemValue(addr);
 
     setRegister(dr, memVal);
@@ -965,8 +969,7 @@ void Computer::lea(val_t inst) {
 
 void Computer::rti(val_t inst) {
     if (getRegister(PSR) & bitMask(15)) {
-        // TODO privilege mode exception
-
+        throw 'Privilege mode exception: RTI';
     } else {
         // PC=mem[R6]; R6 is the SSP
         mem_addr_t r6 = getRegister(R6);
@@ -992,7 +995,7 @@ void Computer::st(val_t inst) {
     }
 
     mem_addr_t addr = getRegister(PC) + offset;
-
+    checkMemAccess(addr);
     setMemValue(addr, getRegister(sr));
 }
 
@@ -1003,7 +1006,9 @@ void Computer::sti(val_t inst) {
     }
     mem_addr_t pc = getRegister(PC);
     mem_addr_t innerAddr = pc + offset;
+    checkMemAccess(innerAddr);
     mem_addr_t addr = getMemValue(innerAddr);
+    checkMemAccess(addr);
     val_t memVal = getRegister(getRegister_9_10_11(inst));
     setMemValue(addr, memVal);
 }
@@ -1017,6 +1022,7 @@ void Computer::str(val_t inst) {
     mem_addr_t baseR = getRegister(getRegister_6_7_8(inst));
 
     mem_addr_t addr = baseR + offset;
+    checkMemAccess(addr);
     setMemValue(addr, srVal);
 }
 
@@ -1032,6 +1038,19 @@ void Computer::trap(val_t inst) {
 
     val_t trapVect = getTrap8(inst);
     setRegister(PC, getMemValue(trapVect));
+}
+
+void Computer::checkMemAccess(mem_addr_t addr)
+{
+    // check against the MPR
+    if (!getPriviliged()) {
+        val_t sector = addr & 0xF000; // select first 4 bits
+        sector >>= 12; // move the bits so they become a number
+        val_t sectorMap = 1 << sector;
+        if (! sectorMap & _memory[MPR]) {
+            throw 'Privilege Mode Exception: Trying to address blocked memory';
+        }
+    }
 }
 
 void Computer::executeSingleInstruction() {
