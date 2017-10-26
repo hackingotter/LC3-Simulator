@@ -371,14 +371,14 @@ val_t Computer::getMemValue(mem_addr_t addr)
 val_t* Computer::getAllMemValues()
 {
     mem_addr_t addr;
-    val_t * ret = (val_t*)malloc(65535 * sizeof(val_t));
+    val_t * ret = (val_t*)malloc((65535+1) * sizeof(val_t));
 
     if (!ret)
     {
         throw("Malloc error");
         return ret;
     }
-    for(addr =0;addr<0xFFF;addr++)
+    for(addr =0;addr<=0xFFFF;addr++)
     {
         ret[addr] = _memory[addr].value;
     }

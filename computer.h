@@ -197,7 +197,7 @@ public slots:
 
 private:
     val_t registers[11];
-    mem_loc_t _memory[0xFFFF];
+    mem_loc_t _memory[0xFFFF+1];
 
     void add(val_t inst);
     void and_op(val_t inst);

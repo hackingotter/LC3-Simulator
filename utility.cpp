@@ -51,11 +51,17 @@ QColor int2QColor(int color)
     int r = (color>>24)&0xFF;
     return  QColor(r,g,b,a);
 }
-val_t unifiedInput2Val(QString input)
+val_t unifiedInput2Val(QString input,bool* ok = Q_NULLPTR)
 {
+
+    qDebug(QString().setNum(*ok).toLocal8Bit());
+    if(input == "")
+    {
+        *ok = false;
+        return 0;
+    }
     qDebug(input.toLocal8Bit());
     val_t out;
-    bool* ok = static_cast<bool*>(malloc(sizeof(bool)));
     if(input.at(0) == '#')
     {
         input.remove(0,1);
@@ -64,7 +70,9 @@ val_t unifiedInput2Val(QString input)
     }
     if(input.at(0)=='0')//pre prefix 0x, 0b, etc
     {
+
         input.remove(0,1);//get rid it
+         qDebug(input.toLocal8Bit());
     }
     if(input.at(0) == 'b'){
 
@@ -77,15 +85,19 @@ val_t unifiedInput2Val(QString input)
         out = input.toInt(ok,8);
         if(*ok)return out;
 
-    } else
+    } else if(input.at(0) == 'x')
     {
-        if(input.at(0) == 'x')
-        {
-            input.remove(0,1);
-        }
-        out = input.toInt(ok,16);//this is the default
+        input.remove(0,1);
+         qDebug(input.toLocal8Bit());
+         out = input.toInt(ok,16);
+         if(*ok)return out;
+    }
+    else
+    {
+        out = input.toInt(ok,10);//this is the default
         if(*ok)return out;
     }
+    *ok = false;
     return 0;
 }
 

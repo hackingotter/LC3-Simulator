@@ -53,7 +53,8 @@ HEADERS += \
     computer.h \
     opcodes.h \
     FileHandler.h \
-    ScrollBarHandler.h
+    ScrollBarHandler.h \
+    ModelDelegate.h
 
 SOURCES += \
     Bridge.cpp \
@@ -76,7 +77,8 @@ SOURCES += \
     utility.cpp \
     assembler.cpp \
     FileHandler.cpp \
-    ScrollBarHandler.cpp
+    ScrollBarHandler.cpp \
+    ModelDelegate.cpp
 
 DISTFILES += \
     Test.txt \

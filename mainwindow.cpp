@@ -6,6 +6,7 @@
 #include "BetterScrollbar.h"
 #include "RegisterModel.h"
 //#include "Simulator.h"
+#include "ModelDelegate.h"
 #include "Util.h"
 #include "stdio.h"
 #include "hope.h"
@@ -29,14 +30,15 @@
 #include <QDataStream>
 #include "Assembler.h"
 #include <QUndoView>
+#include <QItemSelectionModel>
 #include <map>
 #include <QFile>
 #define REGISTERVIEWNUMCOLUMN 2
 
 #define SCROLLTO(VIEW,INPUT)\
-QModelIndex  a =(VIEW)->model()->index(INPUT,0);\
-(VIEW)->scrollTo(a,QAbstractItemView::PositionAtTop);
-
+    {\
+        (VIEW)->scrollTo((VIEW)->model()->index(INPUT,0),QAbstractItemView::PositionAtTop);\
+    }
 #define MEMVIEWSETUPPERCENT 20
 
 #define HEX_COLUMN_WIDTH 60
@@ -381,9 +383,19 @@ void MainWindow::setupMemView(QTableView* view)
     view->setColumnWidth(MEM_VIEW_VAL_COL,HEX_COLUMN_WIDTH);
     view->horizontalHeader()->setSectionResizeMode(MEM_VIEW_VAL_COL,QHeaderView::Fixed);
 
+    view->setSelectionMode(QAbstractItemView::SingleSelection);
+    view->setSelectionBehavior(QAbstractItemView::SelectRows);
 
 
 //    QObject::connect(Computer::getDefault(),SIGNAL(update()),view,SLOT(repaint()));
+}
+void MainWindow::onTableClicked(const QModelIndex & current)
+{
+    int column = current.column();
+    int row = current.row();
+
+    qDebug("Selection at (" + QString().setNum(row).toLocal8Bit() + ", " + QString().setNum(column).toLocal8Bit() + ")");
+
 }
 void MainWindow::setupStackView(QTableView* view)
 {
@@ -476,35 +488,70 @@ void MainWindow::on_StackViewInput_returnPressed()
 
 void MainWindow::on_MemView1PCButton_pressed()
 {
+    qDebug("hello");
+    bool* ok = static_cast<bool*>(malloc(sizeof(bool)));
     SCROLLTO(ui->MemView1View,Computer::getDefault()->getRegister(PC))
 }
 void MainWindow::on_MemView2PCButton_pressed()
 {
+    bool* ok;
     SCROLLTO(ui->MemView2View,Computer::getDefault()->getRegister(PC))
 }
 void MainWindow::on_MemView3PCButton_pressed()
 {
+    bool* ok;
     SCROLLTO(ui->MemView3View,Computer::getDefault()->getRegister(PC))
 }
 void MainWindow::on_MemView1GotoButton_pressed()
 {
-    SCROLLTO(ui->MemView1View,Utility::unifiedInput2Val(ui->MemView1Input->text())
-             )
+    qDebug("MemView1Goto or PC was pressed, checking if target is valid.");
+    bool ok = true;
+//    int target = Utility::unifiedInput2Val(ui->MemView1Input->text(),&ok);
+
+//    std::cout << ok << std::endl;
+//    if(ok)
+//    {
+//        qDebug("It was valid");
+//    QModelIndex  a =(ui->MemView1View)->model()->index(target,0);
+//    (ui->MemView1View)->scrollTo(a,QAbstractItemView::PositionAtTop);
+//    } else {
+//        qDebug("It was not valid");
+//    }
+    int target = Utility::unifiedInput2Val(ui->MemView1Input->text(),&ok);
+    if(ok)
+    {
+    SCROLLTO(ui->MemView1View,target)
+    }
     CLEAR(ui->MemView1Input)
 }
 void MainWindow::on_MemView2GotoButton_pressed()
 {
-    SCROLLTO(ui->MemView2View,Utility::unifiedInput2Val(ui->MemView2Input->text()))
+    bool ok = true;
+    int target = Utility::unifiedInput2Val(ui->MemView2Input->text(),&ok);
+    if(ok)
+    {
+    SCROLLTO(ui->MemView2View,target)
+    }
     CLEAR(ui->MemView2Input)
 }
 void MainWindow::on_MemView3GotoButton_pressed()
 {
-    SCROLLTO(ui->MemView3View,Utility::unifiedInput2Val(ui->MemView3Input->text()))
+    bool ok = true;
+    int target = Utility::unifiedInput2Val(ui->MemView3Input->text(),&ok);
+    if(ok)
+    {
+    SCROLLTO(ui->MemView3View,target)
+    }
     CLEAR(ui->MemView3Input)
 }
 void MainWindow::on_StackViewGotoButton_pressed()
 {
-    SCROLLTO(ui->StackViewView,Utility::unifiedInput2Val(ui->StackViewInput->text()))
+    bool ok = true;
+    int target =Utility::unifiedInput2Val(ui->StackViewInput->text(),&ok);
+    if(ok)
+    {
+        SCROLLTO(ui->StackViewView,target);
+    }
     CLEAR(ui->StackViewInput)
 }
 void MainWindow::on_NextButton_pressed()

@@ -149,6 +149,8 @@ public slots:
 
     void setupMemView(QTableView* view);
 
+
+
     void setupControlButtons();
 
     void on_MemView1PCButton_pressed();
@@ -204,6 +206,7 @@ signals:
     void requestUndo();
     void requestHalt();
 public slots:
+    void onTableClicked(const QModelIndex & current);
     void gotoRunningMode();
     void gotoUserMode();
 

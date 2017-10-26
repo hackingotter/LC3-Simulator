@@ -18,6 +18,7 @@ extern "C"
 #include <Util.h>
 //#include <Simulator.h>
 }
+#include <QItemSelectionModel>
 
 
 
@@ -41,7 +42,11 @@ modeler::modeler(QObject *parent,bool* access): QStandardItemModel(parent),threa
     HeaderLabel.replace(MNEMCOLUMN,"Mnem");
     setHorizontalHeaderLabels(HeaderLabel);
     setItem(0,new QStandardItem("Hey"));
-    setRowCount(MEMSIZE);
+    setRowCount(MEMSIZE+1);
+
+
+
+
 }
 
 
@@ -159,11 +164,13 @@ QVariant modeler::data(const QModelIndex &index, int role) const
         }
         return QVariant();
     }
+
     return QVariant();
 }
 
 bool modeler::setData(const QModelIndex &index, const QVariant &value, int role)
 {
+    bool ok = true;
     qDebug("Setting Data");
     mem_addr_t addr = index.row();
     int column = index.column();
@@ -197,8 +204,11 @@ bool modeler::setData(const QModelIndex &index, const QVariant &value, int role)
             qDebug("You just set a Value");
         {
 
-                Computer::getDefault()->setMemValue(addr,Utility::unifiedInput2Val(value.toString()));
-
+                val_t newValue = Utility::unifiedInput2Val(value.toString(),&ok);
+                if(ok)
+                {
+                    Computer::getDefault()->setMemValue(addr,newValue);
+                }
 
 
         }
@@ -422,6 +432,7 @@ QString modeler::addr2Mnem(mem_addr_t addr)const
     }
     return out;
 }
+
 
 QString modeler::name_or_addr(mem_addr_t target) const
 {
