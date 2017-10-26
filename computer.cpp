@@ -892,6 +892,8 @@ void Computer::ld(val_t inst) {
     } else {
         setProgramStatus(cond_p);
     }
+
+    checkSpecialAddressRead(addr);
 }
 
 void Computer::ldi(val_t inst) {
@@ -917,6 +919,8 @@ void Computer::ldi(val_t inst) {
     } else {
         setProgramStatus(cond_p);
     }
+
+    checkSpecialAddressRead(innerAddr);
 }
 
 void Computer::ldr(val_t inst) {
@@ -943,6 +947,8 @@ void Computer::ldr(val_t inst) {
     } else {
         setProgramStatus(cond_p);
     }
+
+    checkSpecialAddressRead(addr);
 }
 
 void Computer::lea(val_t inst) {
@@ -997,6 +1003,8 @@ void Computer::st(val_t inst) {
     mem_addr_t addr = getRegister(PC) + offset;
     checkMemAccess(addr);
     setMemValue(addr, getRegister(sr));
+
+    checkSpecialAddressWrite(addr);
 }
 
 void Computer::sti(val_t inst) {
@@ -1011,6 +1019,8 @@ void Computer::sti(val_t inst) {
     checkMemAccess(addr);
     val_t memVal = getRegister(getRegister_9_10_11(inst));
     setMemValue(addr, memVal);
+
+    checkSpecialAddressWrite(addr);
 }
 
 void Computer::str(val_t inst) {
@@ -1024,6 +1034,8 @@ void Computer::str(val_t inst) {
     mem_addr_t addr = baseR + offset;
     checkMemAccess(addr);
     setMemValue(addr, srVal);
+
+    checkSpecialAddressWrite(addr);
 }
 
 void Computer::trap(val_t inst) {
@@ -1047,11 +1059,37 @@ void Computer::checkMemAccess(mem_addr_t addr)
         val_t sector = addr & 0xF000; // select first 4 bits
         sector >>= 12; // move the bits so they become a number
         val_t sectorMap = 1 << sector;
-        if (! sectorMap & _memory[MPR]) {
+        if ((sectorMap & _memory[MPR].value) == 0) {
             throw 'Privilege Mode Exception: Trying to address blocked memory';
         }
     }
 }
+
+void Computer::checkSpecialAddressRead(mem_addr_t addr)
+{
+    switch (addr) {
+    case KBDR:
+        setMemValue(KBSR,0x0000);
+        break;
+    default:
+        break;
+    }
+}
+
+void Computer::checkSpecialAddressWrite(mem_addr_t addr)
+{
+    switch (addr) {
+    case DSR:
+        if (getMemValue(DSR) == 0x8000) {
+             IFNOMASK(hasCharacterToDisplay();)
+        }
+        break;
+    default:
+        break;
+    }
+}
+
+
 
 void Computer::executeSingleInstruction() {
 
@@ -1088,6 +1126,38 @@ void Computer::executeUntilAddress(mem_addr_t addr)
     }
 
     setRunning(false);
+}
+
+bool Computer::setKeyboardCharacter(char c, bool force)
+{
+    val_t sr = getMemValue(KBSR);
+    val_t val = c << 8;
+    bool needsForce = sr == 0x8000;
+
+    if (!needsForce || force) {
+        setMemValue(KBDR,val);
+    }
+    return !needsForce;
+}
+
+char Computer::getKeyboardCharacter()
+{
+    val_t val = getMemValue(KBDR);
+    val >>= 8;
+    return (char)val;
+}
+
+char Computer::getDisplayCharacter()
+{
+    makeDisplayReady();
+    val_t val = getMemValue(DDR);
+    val >>= 8;
+    return (char)val;
+}
+
+void Computer::makeDisplayReady()
+{
+    setMemValue(DSR,0x8000);
 }
 
 

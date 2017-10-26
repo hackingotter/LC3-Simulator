@@ -193,8 +193,32 @@ public:
      // executes until pc = addr or the MCR is set to stop
      void executeUntilAddress(mem_addr_t addr);
 
+     // I/O
+     // #########################
+
+     /** if possible sets the KBDR
+      * if previous character has not been read false is returned
+      * \brief setKeyboardCharacter
+      * \param c
+      * \param force
+      * \return success
+      */
+     bool setKeyboardCharacter(char c, bool force = false);
+
+     char getKeyboardCharacter();
+
+     /** also sets DPSR to 1
+      * \brief getDisplayCharacter
+      * \return
+      */
+     char getDisplayCharacter();
+
+     void makeDisplayReady();
+
+
 signals:
      void update();
+     void hasCharacterToDisplay();
 
 public slots:
 
@@ -224,10 +248,13 @@ private:
     void trap(val_t inst);
 
     void checkMemAccess(mem_addr_t addr);
+    void checkSpecialAddressRead(mem_addr_t addr);
+    void checkSpecialAddressWrite(mem_addr_t addr);
 
     void executeBr(val_t inst);
 
     void executeCycle();
+
 };
 
 #endif // COMPUTER_H
