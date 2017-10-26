@@ -186,6 +186,10 @@ Computer::Computer(QObject *parent) : QObject(parent)
 {
     Undos = new HistoryHandler();
     Undos->setUndoLimit(65535);
+
+    savedSSP = 0;
+    savedUSP = 0;
+    activeStack = supervisorStack;
 }
 
 // default
@@ -292,10 +296,13 @@ void Computer::setProgramStatus(cond_t stat) {
 void Computer::setPriviliged(bool priv)
 {
     val_t oldPSR = getRegister(PSR);
-    if (priv)
+    if (priv) {
+        setActiveStack(supervisorStack);
         oldPSR |= 0x8000; // this will force bit 15 to 1 but maintain all others
-    else
+    } else {
+        setActiveStack(userStack);
         oldPSR &= 0x7FFF; // this will force bit 15 to 0 but maintain all others
+    }
 
     setRegister(PSR,oldPSR);
 }
@@ -303,6 +310,24 @@ void Computer::setPriviliged(bool priv)
 bool Computer::getPriviliged()
 {
     return getRegister(PSR) & 0x8000; // bit 15 is privilige bit
+}
+
+void Computer::setActiveStack(stack_type s)
+{
+    if (s == activeStack) return;
+
+    if (s == userStack) {
+        savedSSP = getRegister(R6);
+        setRegister(R6,savedUSP);
+    } else {
+        savedUSP = getRegister(R6);
+        setRegister(R6,savedSSP);
+    }
+}
+
+stack_type Computer::getActiveStackType()
+{
+    return activeStack;
 }
 
 bool Computer::isRunning()
@@ -855,6 +880,7 @@ void Computer::ld(val_t inst) {
     }
 
     mem_addr_t addr = getRegister(PC) + offset;
+    checkMemAccess(addr);
     val_t memVal = getMemValue(addr);
 
     setRegister(dr, memVal);
@@ -866,6 +892,8 @@ void Computer::ld(val_t inst) {
     } else {
         setProgramStatus(cond_p);
     }
+
+    checkSpecialAddressRead(addr);
 }
 
 void Computer::ldi(val_t inst) {
@@ -877,7 +905,9 @@ void Computer::ldi(val_t inst) {
     }
 
     mem_addr_t addr = getRegister(PC) + offset;
+    checkMemAccess(addr);
     mem_addr_t innerAddr = getMemValue(addr);
+    checkMemAccess(addr);
     val_t memVal = getMemValue(innerAddr);
 
     setRegister(dr, memVal);
@@ -889,6 +919,8 @@ void Computer::ldi(val_t inst) {
     } else {
         setProgramStatus(cond_p);
     }
+
+    checkSpecialAddressRead(innerAddr);
 }
 
 void Computer::ldr(val_t inst) {
@@ -903,6 +935,7 @@ void Computer::ldr(val_t inst) {
     }
 
     mem_addr_t addr = baseAddr + offset;
+    checkMemAccess(addr);
     val_t memVal = getMemValue(addr);
 
     setRegister(dr, memVal);
@@ -914,6 +947,8 @@ void Computer::ldr(val_t inst) {
     } else {
         setProgramStatus(cond_p);
     }
+
+    checkSpecialAddressRead(addr);
 }
 
 void Computer::lea(val_t inst) {
@@ -940,8 +975,7 @@ void Computer::lea(val_t inst) {
 
 void Computer::rti(val_t inst) {
     if (getRegister(PSR) & bitMask(15)) {
-        // TODO privilege mode exception
-
+        throw 'Privilege mode exception: RTI';
     } else {
         // PC=mem[R6]; R6 is the SSP
         mem_addr_t r6 = getRegister(R6);
@@ -967,8 +1001,10 @@ void Computer::st(val_t inst) {
     }
 
     mem_addr_t addr = getRegister(PC) + offset;
-
+    checkMemAccess(addr);
     setMemValue(addr, getRegister(sr));
+
+    checkSpecialAddressWrite(addr);
 }
 
 void Computer::sti(val_t inst) {
@@ -978,9 +1014,13 @@ void Computer::sti(val_t inst) {
     }
     mem_addr_t pc = getRegister(PC);
     mem_addr_t innerAddr = pc + offset;
+    checkMemAccess(innerAddr);
     mem_addr_t addr = getMemValue(innerAddr);
+    checkMemAccess(addr);
     val_t memVal = getRegister(getRegister_9_10_11(inst));
     setMemValue(addr, memVal);
+
+    checkSpecialAddressWrite(addr);
 }
 
 void Computer::str(val_t inst) {
@@ -992,7 +1032,10 @@ void Computer::str(val_t inst) {
     mem_addr_t baseR = getRegister(getRegister_6_7_8(inst));
 
     mem_addr_t addr = baseR + offset;
+    checkMemAccess(addr);
     setMemValue(addr, srVal);
+
+    checkSpecialAddressWrite(addr);
 }
 
 void Computer::trap(val_t inst) {
@@ -1008,6 +1051,45 @@ void Computer::trap(val_t inst) {
     val_t trapVect = getTrap8(inst);
     setRegister(PC, getMemValue(trapVect));
 }
+
+void Computer::checkMemAccess(mem_addr_t addr)
+{
+    // check against the MPR
+    if (!getPriviliged()) {
+        val_t sector = addr & 0xF000; // select first 4 bits
+        sector >>= 12; // move the bits so they become a number
+        val_t sectorMap = 1 << sector;
+        if ((sectorMap & _memory[MPR].value) == 0) {
+            throw 'Privilege Mode Exception: Trying to address blocked memory';
+        }
+    }
+}
+
+void Computer::checkSpecialAddressRead(mem_addr_t addr)
+{
+    switch (addr) {
+    case KBDR:
+        setMemValue(KBSR,0x0000);
+        break;
+    default:
+        break;
+    }
+}
+
+void Computer::checkSpecialAddressWrite(mem_addr_t addr)
+{
+    switch (addr) {
+    case DSR:
+        if (getMemValue(DSR) == 0x8000) {
+             IFNOMASK(hasCharacterToDisplay();)
+        }
+        break;
+    default:
+        break;
+    }
+}
+
+
 
 void Computer::executeSingleInstruction() {
 
@@ -1044,6 +1126,38 @@ void Computer::executeUntilAddress(mem_addr_t addr)
     }
 
     setRunning(false);
+}
+
+bool Computer::setKeyboardCharacter(char c, bool force)
+{
+    val_t sr = getMemValue(KBSR);
+    val_t val = c << 8;
+    bool needsForce = sr == 0x8000;
+
+    if (!needsForce || force) {
+        setMemValue(KBDR,val);
+    }
+    return !needsForce;
+}
+
+char Computer::getKeyboardCharacter()
+{
+    val_t val = getMemValue(KBDR);
+    val >>= 8;
+    return (char)val;
+}
+
+char Computer::getDisplayCharacter()
+{
+    makeDisplayReady();
+    val_t val = getMemValue(DDR);
+    val >>= 8;
+    return (char)val;
+}
+
+void Computer::makeDisplayReady()
+{
+    setMemValue(DSR,0x8000);
 }
 
 

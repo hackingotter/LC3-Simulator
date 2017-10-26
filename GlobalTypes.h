@@ -13,7 +13,7 @@
 
 
 
-#define NUM_OF_REGS 11
+
 
 /** Registers and memory contain 16 bits. Defined for readability of code.
  */
@@ -58,10 +58,17 @@ typedef enum reg_t {
     R7 = 7,
     SPR = 7,
     PC = 8,
-    MPR = 9,//Memory Protection Register: actually in memory!!!!
-    PSR = 10
+    PSR = 9
 } reg_t;
 
+#define NUM_OF_REGS 10
+
+/** used to reference the two stacks that exist
+  */
+typedef enum stack_type {
+    userStack = 0,
+    supervisorStack = 1
+} stack_type;
 
 // structs
 

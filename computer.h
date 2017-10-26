@@ -79,6 +79,9 @@ public:
     bool getPriviliged();
 
 
+    void setActiveStack(stack_type s);
+    stack_type getActiveStackType();
+
     bool isRunning();
     void setRunning(bool run);
 
@@ -190,14 +193,42 @@ public:
      // executes until pc = addr or the MCR is set to stop
      void executeUntilAddress(mem_addr_t addr);
 
+     // I/O
+     // #########################
+
+     /** if possible sets the KBDR
+      * if previous character has not been read false is returned
+      * \brief setKeyboardCharacter
+      * \param c
+      * \param force
+      * \return success
+      */
+     bool setKeyboardCharacter(char c, bool force = false);
+
+     char getKeyboardCharacter();
+
+     /** also sets DPSR to 1
+      * \brief getDisplayCharacter
+      * \return
+      */
+     char getDisplayCharacter();
+
+     void makeDisplayReady();
+
+
 signals:
      void update();
+     void hasCharacterToDisplay();
 
 public slots:
 
 private:
     val_t registers[11];
     mem_loc_t _memory[0xFFFF+1];
+
+    val_t savedUSP;
+    val_t savedSSP;
+    stack_type activeStack;
 
     void add(val_t inst);
     void and_op(val_t inst);
@@ -216,9 +247,14 @@ private:
     void str(val_t inst);
     void trap(val_t inst);
 
+    void checkMemAccess(mem_addr_t addr);
+    void checkSpecialAddressRead(mem_addr_t addr);
+    void checkSpecialAddressWrite(mem_addr_t addr);
+
     void executeBr(val_t inst);
 
     void executeCycle();
+
 };
 
 #endif // COMPUTER_H
