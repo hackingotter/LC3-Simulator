@@ -66,8 +66,8 @@ typedef enum reg_t {
 /** used to reference the two stacks that exist
   */
 typedef enum stack_type {
-    user = 0,
-    supervisor = 1
+    userStack = 0,
+    supervisorStack = 1
 } stack_type;
 
 // structs

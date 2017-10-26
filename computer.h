@@ -79,6 +79,9 @@ public:
     bool getPriviliged();
 
 
+    void setActiveStack(stack_type s);
+    stack_type getActiveStackType();
+
     bool isRunning();
     void setRunning(bool run);
 
@@ -201,6 +204,7 @@ private:
 
     val_t savedUSP;
     val_t savedSSP;
+    stack_type activeStack;
 
     void add(val_t inst);
     void and_op(val_t inst);
@@ -218,6 +222,8 @@ private:
     void sti(val_t inst);
     void str(val_t inst);
     void trap(val_t inst);
+
+    void checkMemAccess(mem_addr_t addr);
 
     void executeBr(val_t inst);
 
