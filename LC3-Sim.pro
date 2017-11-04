@@ -54,7 +54,9 @@ HEADERS += \
     opcodes.h \
     FileHandler.h \
     ScrollBarHandler.h \
-    ModelDelegate.h
+    ModelDelegate.h \
+    KBRDModel.h \
+    InOutSet.h
 
 SOURCES += \
     Bridge.cpp \
@@ -78,7 +80,9 @@ SOURCES += \
     assembler.cpp \
     FileHandler.cpp \
     ScrollBarHandler.cpp \
-    ModelDelegate.cpp
+    ModelDelegate.cpp \
+    KBRDModel.cpp \
+    InOutSet.cpp
 
 DISTFILES += \
     Test.txt \

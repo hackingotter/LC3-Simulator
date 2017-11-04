@@ -74,10 +74,6 @@ QVariant RegisterModel::data(const QModelIndex &index,int role) const
     if(!index.isValid()) return QVariant();
     if(role == Qt::CheckStateRole)
     {
-        switch(column)
-        {
-        case reg_color_column: return true;
-        }
         return  QVariant();
     }
     if(role == Qt::BackgroundRole)

@@ -33,6 +33,9 @@
 #include <QItemSelectionModel>
 #include <map>
 #include <QFile>
+#include "KBRDModel.h"
+#include <QProcess>
+#include <QCoreApplication>
 #define REGISTERVIEWNUMCOLUMN 2
 
 #define SCROLLTO(VIEW,INPUT)\
@@ -89,6 +92,7 @@
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
+
     Computer::getDefault()->setProgramStatus(cond_z);
 
     Utility::systemInfoDebug();//Just some fun info
@@ -99,8 +103,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     QFuture<void> f1 = QtConcurrent::run(threadTest,QString("1"));
     f1.waitForFinished();
 
+    QProcess* th = new QProcess(this);
 
 
+    qDebug(QString().setNum(th->processId()).toLocal8Bit());
 
 
 
@@ -112,6 +118,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     setupRegisterView();
     setupViews();
     setupControlButtons();
+    setupInOut();
+
+
+
     Bridge::doWork();
     qDebug("Connecting Disp");
 
@@ -129,6 +139,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 //    Computer::getDefault()->loadProgramFile(QString("testing.asm").toLocal8Bit().data());
 
     update();
+    qDebug(QString().setNum(th->processId()).toLocal8Bit());
+
 
 
 
@@ -389,6 +401,17 @@ void MainWindow::setupMemView(QTableView* view)
 
 //    QObject::connect(Computer::getDefault(),SIGNAL(update()),view,SLOT(repaint()));
 }
+
+void MainWindow::setupInOut()
+{
+
+    InOutPut = new InOutSet(this);
+    ui->inOutHome->addWidget(InOutPut);
+    CONNECT(this, reCheck(), InOutPut, update());
+
+
+
+}
 void MainWindow::onTableClicked(const QModelIndex & current)
 {
     int column = current.column();
@@ -571,6 +594,7 @@ void MainWindow::update()
     UPDATEVIEW(ui->StackViewView);
     UPDATEVIEW(ui->RegisterView);
     Saturn->update();
+    emit reCheck();
 }
 
 void MainWindow::threadTest(QString name)
@@ -695,3 +719,6 @@ void MainWindow::on_consoleEnterButton_pressed()
 {
     qDebug("I want to take the input");
 }
+
+
+

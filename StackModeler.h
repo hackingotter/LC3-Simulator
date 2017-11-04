@@ -22,6 +22,7 @@ public:
 
     explicit StackModeler(QObject *parent = 0,bool* access= Q_NULLPTR);
     QVariant data(const QModelIndex &index,int role) const override;
+    void setData(const QModelIndex &index, const QVariant &value, int role) const ;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
 public slots:
     void flip();

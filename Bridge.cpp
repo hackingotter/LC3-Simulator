@@ -51,14 +51,9 @@ void Bridge::process()
         // TODO update
 
         qDebug("Am I done? Starting at"+ QString().setNum(target_PC).toLocal8Bit());
-        while((Computer::getDefault()->getRegister(PC)!= target_PC)&&(*ok !=1)&&!Bridge::isHalting)
-        {
-            qDebug("Trying at "+ QString().setNum(Computer::getDefault()->getRegister(PC)).toLocal8Bit());
-            Computer::getDefault()->executeSingleInstruction();
-            qDebug("Executed with error of " +QString().setNum(*ok).toLocal8Bit());
-        }
+       Computer::getDefault()->executeUntilAddress(target_PC);
         Bridge::isHalting = false;
-        qDebug("Done!");
+
         break;
     }
     case Step:

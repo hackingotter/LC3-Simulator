@@ -162,7 +162,7 @@ class changeMemComment:public QUndoCommand
 public:
     changeMemComment(mem_addr_t addr,QString oldCom, QString newCom):mem_addr(addr),oldComment(oldCom),newComment(newCom)
     {
-        setText("Changed Comment at " + getHexString(addr)+ "to " + newComment);
+        setText("Changed Comment at " + getHexString(addr)+ " to " + newComment);
         QUndoCommand::setObsolete(newComment==oldComment);
     }
     void undo()
@@ -361,7 +361,7 @@ void Computer::setMemValue(mem_addr_t addr, val_t val)
     _memory[addr].value = val;
     TRY2PUSH(oval,val,changeMemValue(addr,oval,val));
 
-    IFNOMASK(emit update();)
+     IFNOMASK(emit update();)
 }
 
 void Computer::setMemValuesBlock(mem_addr_t addr, size_t blockSize, val_t *vals)
@@ -820,6 +820,7 @@ void Computer::executeCycle()
     default:
         break;
     }
+    Undos->endMacro();
 }
 
 void Computer::jmp(val_t inst) {
@@ -1059,9 +1060,9 @@ void Computer::checkMemAccess(mem_addr_t addr)
         val_t sector = addr & 0xF000; // select first 4 bits
         sector >>= 12; // move the bits so they become a number
         val_t sectorMap = 1 << sector;
-        if ((sectorMap & _memory[MPR].value) == 0) {
-            throw 'Privilege Mode Exception: Trying to address blocked memory';
-        }
+//        if ((sectorMap & _memory[MPR].value) == 0) {
+//            throw 'Privilege Mode Exception: Trying to address blocked memory';
+//        }
     }
 }
 
@@ -1115,10 +1116,12 @@ void Computer::startExecution()
     while (isRunning()) {
         executeCycle();
     }
+
 }
 
 void Computer::executeUntilAddress(mem_addr_t addr)
 {
+    Undos->beginMacro("Executing from " + getHexString(getRegister(PC)) + " until "+getHexString(addr));
     setRunning(true);
 
     while (isRunning() && getRegister(PC) != addr) {
@@ -1126,16 +1129,17 @@ void Computer::executeUntilAddress(mem_addr_t addr)
     }
 
     setRunning(false);
+    Undos->endMacro();
+
 }
 
 bool Computer::setKeyboardCharacter(char c, bool force)
 {
     val_t sr = getMemValue(KBSR);
-    val_t val = c << 8;
     bool needsForce = sr == 0x8000;
 
     if (!needsForce || force) {
-        setMemValue(KBDR,val);
+        setMemValue(KBDR,c);
     }
     return !needsForce;
 }
@@ -1143,7 +1147,7 @@ bool Computer::setKeyboardCharacter(char c, bool force)
 char Computer::getKeyboardCharacter()
 {
     val_t val = getMemValue(KBDR);
-    val >>= 8;
+//    val >>= 8;
     return (char)val;
 }
 
@@ -1151,7 +1155,7 @@ char Computer::getDisplayCharacter()
 {
     makeDisplayReady();
     val_t val = getMemValue(DDR);
-    val >>= 8;
+//    val >>= 8;
     return (char)val;
 }
 

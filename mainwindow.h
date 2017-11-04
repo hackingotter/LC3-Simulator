@@ -16,6 +16,7 @@
 #include "ThreadManager.h"
 #include "StackModeler.h"
 #include "ScrollBarHandler.h"
+#include "InOutSet.h"
 #define BRSLOT 0
 #define ADDRSLOT 1
 #define NAMESLOT 2
@@ -110,6 +111,8 @@ public:
 
     ScrollBarHandler* Saturn;
 
+    InOutSet* InOutPut;
+
     /**
      * @brief threadRunning Describes the runningness of the sim thread 
      * this is given to any part of the
@@ -118,6 +121,7 @@ public:
      * 
      */
     bool* threadRunning = new bool(false);//the thread isn't running on init
+
 
 
 
@@ -149,7 +153,7 @@ public slots:
 
     void setupMemView(QTableView* view);
 
-
+    void setupInOut();
 
     void setupControlButtons();
 
@@ -189,7 +193,7 @@ public slots:
 
     static void  threadTest(QString);
 
-    void update();
+
 
     void on_pushButton_7_clicked();
 
@@ -198,11 +202,12 @@ public slots:
         printf( "%d\n", x );
     }
     void prepWork();
-
+    void update();
     void readSettings();
     void saveSettings();
     void closeEvent(QCloseEvent *event);
 signals:
+    void reCheck();
     void requestUndo();
     void requestHalt();
 public slots:

@@ -10,6 +10,7 @@ StackModeler::StackModeler(QObject* parent,bool* access):modeler(parent,access)
     HeaderLabel.append("Addr");
     HeaderLabel.append("Offset");
     setHorizontalHeaderLabels(HeaderLabel);
+    setRowCount(0xC000 - 0x3000);
     qDebug("Current num of rows is" + QString().setNum(rowCount()).toLocal8Bit());
 }
 QVariant StackModeler::data(const QModelIndex &index,int role) const
@@ -32,6 +33,9 @@ QVariant StackModeler::data(const QModelIndex &index,int role) const
             return QVariant(getHexString(addr));
         case OFFSETCOLUMN:
             return QVariant((abs(addr - Computer::getDefault()->getRegister(R6)) < 256) ? QString().setNum(addr - Computer::getDefault()->getRegister(R6)):"");
+
+        case VALUECOLUMN:
+            return QVariant(getHexString(Computer::getDefault()->getMemValue(addr)));
         }
     }
     if(role == Qt::BackgroundRole)
@@ -40,6 +44,44 @@ QVariant StackModeler::data(const QModelIndex &index,int role) const
     }
     return QVariant();
 }
+void StackModeler::setData(const QModelIndex &index, const QVariant &value, int role) const
+{
+    bool ok = true;
+    mem_addr_t addr;
+    if(*bigTop){
+    addr = 0xBFFF - index.row();
+    }else
+    {
+        addr = 0x3000 + index.row();
+    }
+
+    const int column = index.column();
+    if(role == Qt::EditRole)
+    {
+        switch(column){
+        case NAMECOLUMN:qDebug("You just set a Label");
+        {
+            Computer::getDefault()->setMemLabelText(addr,value.toString());
+        }
+        case VALUECOLUMN:
+        {
+            val_t newValue = Utility::unifiedInput2Val(value.toString(),&ok);
+            if(ok)
+            {
+                Computer::getDefault()->setMemValue(addr,newValue);
+            }
+        }
+        }
+
+
+
+
+    }
+}
+
+
+
+
 Qt::ItemFlags StackModeler::flags(const QModelIndex &index) const
 {
     switch(index.column())
