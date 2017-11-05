@@ -139,7 +139,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 //    Computer::getDefault()->loadProgramFile(QString("testing.asm").toLocal8Bit().data());
 
     update();
-    qDebug(QString().setNum(th->processId()).toLocal8Bit());
+//    qDebug(QString().setNum(th->processId()).toLocal8Bit());
 
 
 

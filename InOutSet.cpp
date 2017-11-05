@@ -12,6 +12,7 @@
 InOutSet::InOutSet(QWidget *parent) : QWidget(parent)
 {
 
+    qDebug("Initializing InOutSet");
     setFocusPolicy(Qt::StrongFocus);
 
 
@@ -24,7 +25,7 @@ InOutSet::InOutSet(QWidget *parent) : QWidget(parent)
     Take = new QPushButton(this);
     Take->setText("Take");
 
-
+    CONNECT(Take,pressed(),this,update());
 
 
     textDisplay = new QLabel(this);
@@ -41,14 +42,15 @@ InOutSet::InOutSet(QWidget *parent) : QWidget(parent)
 }
 void InOutSet::keyPressEvent(QKeyEvent *event)
 {
-
+    qDebug("key pressed");
     char c = event->text().at(0).toLatin1();
-    qDebug("key was pressed");
+
     if(c>= 'a' && c<= 'g')
     {
-        qDebug(c+ "");
+        qDebug("A");
 
-        Computer::getDefault()->setKeyboardCharacter(c,true);
+        Computer::getDefault()->setKeyboardCharacter('A',true);
+//        update();
         event->accept();
 
     }
@@ -58,7 +60,7 @@ void InOutSet::keyPressEvent(QKeyEvent *event)
 void InOutSet::update()
 {
 
-    QString n3w = QString(textDisplay->text()+ Computer::getDefault()->getKeyboardCharacter());
+    QString n3w = QString(textDisplay->text()+ QString((Computer::getDefault()->getKeyboardCharacter())));
     qDebug(n3w.toLocal8Bit());
     textDisplay->setText(n3w);
 }
