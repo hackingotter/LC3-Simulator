@@ -40,6 +40,8 @@ public:
 
     int updateMask;
 
+    int remember = 0;
+
     /** Returns the contents of a register
      * \param reg The register whose value is requested.
      * \return The contens of register reg.
@@ -219,7 +221,8 @@ public:
 signals:
      void update();
      void hasCharacterToDisplay();
-
+     void pushDisplay(val_t character);
+     void popDisplay();
 public slots:
 
 private:

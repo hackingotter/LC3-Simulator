@@ -3,9 +3,11 @@
 #include "Util.h"
 #include <QString>
 #include <QUndoCommand>
+#include <QLabel>
 
+#define UNDOS
 
-#define TRY2PUSH(OLD,NEW,DO) {if(NEW!=OLD)Computer::Undos->add(new Action::DO);}
+#define TRY2PUSH(OLD,NEW,DO) {if((Computer::remember==0))Computer::Undos->add(new Action::DO);}
 #define INITFUNC(TEXT,STUFF) \
 {\
     setText(TEXT);\
@@ -40,23 +42,51 @@ public:
     doPriority mode;
 
 };
+class changeTextDisplay : public QUndoCommand
+{
+public:
+    changeTextDisplay(QLabel* target,char newchar):_target(target),_newchar(newchar)
+    {
+        setText("Pushed " +QString(&_newchar) + " to the display");
 
+    }
+    void undo()
+    {
+                Computer::getDefault()->remember++;
+
+                Computer::getDefault()->remember--;
+    }
+    void redo()
+    {
+                Computer::getDefault()->remember++;
+        _target->setText(_target->text()+(char)(_newchar));
+                Computer::getDefault()->remember--;
+    }
+private:
+    QLabel* _target;
+    char _newchar;
+};
 class changeRegCondt: public QUndoCommand
 {
 public:
     changeRegCondt(cond_t ncond,cond_t ocond):newCondt(ncond),oldCondt(ocond)
     {
+
+
         setText(QString("Set Condition to "+QString().setNum(ncond)));
-        QUndoCommand::setObsolete(newCondt == oldCondt);
     }
     void undo()
     {
+        Computer::getDefault()->remember++;
         Computer::getDefault()->setProgramStatus(oldCondt);
+        Computer::getDefault()->remember--;
     }
 
     void redo()
     {
+        Computer::getDefault()->remember++;
         Computer::getDefault()->setProgramStatus(newCondt);
+        Computer::getDefault()->remember--;
     }
 private:
     cond_t newCondt;
@@ -69,16 +99,21 @@ class changeRegValue: public QUndoCommand
 public:
     changeRegValue(reg_t reg,val_t oval, val_t nval):regName(reg),newValue(nval),oldValue(oval)
     {
+
         setText(    QString("Set "+ ((regName<8)?"R"+QString().setNum(regName):" other") + " to "+QString().setNum(newValue)));
-        QUndoCommand::setObsolete(newValue==oldValue);
     }
     void undo()
     {
+        Computer::getDefault()->remember++;
+
         Computer::getDefault()->setRegister(regName,oldValue);
+        Computer::getDefault()->remember--;
     }
     void redo()
     {
+        Computer::getDefault()->remember++;
         Computer::getDefault()->setRegister(regName,newValue);
+        Computer::getDefault()->remember--;
     }
 
 private:
@@ -91,19 +126,27 @@ class changeMemValue: public QUndoCommand
 public:
     changeMemValue(mem_addr_t addr,val_t oval,val_t nval):mem_addr(addr),oldValue(oval),newValue(nval)
     {
-        setText(
-                    QString("Set " + getHexString(addr) + " to "+QString().setNum(newValue)));
-        QUndoCommand::setObsolete(newValue==oldValue);
+        qDebug("I am");
+        setText(QString("Set " + getHexString(addr) + " to "+QString().setNum(newValue)));
+
+
     }
     void undo()
     {
-
+        Computer::getDefault()->remember++;
         Computer::getDefault()->setMemValue(mem_addr,oldValue);
+        if(mem_addr == DDR)
+            Computer::getDefault()->popDisplay();
+        Computer::getDefault()->remember--;
     }
     void redo()
     {
-        Computer::getDefault()->setMemValue(mem_addr,newValue);
 
+        Computer::getDefault()->remember++;
+        Computer::getDefault()->setMemValue(mem_addr,newValue);
+        if(mem_addr == DDR)
+            Computer::getDefault()->pushDisplay(newValue);
+        Computer::getDefault()->remember--;
     }
 
     ~changeMemValue() {;}
@@ -124,11 +167,15 @@ public:
     }
     void undo()
     {
+                Computer::getDefault()->remember++;
         Computer::getDefault()->setMemLabel(mem_addr,oldLabelPtr);
+                Computer::getDefault()->remember--;
     }
     void redo()
     {
+                Computer::getDefault()->remember++;
         Computer::getDefault()->setMemLabel(mem_addr,newLabelPtr);
+                Computer::getDefault()->remember--;
     }
 
 private:
@@ -146,11 +193,15 @@ public:
     }
     void undo()
     {
+                Computer::getDefault()->remember++;
         Computer::getDefault()->setMemBreakPoint(mem_addr,oldBreak);
+                Computer::getDefault()->remember--;
     }
     void redo()
     {
+                Computer::getDefault()->remember++;
         Computer::getDefault()->setMemBreakPoint(mem_addr,newBreak);
+                Computer::getDefault()->remember--;
     }
 private:
     mem_addr_t mem_addr;
@@ -167,17 +218,24 @@ public:
     }
     void undo()
     {
+        Computer::getDefault()->remember++;
         Computer::getDefault()->setMemComment(mem_addr,oldComment);
+        Computer::getDefault()->remember--;
     }
     void redo()
     {
+        Computer::getDefault()->remember++;
         Computer::getDefault()->setMemComment(mem_addr,newComment);
+        Computer::getDefault()->remember--;
     }
 private:
     mem_addr_t mem_addr;
     QString oldComment;
     QString newComment;
 };
+
+
+
 
 
 }
@@ -226,7 +284,7 @@ void Computer::setRegister(reg_t reg, val_t val) {
     //will implement an identification method
     val_t oval = registers[reg];
     registers[reg] = val;
-    Undos->add(new Action::changeRegValue(reg,oval,val));
+    TRY2PUSH(oval, val,changeRegValue(reg,oval,val));
 
     IFNOMASK(emit update();)
 }
@@ -357,8 +415,13 @@ mem_loc_t Computer::getMemLocation(mem_addr_t addr)
 
 void Computer::setMemValue(mem_addr_t addr, val_t val)
 {
+    qDebug("Settin' Mem");
     val_t oval = _memory[addr].value;
     _memory[addr].value = val;
+
+    if(addr>=0xfe00)    qDebug(getHexString(addr).toLocal8Bit());
+
+
     TRY2PUSH(oval,val,changeMemValue(addr,oval,val));
 
      IFNOMASK(emit update();)
@@ -1135,11 +1198,14 @@ void Computer::executeUntilAddress(mem_addr_t addr)
 
 bool Computer::setKeyboardCharacter(char c, bool force)
 {
+
     val_t sr = getMemValue(KBSR);
     bool needsForce = sr == 0x8000;
 
     if (!needsForce || force) {
+        Undos->beginMacro(QString(&c) + " key pressed");
         setMemValue(KBDR,c);
+        Undos->endMacro();
     }
     return !needsForce;
 }
@@ -1147,7 +1213,8 @@ bool Computer::setKeyboardCharacter(char c, bool force)
 char Computer::getKeyboardCharacter()
 {
     val_t val = getMemValue(KBDR);
-//    val >>= 8;
+    setMemValue(KBSR,0x8000);
+    //    val >>= 8;
     return (char)val;
 }
 

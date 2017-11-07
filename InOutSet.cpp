@@ -1,19 +1,25 @@
 #include "InOutSet.h"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
-
+#include <QChar>
 #include <QKeyEvent>
 #include <QDebug>
 
+#include <QLabel>
 #include "computer.h"
+#include <QUndoCommand>
 
+
+namespace Action {
+
+};
 
 
 InOutSet::InOutSet(QWidget *parent) : QWidget(parent)
 {
 
     qDebug("Initializing InOutSet");
-    setFocusPolicy(Qt::StrongFocus);
+
 
 
     QHBoxLayout* hLayout = new QHBoxLayout(this);
@@ -25,46 +31,89 @@ InOutSet::InOutSet(QWidget *parent) : QWidget(parent)
     Take = new QPushButton(this);
     Take->setText("Take");
 
-    CONNECT(Take,pressed(),this,update());
+    connect(Take,SIGNAL(released()),this,SLOT(kick()));
+    connect(Computer::getDefault(),SIGNAL(pushDisplay(val_t)),this,SLOT(pushChar(val_t)));
+    connect(Computer::getDefault(),SIGNAL(popDisplay()),this,SLOT(popChar()));
+//    CONNECT(Take,QPushButton::pressed(),this,update());
 
 
     textDisplay = new QLabel(this);
-    textDisplay->setStyleSheet("background-color:red;");
+    textDisplay->setStyleSheet("background-color:x0000FFF;");
     textDisplay->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
-
-
+    textDisplay->setWordWrap(true);
+    textDisplay->setAlignment(Qt::AlignTop|Qt::AlignLeft);
+    textDisplay->setFocusPolicy(Qt::StrongFocus);
+    textDisplay->setStyleSheet(":focus{background-color:blue}");
     setLayout(hLayout);
     hLayout->addWidget(textDisplay);
     hLayout->addLayout(vLayout);
     vLayout->addWidget(Clear);
     vLayout->addWidget(Take);
     textDisplay->setText("Hello");
+
 }
 void InOutSet::keyPressEvent(QKeyEvent *event)
 {
-    qDebug("key pressed");
-    char c = event->text().at(0).toLatin1();
+    qDebug("key pressed processing begin");
+    event->accept();
 
-    if(c>= 'a' && c<= 'g')
-    {
-        qDebug("A");
+    qDebug(QString().setNum(event->key()).toLocal8Bit());
+    char temp = '\0';
+    char* input = &temp;
 
-        Computer::getDefault()->setKeyboardCharacter('A',true);
-//        update();
-        event->accept();
 
-    }
+        switch(event->key())
+        {
+#ifndef QT_NO_DEBUG_OUTPUT
+        case 0x01000037:/*F8, for easy intake*/
+            update();
+            return;
+
+#endif
+
+        case 0x01000004://return
+        case 0x01000005:{qDebug("Enter");*input = ('\n');break;}
+        default:
+            {
+            if(event->key()<128)
+                {
+                    qDebug("Normal");
+                    *input = event->key();
+                }
+            }
+        }
+        if(input != nullptr) Computer::getDefault()->setKeyboardCharacter(*input,true);
+
+
+    qDebug("done with key");
+
+}
+void InOutSet::clearText()
+{
 
 
 }
 void InOutSet::update()
 {
 
-    QString n3w = QString(textDisplay->text()+ QString((Computer::getDefault()->getKeyboardCharacter())));
-    qDebug(n3w.toLocal8Bit());
-    textDisplay->setText(n3w);
+
+}
+void InOutSet::popChar()
+{
+    QString text = textDisplay->text();
+    text.chop(1);
+    textDisplay->setText(text);
+}
+void InOutSet::pushChar(val_t val)
+{
+    qDebug("pushChar requested");
+    textDisplay->setText(textDisplay->text()+(char)val);
 }
 
-
+void InOutSet::kick()
+{
+    qDebug("Kicked");
+    Computer::getDefault()->setMemValue(DDR,Computer::getDefault()->getMemValue(KBDR));
+}
 
 
