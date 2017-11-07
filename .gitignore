@@ -41,3 +41,16 @@ CMakeLists.txt.user*
 
 *.h.*
 *.h~
+
+*1.exe
+*2.exe
+*3.exe
+*4.exe
+*5.exe
+*6.exe
+*7.exe
+*8.exe
+*9.exe
+*0.exe
+
+object_script*
