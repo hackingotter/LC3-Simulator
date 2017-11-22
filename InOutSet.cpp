@@ -37,6 +37,8 @@ InOutSet::InOutSet(QWidget *parent) : QWidget(parent)
 //    CONNECT(Take,QPushButton::pressed(),this,update());
 
 
+
+
     textDisplay = new QLabel(this);
     textDisplay->setStyleSheet("background-color:x0000FFF;");
     textDisplay->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);

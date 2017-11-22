@@ -16,7 +16,7 @@ qDebug("Masking" + QString().setNum(Computer::getDefault()->updateMask).toLocal8
 
 #define UNMASK {(Computer::getDefault()->updateMask==0)?:Computer::getDefault()->updateMask--;qDebug("Unmasking"+ QString().setNum(Computer::getDefault()->updateMask).toLocal8Bit());}
 
-#define IFNOMASK(EXECUTE) {if(Computer::getDefault()->updateMask==0){EXECUTE;qDebug("Higher");}}
+#define IFNOMASK(EXECUTE) {if(Computer::getDefault()->updateMask==0){EXECUTE;/*qDebug("Higher")*/;}}
 
 #define KBSR 0xFE00
 #define KBDR 0xFE02

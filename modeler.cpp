@@ -111,6 +111,7 @@ QVariant modeler::data(const QModelIndex &index, int role) const
     if(role == Qt::BackgroundRole&&column == 0)
     {
 
+
         if(addr == Computer::getDefault()->getRegister(PC))
         {
 
@@ -121,6 +122,31 @@ QVariant modeler::data(const QModelIndex &index, int role) const
 
             return QBrush(Qt::blue);
         }
+        if(addr == Computer::getDefault()->getRegister(R1))
+        {
+            return QBrush(Qt::green);
+        }
+        if(addr == Computer::getDefault()->getRegister(R2))
+        {
+            return QBrush(Qt::darkRed);
+//            darkRed,
+//            darkGreen,
+//            darkBlue,
+//            darkCyan,
+        }
+        if(addr == Computer::getDefault()->getRegister(R3))
+        {
+            return QBrush(Qt::darkGreen);
+        }
+        if(addr == Computer::getDefault()->getRegister(R4))
+        {
+            return QBrush(Qt::darkBlue);
+        }
+        if(addr == Computer::getDefault()->getRegister(R5))
+        {
+            return QBrush(Qt::darkCyan);
+        }
+
         return QVariant();
     }
     if (role == Qt::DisplayRole)

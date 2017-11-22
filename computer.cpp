@@ -494,11 +494,10 @@ void Computer::setMemLabelText(mem_addr_t addr,QString labelString)
     MASK
     // free old label
     label_t* oldLabel = getMemLabel(addr);
-    if (oldLabel)
-        free(oldLabel);
+
 
     // store new label
-    setMemLabel(addr,label);
+    TRY2PUSH(addr,oldLabel,changeMemLabel(addr,oldLabel,label));
     UNMASK
             qDebug("all good here");
     IFNOMASK(emit update();)
@@ -528,7 +527,7 @@ void Computer::setMemComment(mem_addr_t addr, QString comment)
     bool b = oldComment.isNull();
     _memory[addr].comment = comment;
 
-    Computer::Undos->add(new Action::changeMemComment(addr,oldComment,comment));
+    TRY2PUSH(oldComment,comment,changeMemComment(addr,oldComment,comment));
 
     IFNOMASK(emit update();)
 }
