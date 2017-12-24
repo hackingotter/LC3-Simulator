@@ -8,7 +8,7 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET =  LC3-Sim
+TARGET =  LC3-Sim900234
 
 
 
@@ -59,7 +59,9 @@ HEADERS += \
     ScrollBarHandler.h \
     ModelDelegate.h \
     KBRDModel.h \
-    InOutSet.h
+    InOutSet.h \
+    WatchWatcher.h \
+    WatchModel.h
 
 SOURCES += \
     Bridge.cpp \
@@ -85,7 +87,9 @@ SOURCES += \
     ScrollBarHandler.cpp \
     ModelDelegate.cpp \
     KBRDModel.cpp \
-    InOutSet.cpp
+    InOutSet.cpp \
+    WatchWatcher.cpp \
+    WatchModel.cpp
 
 DISTFILES += \
     Test.txt \

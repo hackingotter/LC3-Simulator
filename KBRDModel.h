@@ -8,8 +8,8 @@ class KBRDModel: public QStandardItemModel
 
 public:
     explicit KBRDModel(QObject* parent=0);
-    virtual ~KBRDModel() {};
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+
 };
 
 #endif // KBRDMODEL_H

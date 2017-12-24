@@ -262,7 +262,7 @@
          <enum>QTabWidget::Rounded</enum>
         </property>
         <property name="currentIndex">
-         <number>4</number>
+         <number>1</number>
         </property>
         <property name="elideMode">
          <enum>Qt::ElideRight</enum>
@@ -320,61 +320,7 @@
          </attribute>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
-           <widget class="QTableWidget" name="tableWidget">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <attribute name="horizontalHeaderCascadingSectionResizes">
-             <bool>false</bool>
-            </attribute>
-            <attribute name="horizontalHeaderDefaultSectionSize">
-             <number>84</number>
-            </attribute>
-            <attribute name="horizontalHeaderMinimumSectionSize">
-             <number>25</number>
-            </attribute>
-            <attribute name="verticalHeaderDefaultSectionSize">
-             <number>25</number>
-            </attribute>
-            <row>
-             <property name="text">
-              <string>New Row</string>
-             </property>
-            </row>
-            <row>
-             <property name="text">
-              <string>New Row</string>
-             </property>
-            </row>
-            <row>
-             <property name="text">
-              <string>New Row</string>
-             </property>
-            </row>
-            <row>
-             <property name="text">
-              <string>New Row</string>
-             </property>
-            </row>
-            <column>
-             <property name="text">
-              <string>Name</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>Condition</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>Other</string>
-             </property>
-            </column>
-           </widget>
+           <layout class="QVBoxLayout" name="verticalLayout_8"/>
           </item>
          </layout>
         </widget>

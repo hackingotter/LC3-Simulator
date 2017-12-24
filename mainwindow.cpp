@@ -119,6 +119,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     setupViews();
     setupControlButtons();
     setupInOut();
+    setupWatches();
 
 
 
@@ -187,7 +188,13 @@ void MainWindow::setupViews()
     qDebug("Done Setting Up Views");
 }
 
-
+void MainWindow::setupWatches()
+{
+    qDebug("Setting up Watch");
+    Clockmaker = new WatchWatcher(0,threadRunning);
+    setupMemView(Clockmaker->getTableViewPtr(),false,false);
+    ui->verticalLayout_8->addWidget(Clockmaker);
+}
 void MainWindow::setupMenuBar()
 {
     QAction* actionLoad_File = new QAction("Load File",this);
@@ -361,18 +368,23 @@ void MainWindow::handleFiles()
     IFNOMASK(emit update();)
 }
 
-void MainWindow::setupMemView(QTableView* view)
+void MainWindow::setupMemView(QTableView* view, bool setmodel, bool setScroll)
 {
 
     qDebug("Attaching the model to the views");
     qDebug("Showing Grid");
     view->showGrid();
+
+    if(setmodel)
+    {
     qDebug("Setting Model");
     view->setModel(model);
+    }
+    if(setScroll){
     HighlightScrollBar* scroll = new HighlightScrollBar(Qt::Vertical,this);
     Saturn->addScrollBar(scroll);
     view->setVerticalScrollBar(scroll);
-
+    }
 
 
     // this is inefficient and useless since we should set those in the design
@@ -593,6 +605,7 @@ void MainWindow::update()
     UPDATEVIEW(ui->MemView3View);
     UPDATEVIEW(ui->StackViewView);
     UPDATEVIEW(ui->RegisterView);
+    UPDATEVIEW(Clockmaker->Coat);
     Saturn->update();
     emit reCheck();
 }

@@ -17,6 +17,7 @@
 #include "StackModeler.h"
 #include "ScrollBarHandler.h"
 #include "InOutSet.h"
+#include "WatchWatcher.h"
 #define BRSLOT 0
 #define ADDRSLOT 1
 #define NAMESLOT 2
@@ -113,6 +114,8 @@ public:
 
     InOutSet* InOutPut;
 
+    WatchWatcher* Clockmaker;
+
     /**
      * @brief threadRunning Describes the runningness of the sim thread 
      * this is given to any part of the
@@ -150,8 +153,10 @@ public slots:
     void on_StackViewGotoButton_pressed();
 
     void setupViews();
+    void setupWatches();
 
-    void setupMemView(QTableView* view);
+    void setupMemView(QTableView* view, bool setmodel = true, bool setScroll =true);
+
 
     void setupInOut();
 

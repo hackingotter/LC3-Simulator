@@ -10,9 +10,7 @@
 #include <QUndoCommand>
 
 
-namespace Action {
 
-};
 
 
 InOutSet::InOutSet(QWidget *parent) : QWidget(parent)
