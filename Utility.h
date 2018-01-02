@@ -32,7 +32,6 @@
 
 #define CHARPTR2QSTRING(CHARPTR)(QString::fromLocal8Bit(CHARPTR))
 
-
 namespace Utility {
 //static bool remember = false;
 

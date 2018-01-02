@@ -33,8 +33,6 @@
 
 
 
-#define CLEARONGOTO (true)
-
 
 
 

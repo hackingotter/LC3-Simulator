@@ -45,8 +45,6 @@ modeler::modeler(QObject *parent,bool* access): QStandardItemModel(parent),threa
     setRowCount(MEMSIZE+1);
 
 
-
-
 }
 
 
@@ -82,6 +80,7 @@ int modeler::columnCount(const QModelIndex &parent) const
 {
     return QStandardItemModel::columnCount(parent);
 }
+
 
 QVariant modeler::data(const QModelIndex &index, int role) const
 {
@@ -297,6 +296,8 @@ QString modeler::mnemonicGen(mem_addr_t addr)const
     out = addr2Mnem(instruction);
     return out;
 }
+
+
 QString modeler::addr2Mnem(mem_addr_t addr)const
 {
     //    qDebug(QString().setNum(addr).toLocal8Bit());

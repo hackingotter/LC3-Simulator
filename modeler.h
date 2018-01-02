@@ -6,6 +6,7 @@
 #include "DoUndo.h"
 #include "computer.h"
 
+#include "QMenu"
 #define NUMBER_OF_COLUMNS 6
 
 
@@ -57,7 +58,9 @@ public:
     QString addr2Mnem(mem_addr_t addr) const;
     QString name_or_addr(mem_addr_t target) const;
     QString mnemonicGen(mem_addr_t addr)const;
+
 signals:
+
     void dataChan(mem_addr_t);
     void valueChanged(mem_addr_t,val_t);
     void nameChanged(mem_addr_t,label_t*);
@@ -66,6 +69,7 @@ signals:
     void requestMemValueChange(mem_addr_t,val_t,int);
     void change();
 private:
+
 };
 
 #endif // MODELER_H

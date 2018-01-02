@@ -8,6 +8,7 @@
 //#include "Simulator.h"
 #include "ModelDelegate.h"
 #include "Util.h"
+#include "MemWindow.h"
 #include "stdio.h"
 #include "hope.h"
 #include <QColorDialog>
@@ -27,6 +28,7 @@
 #include <QSettings>
 #include <QMessageBox>
 #include <QFileDialog>
+#include "MemTable.h"
 #include <QDataStream>
 #include "Assembler.h"
 #include <QUndoView>
@@ -37,11 +39,11 @@
 #include <QProcess>
 #include <QCoreApplication>
 #define REGISTERVIEWNUMCOLUMN 2
-
 #define SCROLLTO(VIEW,INPUT)\
     {\
         (VIEW)->scrollTo((VIEW)->model()->index(INPUT,0),QAbstractItemView::PositionAtTop);\
     }
+
 #define MEMVIEWSETUPPERCENT 20
 
 #define HEX_COLUMN_WIDTH 60
@@ -76,7 +78,6 @@
     disp->update();
 
 
-#define CLEAR(INPUT) if(CLEARONGOTO)INPUT->clear();
 
 #define UPDATE_REGISTER_DISPLAY(UI,REGISTER)\
     UI->RegisterView->item((int)REGISTER,REGISTERVIEWNUMCOLUMN)->setText(QString().setNum(getRegister(REGISTER)));
@@ -145,6 +146,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 
 
+//    ui->MemView1->layout()->addWidget(new MemWindow(model));
+
+
+
+
 }
 MainWindow::~MainWindow()
 {
@@ -161,7 +167,8 @@ void MainWindow::setupViews()
     qInfo("Size Set");
     QString str;
     Saturn = new ScrollBarHandler();
-    setupMemView(ui->MemView1View);
+//    ui->MemorySplitter->addWidget(new MemWindow(model));
+//    setupMemView(ui->MemView1View);
     setupMemView(ui->MemView2View);
     setupMemView(ui->MemView3View);
     setupStackView(ui->StackViewView);
@@ -177,7 +184,7 @@ void MainWindow::setupViews()
      */
     qDebug("Connecting View interfaces");
     {
-        connect(ui->MemView1Input,SIGNAL(returnPressed()),ui->MemView1GotoButton,SLOT(click()));
+     //   connect(ui->MemView1Input,SIGNAL(returnPressed()),ui->MemView1GotoButton,SLOT(click()));
         connect(ui->MemView2Input,SIGNAL(returnPressed()),ui->MemView2GotoButton,SLOT(click()));
         connect(ui->MemView3Input,SIGNAL(returnPressed()),ui->MemView3GotoButton,SLOT(click()));
         connect(ui->StackViewInput,SIGNAL(returnPressed()),ui->StackViewGotoButton,SLOT(click()));
@@ -411,6 +418,11 @@ void MainWindow::setupMemView(QTableView* view, bool setmodel, bool setScroll)
     view->setSelectionBehavior(QAbstractItemView::SelectRows);
 
 
+//    view->setContextMenuPolicy(Qt::CustomContextMenu);
+
+//    connect(view, SIGNAL(customContextMenuRequested(const QPoint &)),
+//            this, SLOT(showClickOptions(const QPoint &,view)));
+
 //    QObject::connect(Computer::getDefault(),SIGNAL(update()),view,SLOT(repaint()));
 }
 
@@ -432,6 +444,7 @@ void MainWindow::onTableClicked(const QModelIndex & current)
     qDebug("Selection at (" + QString().setNum(row).toLocal8Bit() + ", " + QString().setNum(column).toLocal8Bit() + ")");
 
 }
+
 void MainWindow::setupStackView(QTableView* view)
 {
     qDebug("Setting up Stack View");

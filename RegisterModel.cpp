@@ -224,7 +224,7 @@ cond_t RegisterModel::handle_CC_RegisterView_Input(QString in)
             {
                 qDebug("It really is!");
                 val_t val = Computer::getDefault()->getRegister(static_cast<reg_t>(reg_num));
-                if(val<0)return cond_n;
+                if(val&0x0)return cond_n;
                 if(val>0)return cond_p;
                 if(val==0)return cond_z;
             }
@@ -244,6 +244,7 @@ cond_t RegisterModel::handle_CC_RegisterView_Input(QString in)
     PSR_HANDLER(lowered,"nnn"   ,   cond_n)
     PSR_HANDLER(lowered,"-"     ,   cond_n)
     //Handle positive
+            PSR_HANDLER(lowered,"😀",cond_p)
     PSR_HANDLER(lowered,"p"     ,   cond_p)
     PSR_HANDLER(lowered,"positive" ,cond_p)
     PSR_HANDLER(lowered,":)"    ,   cond_p)

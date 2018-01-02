@@ -61,7 +61,9 @@ HEADERS += \
     KBRDModel.h \
     InOutSet.h \
     WatchWatcher.h \
-    WatchModel.h
+    WatchModel.h \
+    MemTable.h \
+    MemWindow.h
 
 SOURCES += \
     Bridge.cpp \
@@ -89,7 +91,9 @@ SOURCES += \
     KBRDModel.cpp \
     InOutSet.cpp \
     WatchWatcher.cpp \
-    WatchModel.cpp
+    WatchModel.cpp \
+    MemTable.cpp \
+    MemWindow.cpp
 
 DISTFILES += \
     Test.txt \
