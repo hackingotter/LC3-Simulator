@@ -142,10 +142,6 @@ public slots:
      * This is a name templated method, one of many that make communication
      * with the ui easy and clear.
      */
-    void on_MemView2GotoButton_pressed();
-
-    void on_MemView1GotoButton_pressed();
-
     void on_MemView3GotoButton_pressed();
 
     void on_StackViewGotoButton_pressed();
@@ -159,8 +155,6 @@ public slots:
     void setupInOut();
 
     void setupControlButtons();
-
-    void on_MemView1PCButton_pressed();
 
     void on_continueButton_clicked();
 
@@ -177,17 +171,12 @@ public slots:
     QString assembleFile(QString path);
     void assembleNLoadFile(QString path = QString());
 
-    void on_MemView1Input_returnPressed();
-
-    void on_MemView2Input_returnPressed();
-
     void on_MemView3Input_returnPressed();
 
     void on_StackViewInput_returnPressed();
 
 
 
-    void on_MemView2PCButton_pressed();
 
     void on_MemView3PCButton_pressed();
 
@@ -210,6 +199,7 @@ public slots:
     void saveSettings();
     void closeEvent(QCloseEvent *event);
 signals:
+    void signalUpdate();
     void reCheck();
     void requestUndo();
     void requestHalt();

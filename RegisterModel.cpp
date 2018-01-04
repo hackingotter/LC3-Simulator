@@ -19,7 +19,6 @@ extern "C"{
 RegisterModel::RegisterModel(QObject* parent,bool* excersize): QStandardItemModel(parent),threadRunning(excersize)
 {
     qDebug("RegisterModel in progress");
-    regColors =  new QList<QColor>();
 
 
 
@@ -84,8 +83,8 @@ QVariant RegisterModel::data(const QModelIndex &index,int role) const
 
             case R6:return R6COLOR;
             case R5:return R5COLOR;
-//            case R4:return R4COLOR;
-//            case R3:return R3COLOR;
+            case R4:return R4COLOR;
+            case R3:return R3COLOR;
             case R2:return R2COLOR;
             case PC:return PCCOLOR;
             case R1:return R1COLOR;

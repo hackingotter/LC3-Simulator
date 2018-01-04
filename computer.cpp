@@ -21,7 +21,7 @@
 #define REDOFUNC(STUFF)  void redo()\
 {\
     STUFF\
-}
+    }
 
 #define SAVEFUNC(STUFF)  QString save()\
 {\
@@ -52,15 +52,15 @@ public:
     }
     void undo()
     {
-                Computer::getDefault()->remember++;
+        Computer::getDefault()->remember++;
 
-                Computer::getDefault()->remember--;
+        Computer::getDefault()->remember--;
     }
     void redo()
     {
-                Computer::getDefault()->remember++;
+        Computer::getDefault()->remember++;
         _target->setText(_target->text()+(char)(_newchar));
-                Computer::getDefault()->remember--;
+        Computer::getDefault()->remember--;
     }
 private:
     QLabel* _target;
@@ -93,7 +93,58 @@ private:
     cond_t oldCondt;
 
 };
+class changeMemBlock: public QUndoCommand
+{
+public:
+    changeMemBlock(mem_loc_t* newBlock,val_t newLen,mem_loc_t* oldBlock,val_t oldBlockLen)
+        :captured(newBlock),capLength(newLen),overwritten(oldBlock),overLength(oldBlockLen)
+    {}
+    void undo()
+    {
+        Computer::getDefault()->remember++;
+//        Computer::getDefault()->set
+//                Computer::getDefault()->setProgramStatus(oldCondt);
+        Computer::getDefault()->remember--;
+    }
 
+    void redo()
+    {
+        Computer::getDefault()->remember++;
+//        Computer::getDefault()->setProgramStatus(newCondt);
+        Computer::getDefault()->remember--;
+    }
+private:
+    mem_loc_t* captured;
+    val_t capLength;
+    mem_loc_t* overwritten;
+    val_t overLength;
+};
+class changeMemLoc:public QUndoCommand
+{
+public:
+    changeMemLoc(mem_loc_t oldL,mem_loc_t newL):newLoc(newL),oldLoc(oldL){
+        addr=oldLoc.addr;
+        setText("movin'");
+
+    }
+    void undo()
+    {
+        Computer::getDefault()->remember++;
+        Computer::getDefault()->setMemLoc(addr,oldLoc);
+        Computer::getDefault()->remember--;
+    }
+
+    void redo()
+    {
+        Computer::getDefault()->remember++;
+        Computer::getDefault()->setMemLoc(addr,newLoc);
+        Computer::getDefault()->remember--;
+    }
+private:
+    mem_loc_t newLoc;
+    mem_loc_t oldLoc;
+    mem_addr_t addr;
+};
 class changeRegValue: public QUndoCommand
 {
 public:
@@ -162,20 +213,20 @@ public:
     {
         setText("set Label");
         QUndoCommand::setObsolete(oldLabelPtr && // null check
-                    (newLabelPtr->name == oldLabelPtr->name) &&
-                    (newLabelPtr->addr==oldLabelPtr->addr));
+                                  (newLabelPtr->name == oldLabelPtr->name) &&
+                                  (newLabelPtr->addr==oldLabelPtr->addr));
     }
     void undo()
     {
-                Computer::getDefault()->remember++;
+        Computer::getDefault()->remember++;
         Computer::getDefault()->setMemLabel(mem_addr,oldLabelPtr);
-                Computer::getDefault()->remember--;
+        Computer::getDefault()->remember--;
     }
     void redo()
     {
-                Computer::getDefault()->remember++;
+        Computer::getDefault()->remember++;
         Computer::getDefault()->setMemLabel(mem_addr,newLabelPtr);
-                Computer::getDefault()->remember--;
+        Computer::getDefault()->remember--;
     }
 
 private:
@@ -193,15 +244,15 @@ public:
     }
     void undo()
     {
-                Computer::getDefault()->remember++;
+        Computer::getDefault()->remember++;
         Computer::getDefault()->setMemBreakPoint(mem_addr,oldBreak);
-                Computer::getDefault()->remember--;
+        Computer::getDefault()->remember--;
     }
     void redo()
     {
-                Computer::getDefault()->remember++;
+        Computer::getDefault()->remember++;
         Computer::getDefault()->setMemBreakPoint(mem_addr,newBreak);
-                Computer::getDefault()->remember--;
+        Computer::getDefault()->remember--;
     }
 private:
     mem_addr_t mem_addr;
@@ -244,6 +295,11 @@ Computer::Computer(QObject *parent) : QObject(parent)
 {
     Undos = new HistoryHandler();
     Undos->setUndoLimit(65535);
+    //critical for being able to undo the moves
+    for(int i = 0;i<=65535;i++)
+    {
+        _memory[i].addr=i;
+    }
 
     savedSSP = 0;
     savedUSP = 0;
@@ -411,6 +467,16 @@ mem_loc_t Computer::getMemLocation(mem_addr_t addr)
     return _memory[addr];
 }
 
+mem_loc_t *Computer::getMemLocationsBlock(mem_addr_t addr, val_t blockSize)
+{
+    mem_loc_t * block = (mem_loc_t*)malloc(sizeof(mem_loc_t)*15);
+    for(val_t i =0;i<blockSize;i++)
+    {
+        block[i]=_memory[addr+i+1];
+    }
+    return block;
+}
+
 
 
 void Computer::setMemValue(mem_addr_t addr, val_t val)
@@ -424,7 +490,7 @@ void Computer::setMemValue(mem_addr_t addr, val_t val)
 
     TRY2PUSH(oval,val,changeMemValue(addr,oval,val));
 
-     IFNOMASK(emit update();)
+    IFNOMASK(emit update();)
 }
 
 void Computer::setMemValuesBlock(mem_addr_t addr, size_t blockSize, val_t *vals)
@@ -492,8 +558,8 @@ void Computer::setMemLabelText(mem_addr_t addr,QString labelString)
     label->name = labelString;
 
     MASK
-    // free old label
-    label_t* oldLabel = getMemLabel(addr);
+            // free old label
+            label_t* oldLabel = getMemLabel(addr);
 
 
     // store new label
@@ -536,6 +602,33 @@ QString Computer::getMemComment(mem_addr_t addr)
 {
     //return "To be figured out. Issues with value vs. reference";
     return _memory[addr].comment;
+}
+
+void Computer::setMemLoc(mem_addr_t addr, mem_loc_t loc_val)
+{
+    qDebug("settin' loc");
+
+
+    mem_loc_t displaced = _memory[addr];
+    _memory[addr] = loc_val;
+
+    printf("%x\n%x\n",&displaced,&loc_val);
+     _memory[addr].addr = addr;
+
+    TRY2PUSH(displaced,loc_val,changeMemLoc(displaced,loc_val));
+
+    IFNOMASK(emit update();)
+
+}
+
+void Computer::setMemLocBlock(mem_addr_t addr, mem_loc_t *loc_val, val_t blockLen)
+{
+    for(int i = 0;i<blockLen;i++)
+    {
+        loc_val[i].addr = addr+i;
+        _memory[addr+i]=loc_val[i];
+
+    }
 }
 
 // loading
@@ -1038,7 +1131,7 @@ void Computer::lea(val_t inst) {
 
 void Computer::rti(val_t inst) {
     if (getRegister(PSR) & bitMask(15)) {
-        throw 'Privilege mode exception: RTI';
+        throw "Privilege mode exception: RTI";
     } else {
         // PC=mem[R6]; R6 is the SSP
         mem_addr_t r6 = getRegister(R6);
@@ -1122,9 +1215,9 @@ void Computer::checkMemAccess(mem_addr_t addr)
         val_t sector = addr & 0xF000; // select first 4 bits
         sector >>= 12; // move the bits so they become a number
         val_t sectorMap = 1 << sector;
-//        if ((sectorMap & _memory[MPR].value) == 0) {
-//            throw 'Privilege Mode Exception: Trying to address blocked memory';
-//        }
+        //        if ((sectorMap & _memory[MPR].value) == 0) {
+        //            throw 'Privilege Mode Exception: Trying to address blocked memory';
+        //        }
     }
 }
 
@@ -1144,7 +1237,7 @@ void Computer::checkSpecialAddressWrite(mem_addr_t addr)
     switch (addr) {
     case DSR:
         if (getMemValue(DSR) == 0x8000) {
-             IFNOMASK(hasCharacterToDisplay();)
+            IFNOMASK(hasCharacterToDisplay();)
         }
         break;
     default:
@@ -1158,7 +1251,7 @@ void Computer::executeSingleInstruction() {
 
     MASK
 
-    setRunning(true);
+            setRunning(true);
 
     executeCycle();
 
@@ -1167,7 +1260,7 @@ void Computer::executeSingleInstruction() {
     UNMASK
 
             IFNOMASK(update();)
-           Undos->endMacro();
+            Undos->endMacro();
 
 }
 
@@ -1221,7 +1314,7 @@ char Computer::getDisplayCharacter()
 {
     makeDisplayReady();
     val_t val = getMemValue(DDR);
-//    val >>= 8;
+    //    val >>= 8;
     return (char)val;
 }
 

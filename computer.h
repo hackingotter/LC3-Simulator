@@ -101,7 +101,7 @@ public:
      * \param blockSize the size of the block the user wants.
      * \return An array of length blockSize containing the memory_loc_t objects for the requested block. Sorted by address.
      */
-    mem_loc_t *getMemLocationsBlock(mem_addr_t addr, size_t blockSize);
+    mem_loc_t *getMemLocationsBlock(mem_addr_t addr, val_t blockSize);
 
     /** Gets the mem location structs for the whole address space.
      * \return An array containing mem loc structs for the whole address space. sorted by address. HAs 2^16 elements.
@@ -140,6 +140,7 @@ public:
      */
     void setMemLoc(mem_addr_t addr, mem_loc_t loc_val);
 
+    void setMemLocBlock(mem_addr_t addr,mem_loc_t* loc_val,val_t blockLen);
     /**
      * \param addr the address of the element to set.
      * \param label the label being set.

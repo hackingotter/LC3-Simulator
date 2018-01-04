@@ -17,8 +17,14 @@
 
 #define SYMBOL_SUFFIX ".sym"
 
-
-
+#define PCCOLOR (QColor(255,255,0))
+#define R0COLOR (QColor(0,102,204))
+#define R1COLOR (QColor(255,102,205))
+#define R2COLOR (QColor(255,153,51))
+#define R3COLOR (QColor(153,51,153))
+#define R4COLOR (QColor(102,255,51))
+#define R5COLOR (QColor(153,102,51))
+#define R6COLOR (QColor(255,0,255))
 #ifndef MEMSIZE
 #define MEMSIZE 65535
 #endif

@@ -11,7 +11,7 @@ namespace Utility {
 int QSTRING2INTBASE(QString source,int suggestedBase)
 {
     qDebug("Looks like we are changing a QString to a Int ");
-            bool* noError;
+    bool* noError;
     //First things first, let's see what Qt gives us
     int qtAttempt = source.toInt(noError,suggestedBase);
     if(noError)
@@ -31,7 +31,7 @@ void systemInfoDebug()
 
     qDebug(QSysInfo::currentCpuArchitecture().toLocal8Bit());
 
-            qDebug(QString("The computer: ").append(QSysInfo::prettyProductName()).toLocal8Bit());
+    qDebug(QString("The computer: ").append(QSysInfo::prettyProductName()).toLocal8Bit());
 }
 
 #define QVARIANT2VAL_T(QVARIANT) (static_cast<val_t>(QVARIANT.toString().toInt(nullptr,16)))
@@ -53,7 +53,7 @@ QColor int2QColor(int color)
 }
 val_t unifiedInput2Val(QString input,bool* ok = Q_NULLPTR)
 {
-
+    *ok = true;//Clean the input.
     qDebug(QString().setNum(*ok).toLocal8Bit());
     if(input == "")
     {
@@ -70,33 +70,42 @@ val_t unifiedInput2Val(QString input,bool* ok = Q_NULLPTR)
     }
     if(input.at(0)=='0')//pre prefix 0x, 0b, etc
     {
+        if(input.length()==1)
+        {
+            *ok = true;
+            return 0;
+            //I think this edge case has been missed
+            //for months now.  Fixed 1/4/2018
+            //-Melberg
+        }
 
         input.remove(0,1);//get rid it
-         qDebug(input.toLocal8Bit());
+        qDebug(input.toLocal8Bit());
     }
-    if(input.at(0) == 'b'){
-
+    if(input.at(0) == 'b')
+    {
         input.remove(0,1);
         out = input.toInt(ok,2);
-        if(*ok)return out;
-    } else if(input.at(0) == 'o')
-    {
-        input.remove(0,1);
-        out = input.toInt(ok,8);
-        if(*ok)return out;
-
-    } else if(input.at(0) == 'x')
-    {
-        input.remove(0,1);
-         qDebug(input.toLocal8Bit());
-         out = input.toInt(ok,16);
-         if(*ok)return out;
-    }
-    else
-    {
-        out = input.toInt(ok,10);//this is the default
-        if(*ok)return out;
-    }
+        return (*ok)?out:0;
+    } else
+        if(input.at(0) == 'o')
+        {
+            input.remove(0,1);
+            out = input.toInt(ok,8);
+            return (*ok)?out:0;
+        } else
+            if(input.at(0) == 'x')
+            {
+                input.remove(0,1);
+                qDebug(input.toLocal8Bit());
+                out = input.toInt(ok,16);
+                return (*ok)?out:0;
+            }
+            else
+            {
+                out = input.toInt(ok,10);//this is the default
+                return (*ok)?out:0;
+            }
     *ok = false;
     return 0;
 }

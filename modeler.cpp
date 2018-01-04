@@ -81,7 +81,48 @@ int modeler::columnCount(const QModelIndex &parent) const
     return QStandardItemModel::columnCount(parent);
 }
 
+QBrush modeler::rowPainter(mem_addr_t addr) const
+{
+    if(addr == Computer::getDefault()->getRegister(PC))
+    {
 
+        return QBrush(PCCOLOR);
+    }
+    if(addr == Computer::getDefault()->getRegister(R7))
+    {
+
+        return QBrush(Qt::blue);
+    }
+    if(addr == Computer::getDefault()->getRegister(R1))
+    {
+        return QBrush(R1COLOR);
+    }
+    if(addr == Computer::getDefault()->getRegister(R2))
+    {
+        return QBrush(R2COLOR);
+//            darkRed,
+//            darkGreen,
+//            darkBlue,
+//            darkCyan,
+    }
+    if(addr == Computer::getDefault()->getRegister(R3))
+    {
+        return QBrush(R3COLOR);
+    }
+    if(addr == Computer::getDefault()->getRegister(R4))
+    {
+        return QBrush(R4COLOR);
+    }
+    if(addr == Computer::getDefault()->getRegister(R5))
+    {
+        return QBrush(R5COLOR);
+    }
+    if(addr == Computer::getDefault()->getRegister(R6))
+    {
+        return QBrush(R6COLOR);
+    }
+    return QBrush();
+}
 QVariant modeler::data(const QModelIndex &index, int role) const
 {
 
@@ -110,41 +151,8 @@ QVariant modeler::data(const QModelIndex &index, int role) const
     if(role == Qt::BackgroundRole&&column == 0)
     {
 
+        return rowPainter(addr);
 
-        if(addr == Computer::getDefault()->getRegister(PC))
-        {
-
-            return QBrush(Qt::yellow);
-        }
-        if(addr == Computer::getDefault()->getRegister(R7))
-        {
-
-            return QBrush(Qt::blue);
-        }
-        if(addr == Computer::getDefault()->getRegister(R1))
-        {
-            return QBrush(Qt::green);
-        }
-        if(addr == Computer::getDefault()->getRegister(R2))
-        {
-            return QBrush(Qt::darkRed);
-//            darkRed,
-//            darkGreen,
-//            darkBlue,
-//            darkCyan,
-        }
-        if(addr == Computer::getDefault()->getRegister(R3))
-        {
-            return QBrush(Qt::darkGreen);
-        }
-        if(addr == Computer::getDefault()->getRegister(R4))
-        {
-            return QBrush(Qt::darkBlue);
-        }
-        if(addr == Computer::getDefault()->getRegister(R5))
-        {
-            return QBrush(Qt::darkCyan);
-        }
 
         return QVariant();
     }

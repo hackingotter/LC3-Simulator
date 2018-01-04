@@ -40,7 +40,10 @@ QVariant StackModeler::data(const QModelIndex &index,int role) const
     }
     if(role == Qt::BackgroundRole)
     {
-        if(Computer::getDefault()->getRegister(R6)==addr) return QBrush(Qt::blue);
+       if(column==0)
+       {
+           return rowPainter(addr);
+       }
     }
     return QVariant();
 }

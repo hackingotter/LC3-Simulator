@@ -167,9 +167,11 @@ void MainWindow::setupViews()
     qInfo("Size Set");
     QString str;
     Saturn = new ScrollBarHandler();
-//    ui->MemorySplitter->addWidget(new MemWindow(model));
+    MemWindow* memy = new MemWindow(model);
+    CONNECT(this,signalUpdate(),memy,kick());
+    ui->MemorySplitter->addWidget(memy);
+
 //    setupMemView(ui->MemView1View);
-    setupMemView(ui->MemView2View);
     setupMemView(ui->MemView3View);
     setupStackView(ui->StackViewView);
 //    MEMVIEWSETUP(ui->MemView2View,model);
@@ -185,7 +187,6 @@ void MainWindow::setupViews()
     qDebug("Connecting View interfaces");
     {
      //   connect(ui->MemView1Input,SIGNAL(returnPressed()),ui->MemView1GotoButton,SLOT(click()));
-        connect(ui->MemView2Input,SIGNAL(returnPressed()),ui->MemView2GotoButton,SLOT(click()));
         connect(ui->MemView3Input,SIGNAL(returnPressed()),ui->MemView3GotoButton,SLOT(click()));
         connect(ui->StackViewInput,SIGNAL(returnPressed()),ui->StackViewGotoButton,SLOT(click()));
 
@@ -517,14 +518,7 @@ void MainWindow::on_continueButton_clicked()
 {
     disp->repaint();
 }
-void MainWindow::on_MemView1Input_returnPressed()
-{
-    //This is just here so that the corressponding GotoButton can listen to it
-}
-void MainWindow::on_MemView2Input_returnPressed()
-{
-    //This is just here so that the corressponding GotoButton can listen to it
-}
+
 void MainWindow::on_MemView3Input_returnPressed()
 {
     //This is just here so that the corressponding GotoButton can listen to it
@@ -534,53 +528,10 @@ void MainWindow::on_StackViewInput_returnPressed()
     //This is just here so that the corressponding GotoButton can listen to it
 }
 
-void MainWindow::on_MemView1PCButton_pressed()
-{
-    qDebug("hello");
-    bool* ok = static_cast<bool*>(malloc(sizeof(bool)));
-    SCROLLTO(ui->MemView1View,Computer::getDefault()->getRegister(PC))
-}
-void MainWindow::on_MemView2PCButton_pressed()
-{
-    bool* ok;
-    SCROLLTO(ui->MemView2View,Computer::getDefault()->getRegister(PC))
-}
 void MainWindow::on_MemView3PCButton_pressed()
 {
     bool* ok;
     SCROLLTO(ui->MemView3View,Computer::getDefault()->getRegister(PC))
-}
-void MainWindow::on_MemView1GotoButton_pressed()
-{
-    qDebug("MemView1Goto or PC was pressed, checking if target is valid.");
-    bool ok = true;
-//    int target = Utility::unifiedInput2Val(ui->MemView1Input->text(),&ok);
-
-//    std::cout << ok << std::endl;
-//    if(ok)
-//    {
-//        qDebug("It was valid");
-//    QModelIndex  a =(ui->MemView1View)->model()->index(target,0);
-//    (ui->MemView1View)->scrollTo(a,QAbstractItemView::PositionAtTop);
-//    } else {
-//        qDebug("It was not valid");
-//    }
-    int target = Utility::unifiedInput2Val(ui->MemView1Input->text(),&ok);
-    if(ok)
-    {
-    SCROLLTO(ui->MemView1View,target)
-    }
-    CLEAR(ui->MemView1Input)
-}
-void MainWindow::on_MemView2GotoButton_pressed()
-{
-    bool ok = true;
-    int target = Utility::unifiedInput2Val(ui->MemView2Input->text(),&ok);
-    if(ok)
-    {
-    SCROLLTO(ui->MemView2View,target)
-    }
-    CLEAR(ui->MemView2Input)
 }
 void MainWindow::on_MemView3GotoButton_pressed()
 {
@@ -612,9 +563,8 @@ void MainWindow::on_NextButton_pressed()
 }
 void MainWindow::update()
 {
+    emit signalUpdate();
     disp->update();
-    UPDATEVIEW(ui->MemView1View);
-    UPDATEVIEW(ui->MemView2View);
     UPDATEVIEW(ui->MemView3View);
     UPDATEVIEW(ui->StackViewView);
     UPDATEVIEW(ui->RegisterView);

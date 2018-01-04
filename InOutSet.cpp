@@ -44,6 +44,8 @@ InOutSet::InOutSet(QWidget *parent) : QWidget(parent)
     textDisplay->setAlignment(Qt::AlignTop|Qt::AlignLeft);
     textDisplay->setFocusPolicy(Qt::StrongFocus);
     textDisplay->setStyleSheet(":focus{background-color:rgb(150,150,255)}");
+
+
     setLayout(hLayout);
     hLayout->addWidget(textDisplay);
     hLayout->addLayout(vLayout);
