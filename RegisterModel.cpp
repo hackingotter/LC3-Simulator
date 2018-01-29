@@ -217,7 +217,7 @@ cond_t RegisterModel::handle_CC_RegisterView_Input(QString in)
         {
             qDebug("It looks like it");
             QString ch = lowered.at(1);
-            int reg_num;
+            int reg_num =0;
             ch.number(reg_num,16);
             if(reg_num<9)
             {

@@ -1,11 +1,4 @@
 #include "FollowButton.h"
 #include "Utility.h"
-FollowButton::FollowButton():QPushButton()
-{
-setText("PC");
-}
-void FollowButton::mouseDoubleClickEvent(QMouseEvent *event)
-{
-qDebug("FOUBL");
-emit doubleClicked();
-}
+FollowButton::FollowButton(QString text):QPushButton(){setText(text);}
+void FollowButton::mouseDoubleClickEvent(QMouseEvent *event){emit doubleClicked();}

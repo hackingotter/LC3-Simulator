@@ -15,6 +15,8 @@ public:
     explicit ScrollBarHandler(QObject *parent = nullptr);
     void addScrollBar(HighlightScrollBar* bar);
     void update();
+    HighlightScrollBar *generateBar(QWidget *parent=0);
+    void removeScrollBar(HighlightScrollBar *Bar);
 signals:
 
 public slots:

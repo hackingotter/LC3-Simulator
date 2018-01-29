@@ -7,6 +7,7 @@
 #include "QPushButton"
 #include "QLineEdit"
 #include "QLabel"
+#include "BetterScrollbar.h"
 #include "computer.h"
 #include "FollowButton.h"
 
@@ -19,6 +20,7 @@ class MemWindow : public QWidget
 {
     Q_OBJECT
     MemTable* View;
+    HighlightScrollBar* Scroll;
     QLabel* Label;
     QLineEdit* Input;
     QPushButton* GotoButton;
@@ -41,7 +43,7 @@ class MemWindow : public QWidget
 
     int getScrollOffset(val_t row, bool *ok);
 public:
-    explicit MemWindow(modeler* model, QWidget *parent = nullptr);
+    explicit MemWindow(modeler* model, HighlightScrollBar *scroll, QWidget *parent = nullptr,QString* buttonName = new QString("PC"));
 
 signals:
 

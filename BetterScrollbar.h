@@ -73,6 +73,7 @@ private:
     QWidget *m_widget;
     HighlightScrollBarOverlay *m_overlay;
     friend class HighlightScrollBarOverlay;
+
 };
 
 #endif // BETTERSCROLLBAR_H

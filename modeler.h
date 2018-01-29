@@ -28,6 +28,10 @@ class modeler : public QStandardItemModel
 
 public:
 
+    
+    mem_loc_t * copied ;
+
+    int copiedLength;
     QObject* paternal_Figure;
     bool* threadRunning;
     explicit modeler(QObject *parent = 0,bool* access= Q_NULLPTR);
@@ -60,6 +64,8 @@ public:
     QString mnemonicGen(mem_addr_t addr)const;
 
     QBrush rowPainter(mem_addr_t addr) const;
+    void setCopied(QModelIndexList* target);
+    mem_loc_t * getCopied();
 signals:
 
     void dataChan(mem_addr_t);

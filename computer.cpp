@@ -612,8 +612,9 @@ void Computer::setMemLoc(mem_addr_t addr, mem_loc_t loc_val)
     mem_loc_t displaced = _memory[addr];
     _memory[addr] = loc_val;
 
-    printf("%x\n%x\n",&displaced,&loc_val);
+//    printf("%x\n%x\n",&displaced,&loc_val);
      _memory[addr].addr = addr;
+
 
     TRY2PUSH(displaced,loc_val,changeMemLoc(displaced,loc_val));
 
@@ -623,14 +624,24 @@ void Computer::setMemLoc(mem_addr_t addr, mem_loc_t loc_val)
 
 void Computer::setMemLocBlock(mem_addr_t addr, mem_loc_t *loc_val, val_t blockLen)
 {
-    for(int i = 0;i<blockLen;i++)
+    Undos->beginMacro("Setting Block");
+    MASK
+    for(mem_addr_t i = 0;i<blockLen;i++)
     {
-        loc_val[i].addr = addr+i;
-        _memory[addr+i]=loc_val[i];
-
+        setMemLoc(addr+i,loc_val[i]);
     }
+    UNMASK
+    Undos->endMacro();
+}
+void Computer::moveRow(mem_addr_t origin, mem_addr_t destination)
+{
+    setMemLoc(destination,_memory[origin]);
 }
 
+void Computer::shiftMemory(mem_addr_t origin, val_t length,mem_addr_t destination )
+{
+
+}
 // loading
 
 size_t Computer::loadProgramFile(char* path) {
@@ -1054,11 +1065,7 @@ void Computer::ld(val_t inst) {
 
 void Computer::ldi(val_t inst) {
     reg_t dr = getRegister_9_10_11(inst);
-    val_t offset = getOffset9(inst);
-    if (offset & bitMask(8)) {
-        // sign extend
-        offset |= 0xFE00;
-    }
+    val_t offset = getSignedOffset9(inst);
 
     mem_addr_t addr = getRegister(PC) + offset;
     checkMemAccess(addr);
@@ -1110,11 +1117,7 @@ void Computer::ldr(val_t inst) {
 void Computer::lea(val_t inst) {
 
     reg_t dr = getRegister_9_10_11(inst);
-    val_t offset = getOffset9(inst);
-    if (offset & bitMask(8)) {
-        // sign extend
-        offset |= 0xFE00;
-    }
+    val_t offset = getSignedOffset9(inst);
 
     val_t val = getRegister(PC) + offset;
 
@@ -1151,11 +1154,7 @@ void Computer::rti(val_t inst) {
 
 void Computer::st(val_t inst) {
     reg_t sr = getRegister_9_10_11(inst);
-    val_t offset = getOffset9(inst);
-    if (offset & bitMask(8)) {
-        offset |= 0xFE00;
-    }
-
+    val_t offset = getSignedOffset9(inst);
     mem_addr_t addr = getRegister(PC) + offset;
     checkMemAccess(addr);
     setMemValue(addr, getRegister(sr));
@@ -1164,10 +1163,7 @@ void Computer::st(val_t inst) {
 }
 
 void Computer::sti(val_t inst) {
-    val_t offset = getOffset9(inst);
-    if (offset & bitMask(8)) {
-        offset |= 0xFE00; // make bits after 9 1's
-    }
+    val_t offset = getSignedOffset9(inst);
     mem_addr_t pc = getRegister(PC);
     mem_addr_t innerAddr = pc + offset;
     checkMemAccess(innerAddr);
@@ -1180,10 +1176,7 @@ void Computer::sti(val_t inst) {
 }
 
 void Computer::str(val_t inst) {
-    val_t offset = getOffset6(inst);
-    if (offset & bitMask(5)) {
-        offset |= 0xFFC0; // make bits after 6 1's
-    }
+    val_t offset = getSignedOffset6(inst);
     val_t srVal = getRegister(getRegister_9_10_11(inst));
     mem_addr_t baseR = getRegister(getRegister_6_7_8(inst));
 
@@ -1207,6 +1200,25 @@ void Computer::trap(val_t inst) {
     val_t trapVect = getTrap8(inst);
     setRegister(PC, getMemValue(trapVect));
 }
+
+val_t Computer::getSignedOffset9(val_t inst)
+{
+    val_t offset = getOffset9(inst);
+    if (offset & bitMask(8)) {
+        offset |= 0xFE00; // make bits after 9 1's
+    }
+    return offset;
+}
+val_t Computer::getSignedOffset6(val_t inst)
+{
+    val_t offset = getOffset6(inst);
+    if (offset & bitMask(5)) {
+        // sign extend
+        offset |= 0xFFC0;
+    }
+    return offset;
+}
+
 
 void Computer::checkMemAccess(mem_addr_t addr)
 {
@@ -1324,8 +1336,88 @@ void Computer::makeDisplayReady()
 }
 
 
+bool Computer::insertBlankRow(mem_addr_t addr)
+{
+    mem_addr_t queue = findSpace(addr,10);
+    for(int i = queue; i >=addr;i--)
+    {
+
+    }
+}
 
 
+bool Computer::preventShiftProblems(mem_addr_t original, mem_addr_t destination,val_t lengthGroupMoved,bool force)
+{
+    //It is understandable that people will want the ablility to shift their
+    //code around.  This presents a problem, once labels are allowed, as
+    //they don't do well when you move one end and not the other.
+
+    mem_addr_t startSearch = (original<=1024)?0:(original-1024);
+    mem_addr_t endSearch = (original>=MEMSIZE-1023)?MEMSIZE:(original+1023);
+
+    /*
+     * We don't need to seach outside what is visible to the original section
+     * right now, we are only keeping track of the beginning.
+     */
+
+    //now, we search for anything that cares about offset.
+    for(mem_addr_t index = startSearch;index<=endSearch;index++)
+    {
+        /* the simplest case arises when either of two things is true:
+         *
+         * Case 1: The line doesn't care about where anything else is.
+         *
+         * Case 2: The line does care about where another line is, but that
+         * line is within the group being moved.
+         *
+         *
+         * For these cases, we simply pass them by
+         */
+
+        //It turns out that it only matters when the connections go from in/out
+        //side of the group to the out/inside of the
+        if(connectedToRange())
+
+
+.......TOOOOODOOOO
+
+
+
+
+    }
+}
+
+bool Computer::connectedToRange(mem_addr_t start,mem_addr_t end,mem_addr_t pov)
+{
+    mem_loc_t inspected = _memory[pov];
+
+    switch (inspected.value & opMask) {
+    case brOpCode:
+    case jsrOpCode:
+    case ldOpCode:
+    case ldiOpCode:
+    case leaOpCode:
+    case stOpCode:
+    case stiOpCode:
+
+
+
+        break;
+    default:
+        return false;//not connected
+        break;
+    }
+}
+
+mem_addr_t Computer::findSpace(mem_addr_t startSearch,int minimumSize)
+{
+    return startSearch+100;
+    int streak = 0;
+    while(streak <minimumSize)
+    {
+        
+    }
+}
 
 
 

@@ -32,8 +32,6 @@ modeler::modeler(QObject *parent,bool* access): QStandardItemModel(parent),threa
     {
         HeaderLabel.append("EMPTY");
     }
-
-
     HeaderLabel.replace(BRCOLUMN,"BR");
     HeaderLabel.replace(ADDRCOLUMN,"Addr");
     HeaderLabel.replace(VALUCOLUMN,"Value");
@@ -121,7 +119,23 @@ QBrush modeler::rowPainter(mem_addr_t addr) const
     {
         return QBrush(R6COLOR);
     }
+//    if(addr == copied->addr)
+//    {
+//        return QBrush(QColor(250,30,205));
+//    }
     return QBrush();
+}
+
+void modeler::setCopied(QModelIndexList *target)
+{
+    copiedLength = target->length();
+    copied = Computer::getDefault()->getMemLocationsBlock(target->at(0).row(),copiedLength);
+}
+
+
+mem_loc_t * modeler::getCopied()
+{
+    return copied;
 }
 QVariant modeler::data(const QModelIndex &index, int role) const
 {

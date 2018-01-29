@@ -2,9 +2,20 @@
 #include "computer.h"
 #include "QLinkedList"
 ScrollBarHandler::ScrollBarHandler(QObject *parent) : QObject(parent){}
-void ScrollBarHandler::addScrollBar(HighlightScrollBar* bar)
+
+HighlightScrollBar* ScrollBarHandler::generateBar(QWidget* parent)
 {
-    bars.append(bar);
+    HighlightScrollBar* newBar = new HighlightScrollBar(Qt::Vertical,parent);
+    bars.append(newBar);
+    return newBar;
+}
+void ScrollBarHandler::addScrollBar(HighlightScrollBar* Bar)
+{
+    bars.append(Bar);
+}
+void ScrollBarHandler::removeScrollBar(HighlightScrollBar* Bar)
+{
+    bars.removeOne(Bar);
 }
 void ScrollBarHandler::update()
 {

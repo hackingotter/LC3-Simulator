@@ -167,10 +167,13 @@ void MainWindow::setupViews()
     qInfo("Size Set");
     QString str;
     Saturn = new ScrollBarHandler();
-    MemWindow* memy = new MemWindow(model);
+    for(int i = 0;i<3;i++)
+    {
+
+        MemWindow* memy = new MemWindow(model,Saturn->generateBar());
     CONNECT(this,signalUpdate(),memy,kick());
     ui->MemorySplitter->addWidget(memy);
-
+}
 //    setupMemView(ui->MemView1View);
     setupMemView(ui->MemView3View);
     setupStackView(ui->StackViewView);

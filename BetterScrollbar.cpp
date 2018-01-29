@@ -92,6 +92,7 @@ void HighlightScrollBar::overlayDestroyed()
     m_overlay = 0;
 }
 
+
 void HighlightScrollBar::addHighlight(Highlight highlight)
 {
     if (!m_overlay)

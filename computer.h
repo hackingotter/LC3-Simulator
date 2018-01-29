@@ -42,6 +42,7 @@ public:
 
     int remember = 0;
 
+
     /** Returns the contents of a register
      * \param reg The register whose value is requested.
      * \return The contens of register reg.
@@ -219,6 +220,11 @@ public:
      void makeDisplayReady();
 
 
+     void shiftMemory(mem_addr_t origin, val_t length, mem_addr_t destination);
+     void moveRow(mem_addr_t origin, mem_addr_t destination);
+     
+     mem_addr_t findSpace(mem_addr_t startSearch, int minimumSize);
+     bool insertBlankRow(mem_addr_t addr);
 signals:
      void update();
      void hasCharacterToDisplay();

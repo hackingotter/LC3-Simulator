@@ -3,7 +3,7 @@
 #include "QHBoxLayout"
 #include "QString"
 #include "Utility.h"
-MemWindow::MemWindow(modeler *model, QWidget *parent) : QWidget(parent)
+MemWindow::MemWindow(modeler *model, HighlightScrollBar* scroll, QWidget *parent,QString* buttonName) : QWidget(parent)
 {
     QHBoxLayout* hLayout = new QHBoxLayout();
     hLayout->setContentsMargins(0,0,0,0);
@@ -26,8 +26,8 @@ MemWindow::MemWindow(modeler *model, QWidget *parent) : QWidget(parent)
      * The only difference between a Follow Button and a Push Button is that
      * the Follow Button sends out a signal whenever it is double clicked.
      */
-    QString* temp = new QString("PC");
-    SpecialButton = new FollowButton();
+
+    SpecialButton = new FollowButton(*buttonName);
     SpecialButton->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Fixed);
     SpecialButton->setMaximumWidth(23);
     SpecialButton->setMaximumHeight(23);
@@ -80,13 +80,7 @@ MemWindow::MemWindow(modeler *model, QWidget *parent) : QWidget(parent)
 }
 void MemWindow::handlePCPress()
 {
-    bool ok = true;
-    val_t target = getScrollOffset(Computer::getDefault()->getRegister(PC),&ok);
-    if(ok)
-    {
-
-        View->scrollToRow(target);
-    }
+    View->scrollToRow(Computer::getDefault()->getRegister(PC));
 }
 void MemWindow::handleGotoPress()
 {
@@ -95,15 +89,13 @@ void MemWindow::handleGotoPress()
 
     if(ok)
     {
-        int newtarget = getScrollOffset(target,&ok);
-        if(ok)
-        {
-            mem_loc_t* bl = Computer::getDefault()->getMemLocationsBlock(0,5);
-            Computer::getDefault()->setMemLocBlock(target,bl,5);
 
-            View->scrollToRow(newtarget);
+        for(int i = 5;i>=0;i--)
+        {
+            Computer::getDefault()->setMemLoc(target+i,Computer::getDefault()->getMemLocation(i));
         }
 
+        View->scrollToRow(target);
     }
     CLEAR(Input);
 
@@ -131,22 +123,6 @@ void MemWindow::kick()
     {
         handlePCPress();
     }
-}
-int MemWindow::getScrollOffset(val_t row, bool* ok)
-{
-    *ok = true;
-    qDebug(QString().setNum(row).toLocal8Bit());
-    int upper = View->indexAt(View->rect().topLeft()).row();
-    int lower = View->indexAt(View->rect().bottomLeft()).row();
-    int offset = (lower - upper)/2;
-    if(offset+row<0)
-    {
-        *ok=false;
-        return 0;
-    }
-    if(row<offset)
-        return row;
-    return row-offset;
 }
 
 
