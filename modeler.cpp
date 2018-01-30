@@ -20,7 +20,9 @@ extern "C"
 }
 #include <QItemSelectionModel>
 
-
+#define TESTOFFSET 3
+#define TESTBEGIN  15
+#define TESTEND    20
 
 using namespace Memory_Modulos;
 modeler::modeler(QObject *parent,bool* access): QStandardItemModel(parent),threadRunning(access)
@@ -79,7 +81,7 @@ int modeler::columnCount(const QModelIndex &parent) const
     return QStandardItemModel::columnCount(parent);
 }
 
-QBrush modeler::rowPainter(mem_addr_t addr) const
+QBrush modeler::column0Painter(mem_addr_t addr) const
 {
     if(addr == Computer::getDefault()->getRegister(PC))
     {
@@ -119,6 +121,56 @@ QBrush modeler::rowPainter(mem_addr_t addr) const
     {
         return QBrush(R6COLOR);
     }
+    return QBrush();
+}
+QBrush modeler::rowPainter(mem_addr_t addr,const QModelIndex &index) const
+{
+
+
+    switch(index.column())
+    {
+    case 0: return column0Painter(addr);break;
+    case 1:
+    {
+        if(Computer::getDefault()->isBetween(TESTBEGIN,TESTEND,addr))
+        {
+            return QBrush(QColor(157,157,20));
+        }
+
+
+    }break;
+    case 2:
+    {
+        for(int i = 0; i < 30; i++)
+        {
+
+
+            int value = Computer::getDefault()->proposedNewLocation(i,TESTOFFSET,TESTBEGIN,TESTEND);
+            if(addr == value)
+            {
+
+                if(addr == i)
+                {
+                    return QBrush(QColor(220,0,0));
+                }
+                if(addr > i)
+                {
+                    return QBrush(QColor(0,220,0));
+                }
+                if(addr < i)
+                {
+                    return QBrush(QColor(0,0,220));
+                }
+            }
+        }
+    }
+
+    }
+
+
+
+
+
 //    if(addr == copied->addr)
 //    {
 //        return QBrush(QColor(250,30,205));
@@ -162,10 +214,10 @@ QVariant modeler::data(const QModelIndex &index, int role) const
     /*
      * Testing if it is asking for the background color
      */
-    if(role == Qt::BackgroundRole&&column == 0)
+    if(role == Qt::BackgroundRole)
     {
 
-        return rowPainter(addr);
+        return rowPainter(addr,index);
 
 
         return QVariant();
@@ -181,6 +233,7 @@ QVariant modeler::data(const QModelIndex &index, int role) const
             return getHexString(addr);
             //        case BRCOLUMN:return /*(bool)getMemBreakPoint(addr);*/ 0;
         case VALUCOLUMN:
+            return getHexString(Computer::getDefault()->proposedNewLocation(addr,TESTOFFSET,TESTBEGIN,TESTEND));
             return getHexString(Computer::getDefault()->getMemValue(addr));
         case NAMECOLUMN:
         {

@@ -94,6 +94,9 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
 
+
+//    std::cout<<Computer::getDefault()->betweenShifts(15,15,50,5,10)<<std::endl;
+
     Computer::getDefault()->setProgramStatus(cond_z);
 
     Utility::systemInfoDebug();//Just some fun info
@@ -533,7 +536,6 @@ void MainWindow::on_StackViewInput_returnPressed()
 
 void MainWindow::on_MemView3PCButton_pressed()
 {
-    bool* ok;
     SCROLLTO(ui->MemView3View,Computer::getDefault()->getRegister(PC))
 }
 void MainWindow::on_MemView3GotoButton_pressed()

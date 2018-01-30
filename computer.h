@@ -10,9 +10,9 @@
 
 #define MASK \
 {\
-Computer::getDefault()->updateMask++;\
-qDebug("Masking" + QString().setNum(Computer::getDefault()->updateMask).toLocal8Bit());\
-}
+    Computer::getDefault()->updateMask++;\
+    qDebug("Masking" + QString().setNum(Computer::getDefault()->updateMask).toLocal8Bit());\
+    }
 
 #define UNMASK {(Computer::getDefault()->updateMask==0)?:Computer::getDefault()->updateMask--;qDebug("Unmasking"+ QString().setNum(Computer::getDefault()->updateMask).toLocal8Bit());}
 
@@ -38,7 +38,7 @@ public:
 
     HistoryHandler* Undos;//will have to work out how to handle this when not in gui
 
-    int updateMask;
+    int updateMask = 0;
 
     int remember = 0;
 
@@ -189,47 +189,86 @@ public:
      */
     size_t loadProgramFile(char* path);
 
-     void executeSingleInstruction();
+    void executeSingleInstruction();
 
-     // starts execution the program until the MCR is set to stop
-     void startExecution();
+    // starts execution the program until the MCR is set to stop
+    void startExecution();
 
-     // executes until pc = addr or the MCR is set to stop
-     void executeUntilAddress(mem_addr_t addr);
+    // executes until pc = addr or the MCR is set to stop
+    void executeUntilAddress(mem_addr_t addr);
 
-     // I/O
-     // #########################
+    // I/O
+    // #########################
 
-     /** if possible sets the KBDR
+    /** if possible sets the KBDR
       * if previous character has not been read false is returned
       * \brief setKeyboardCharacter
       * \param c
       * \param force
       * \return success
       */
-     bool setKeyboardCharacter(char c, bool force = false);
+    bool setKeyboardCharacter(char c, bool force = false);
 
-     char getKeyboardCharacter();
+    char getKeyboardCharacter();
 
-     /** also sets DPSR to 1
+    /** also sets DPSR to 1
       * \brief getDisplayCharacter
       * \return
       */
-     char getDisplayCharacter();
+    char getDisplayCharacter();
 
-     void makeDisplayReady();
+    void makeDisplayReady();
 
 
-     void shiftMemory(mem_addr_t origin, val_t length, mem_addr_t destination);
-     void moveRow(mem_addr_t origin, mem_addr_t destination);
-     
-     mem_addr_t findSpace(mem_addr_t startSearch, int minimumSize);
-     bool insertBlankRow(mem_addr_t addr);
+    void shiftMemory(mem_addr_t origin, val_t length, mem_addr_t destination);
+    void moveRow(mem_addr_t origin, mem_addr_t destination);
+
+    mem_addr_t findSpace(mem_addr_t startSearch, int minimumSize);
+    bool insertBlankRow(mem_addr_t addr);
+    val_t getSignedOffset6(val_t inst);
+    val_t getSignedOffset9(val_t inst);
+    val_t getSignedOffset11(val_t inst);
+    /**
+      * One of the tools that makes figuring out if a line needs its value
+      * changed due to a potential line shift is the ability to find out
+      * whether or not the line is connected to another line, and, if it is,
+      * to what line that connection terminates at.
+      *
+      * \param addr The address of the mem_loc_t to be examined.
+      * \return The address of the line which addr is connected to, addr if none or self.
+      */
+
+    mem_addr_t connectedAddress(mem_loc_t mem);
+    bool previewShift(mem_addr_t originStart, mem_addr_t originEnd, mem_addr_t destination);
+    bool preventShiftProblems(mem_addr_t original, mem_addr_t destination, val_t lengthGroupMoved, bool force);
+    bool isBetween(val_t min, val_t max, val_t val);
+    bool stillInRange(mem_addr_t current, int32_t delta, mem_addr_t beginRange, mem_addr_t endRange);
+    bool betweenShifts(mem_addr_t addr, int32_t delta, mem_addr_t begin, mem_addr_t end);
+    /** proposedNewLocation
+      * \param addr The address whose shifted value you would like to see.
+      * \param delta The amount that the area to be shifted is to be shifted
+      * \param begin The begininng of the area to be shifted
+      * \param end The end of the area to be shifted
+      * \return The shifted address.
+      */
+    mem_addr_t proposedNewLocation(mem_addr_t addr, int32_t delta, mem_addr_t begin, mem_addr_t end);
+
+
+    mem_loc_t * slideMemory(mem_addr_t begin, mem_addr_t end, int32_t delta, bool *ok);
+
+
+    bool canConnect(mem_loc_t from, mem_addr_t to);
+    int getPCOffsetNumber(mem_loc_t mem);
+    bool canShiftClean(mem_addr_t originStart, mem_addr_t originEnd, mem_addr_t destination);
+    mem_loc_t createShiftedLoc(mem_loc_t original, mem_addr_t newAddress, mem_addr_t newTarget, bool *ok);
+    val_t targetOffset(mem_loc_t mem, mem_addr_t target);
+    mem_loc_t makeShiftedLoc(mem_loc_t original, mem_addr_t newLocation, mem_addr_t newTarget);
+    val_t generateOffset(mem_loc_t mem, val_t difference, bool *ok);
 signals:
-     void update();
-     void hasCharacterToDisplay();
-     void pushDisplay(val_t character);
-     void popDisplay();
+    void update();
+    void hasCharacterToDisplay();
+    void pushDisplay(val_t character);
+    void popDisplay();
 public slots:
 
 private:
@@ -265,6 +304,7 @@ private:
 
     void executeCycle();
 
+    bool connectedToRange(mem_addr_t start, mem_addr_t end, mem_addr_t pov);
 };
 
 #endif // COMPUTER_H

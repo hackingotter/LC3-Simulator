@@ -63,9 +63,10 @@ public:
     QString name_or_addr(mem_addr_t target) const;
     QString mnemonicGen(mem_addr_t addr)const;
 
-    QBrush rowPainter(mem_addr_t addr) const;
+    QBrush rowPainter(mem_addr_t addr, const QModelIndex &index) const;
     void setCopied(QModelIndexList* target);
     mem_loc_t * getCopied();
+      QBrush column0Painter(mem_addr_t addr) const;
 signals:
 
     void dataChan(mem_addr_t);
@@ -76,6 +77,7 @@ signals:
     void requestMemValueChange(mem_addr_t,val_t,int);
     void change();
 private:
+
 
 };
 

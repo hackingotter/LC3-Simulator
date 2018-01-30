@@ -102,15 +102,15 @@ public:
     void undo()
     {
         Computer::getDefault()->remember++;
-//        Computer::getDefault()->set
-//                Computer::getDefault()->setProgramStatus(oldCondt);
+        //        Computer::getDefault()->set
+        //                Computer::getDefault()->setProgramStatus(oldCondt);
         Computer::getDefault()->remember--;
     }
 
     void redo()
     {
         Computer::getDefault()->remember++;
-//        Computer::getDefault()->setProgramStatus(newCondt);
+        //        Computer::getDefault()->setProgramStatus(newCondt);
         Computer::getDefault()->remember--;
     }
 private:
@@ -612,8 +612,8 @@ void Computer::setMemLoc(mem_addr_t addr, mem_loc_t loc_val)
     mem_loc_t displaced = _memory[addr];
     _memory[addr] = loc_val;
 
-//    printf("%x\n%x\n",&displaced,&loc_val);
-     _memory[addr].addr = addr;
+    //    printf("%x\n%x\n",&displaced,&loc_val);
+    _memory[addr].addr = addr;
 
 
     TRY2PUSH(displaced,loc_val,changeMemLoc(displaced,loc_val));
@@ -626,12 +626,12 @@ void Computer::setMemLocBlock(mem_addr_t addr, mem_loc_t *loc_val, val_t blockLe
 {
     Undos->beginMacro("Setting Block");
     MASK
-    for(mem_addr_t i = 0;i<blockLen;i++)
+            for(mem_addr_t i = 0;i<blockLen;i++)
     {
         setMemLoc(addr+i,loc_val[i]);
     }
     UNMASK
-    Undos->endMacro();
+            Undos->endMacro();
 }
 void Computer::moveRow(mem_addr_t origin, mem_addr_t destination)
 {
@@ -1014,12 +1014,7 @@ void Computer::jsr(val_t inst) {
 
     if (bitMask(11) & inst) {
         // offset mode
-        val_t offset = getOffset11(inst);
-        jsrAddr = getRegister(PC);
-        if (offset & bitMask(10)) {
-            // sign extend
-            offset |= 0xF400;
-        }
+        val_t offset = getSignedOffset11(inst);
         jsrAddr += offset;
 
     } else {
@@ -1041,10 +1036,7 @@ void Computer::jsr(val_t inst) {
 void Computer::ld(val_t inst) {
     reg_t dr = getRegister_9_10_11(inst);
     val_t offset = getOffset9(inst);
-    if (offset & bitMask(8)) {
-        // sign extend
-        offset |= 0xFE00;
-    }
+
 
     mem_addr_t addr = getRegister(PC) + offset;
     checkMemAccess(addr);
@@ -1091,11 +1083,8 @@ void Computer::ldr(val_t inst) {
     reg_t baseR = getRegister_6_7_8(inst);
     mem_addr_t baseAddr = getRegister(baseR);
 
-    val_t offset = getOffset6(inst);
-    if (offset & bitMask(5)) {
-        // sign extend
-        offset |= 0xFFC0;
-    }
+    val_t offset = getSignedOffset6(inst);
+
 
     mem_addr_t addr = baseAddr + offset;
     checkMemAccess(addr);
@@ -1201,6 +1190,15 @@ void Computer::trap(val_t inst) {
     setRegister(PC, getMemValue(trapVect));
 }
 
+val_t Computer::getSignedOffset11(val_t inst)
+{
+    val_t offset = getOffset11(inst);
+    if (offset & bitMask(10)) {
+        // sign extend
+        offset |= 0xF400;
+    }
+    return offset;
+}
 val_t Computer::getSignedOffset9(val_t inst)
 {
     val_t offset = getOffset9(inst);
@@ -1344,7 +1342,35 @@ bool Computer::insertBlankRow(mem_addr_t addr)
 
     }
 }
+bool Computer::canShiftClean(mem_addr_t originStart, mem_addr_t originEnd,mem_addr_t destination)
+{
+    int32_t offset = destination-originStart;//this needs to be big because a int16_t can't contain
+    //all the possible values which it could be asked to hold.
+    mem_addr_t startSearch = (originStart<=1024)?0:(originStart-1024);
+    mem_addr_t endSearch = (originEnd>=MEMSIZE-1023)?MEMSIZE:(originEnd+1023);
+    for(mem_addr_t index = startSearch;index<=endSearch;index++)
+    {
 
+        mem_addr_t connected = connectedAddress(_memory[index]);
+
+        if(connected!=index)//we don't care about normal lines
+        {
+            mem_addr_t futureCurrent = proposedNewLocation(index,offset,originStart,originEnd);
+            mem_addr_t futureTarget  = proposedNewLocation(connected,offset,originStart,originEnd);
+
+
+
+
+
+        }
+
+    }
+
+}
+mem_loc_t Computer::makeShiftedLoc(mem_loc_t original,mem_addr_t newLocation, mem_addr_t newTarget)
+{
+
+}
 
 bool Computer::preventShiftProblems(mem_addr_t original, mem_addr_t destination,val_t lengthGroupMoved,bool force)
 {
@@ -1355,15 +1381,18 @@ bool Computer::preventShiftProblems(mem_addr_t original, mem_addr_t destination,
     mem_addr_t startSearch = (original<=1024)?0:(original-1024);
     mem_addr_t endSearch = (original>=MEMSIZE-1023)?MEMSIZE:(original+1023);
 
+
+
+
+    return startSearch==destination==lengthGroupMoved==endSearch;
     /*
      * We don't need to seach outside what is visible to the original section
      * right now, we are only keeping track of the beginning.
      */
 
     //now, we search for anything that cares about offset.
-    for(mem_addr_t index = startSearch;index<=endSearch;index++)
-    {
-        /* the simplest case arises when either of two things is true:
+
+    /* the simplest case arises when either of two things is true:
          *
          * Case 1: The line doesn't care about where anything else is.
          *
@@ -1374,39 +1403,141 @@ bool Computer::preventShiftProblems(mem_addr_t original, mem_addr_t destination,
          * For these cases, we simply pass them by
          */
 
-        //It turns out that it only matters when the connections go from in/out
-        //side of the group to the out/inside of the
-        if(connectedToRange())
-
-
-.......TOOOOODOOOO
+    //It turns out that it only matters when the connections go from in/out
+    //side of the group to the out/inside of the
+    //        if(connectedToRange())
 
 
 
 
-    }
+
+
 }
 
-bool Computer::connectedToRange(mem_addr_t start,mem_addr_t end,mem_addr_t pov)
+bool Computer::stillInRange(mem_addr_t current, int32_t delta, mem_addr_t beginRange,mem_addr_t endRange)
 {
-    mem_loc_t inspected = _memory[pov];
 
-    switch (inspected.value & opMask) {
+
+}
+bool Computer::betweenShifts(mem_addr_t addr,int32_t delta, mem_addr_t begin, mem_addr_t end)
+{
+    //if you are after end but before begin + delta
+    //if you are before begin but after end + delta
+    int  boundsMin = end + ((delta>0)?0:delta);
+    int boundsMax = begin + ((delta>0)?delta:0);
+    return isBetween(boundsMin,boundsMax,addr);
+}
+mem_addr_t Computer::proposedNewLocation(mem_addr_t addr,int32_t delta, mem_addr_t begin, mem_addr_t end)
+{
+    if(delta == 0) return addr;
+
+    if(isBetween(begin,end,addr))//if you are in the moved group, your location is just
+        //the delta away
+    {
+        return addr + delta;
+    }
+    if(isBetween(begin,end,addr-delta) || betweenShifts(addr,delta,begin,end))
+    {
+        return addr + ((delta<0)?1:-1)*(1+(end - begin));
+    }
+
+    return addr;
+}
+
+mem_loc_t Computer::createShiftedLoc(mem_loc_t original,mem_addr_t newAddress, mem_addr_t newTarget, bool* ok)
+{
+    mem_loc_t out;
+    memcpy(&out,&original,sizeof(original));
+    out.addr = newAddress;
+
+
+
+
+}
+mem_loc_t *Computer::slideMemory(mem_addr_t begin, mem_addr_t end, int32_t delta, bool* ok)
+{
+
+}
+
+bool Computer::isBetween(val_t min, val_t max, val_t val )
+{
+    return (val >= min)&&(val<= max);
+}
+
+mem_addr_t Computer::connectedAddress(mem_loc_t mem)
+{
+
+    int offset = getPCOffsetNumber(mem);
+    val_t inst = mem.value;
+    int addrOffset = 0;
+    switch (offset) {
+    case 11:
+        addrOffset = getSignedOffset11(inst);
+        break;
+    case 9:
+        addrOffset = getSignedOffset9(inst);
+        break;
+    default:
+
+        break;
+    }
+    return mem.addr + addrOffset;
+
+}
+
+int Computer::getPCOffsetNumber(mem_loc_t mem)
+{
+
+    val_t inst = mem.value;
+    switch (inst & opMask) {
+    //Offset9
     case brOpCode:
-    case jsrOpCode:
     case ldOpCode:
     case ldiOpCode:
     case leaOpCode:
     case stOpCode:
     case stiOpCode:
 
-
-
-        break;
+        return 9;
+        //Offset11
+    case jsrOpCode:
+        if(bitMask(11) & inst)//We have to differentiate between Jsr and jsrr
+        {
+            return 11;
+        }
+        return 0;
     default:
-        return false;//not connected
-        break;
+        return 0;//not connected
     }
+}
+bool Computer::canConnect(mem_loc_t from, mem_addr_t to)
+{
+    int power = getPCOffsetNumber(from);
+    return (isBetween(-1*2^(power-1),2^(power-1)-1,from.addr-to));
+}
+val_t Computer::targetOffset(mem_loc_t mem,mem_addr_t target)
+{
+
+    int pcOffsetNumber = getPCOffsetNumber(mem);
+
+}
+
+val_t Computer::generateOffset(mem_loc_t mem, val_t difference, bool* ok)
+{
+    *ok = true;
+    int power =getPCOffsetNumber(mem);
+    if(!canConnect(mem,mem.addr+difference))
+    {
+        *ok = false;
+        return 0;
+    }
+    val_t mask = 0xFFFF>>(16-power);
+    val_t maskedOffset = mask & difference;
+    val_t nonOffsetProtector = mask<<power;
+    val_t cleaned = mem.value & nonOffsetProtector;
+    val_t offseted = cleaned | maskedOffset;
+
+    return offseted;
 }
 
 mem_addr_t Computer::findSpace(mem_addr_t startSearch,int minimumSize)

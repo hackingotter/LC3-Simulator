@@ -42,7 +42,7 @@ QVariant StackModeler::data(const QModelIndex &index,int role) const
     {
        if(column==0)
        {
-           return rowPainter(addr);
+           return rowPainter(addr,index);
        }
     }
     return QVariant();
