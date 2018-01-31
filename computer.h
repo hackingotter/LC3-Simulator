@@ -264,6 +264,7 @@ public:
     val_t targetOffset(mem_loc_t mem, mem_addr_t target);
     mem_loc_t makeShiftedLoc(mem_loc_t original, mem_addr_t newLocation, mem_addr_t newTarget);
     val_t generateOffset(mem_loc_t mem, val_t difference, bool *ok);
+    mem_addr_t connectedAddress(mem_addr_t addr);
 signals:
     void update();
     void hasCharacterToDisplay();

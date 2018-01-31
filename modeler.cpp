@@ -121,6 +121,13 @@ QBrush modeler::column0Painter(mem_addr_t addr) const
     {
         return QBrush(R6COLOR);
     }
+    //the below doesn't work
+    val_t pc = Computer::getDefault()->getRegister(PC);
+
+    if(addr == Computer::getDefault()->connectedAddress(PC))
+    {
+        return QBrush(QColor(230,230,230));
+    }
     return QBrush();
 }
 QBrush modeler::rowPainter(mem_addr_t addr,const QModelIndex &index) const

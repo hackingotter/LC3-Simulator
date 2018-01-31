@@ -1,6 +1,7 @@
 #include "MemTable.h"
 #include "QHeaderView"
 #include "computer.h"
+#include "iostream"
 #include "Utility.h"
 
 #define MEM_VIEW_BP_COL      0
@@ -44,10 +45,13 @@ MemTable::MemTable(modeler* model,QWidget* parent):QTableView(parent)
 void MemTable::setupConnections()
 {
     CONNECT(this,customContextMenuRequested(const QPoint &),
-                this,showClickOptions(const QPoint &));
+            this,showClickOptions(const QPoint &));
 }
 void MemTable::showClickOptions(const QPoint &pos)
 {
+    mem_addr_t row = rowAt(pos.y());
+    int column = columnAt(pos.x());
+
 
     qDebug("clicking!");
     QMenu ClickMenu(tr("Some Text"),this);
@@ -57,7 +61,8 @@ void MemTable::showClickOptions(const QPoint &pos)
     QAction insert("Insert",this);
     QAction shift("Shift Down",this);
 
-//    connect(insert,SIGNAL(QAction::triggered(bool)),this,SLOT(handleShift()));
+
+    //    connect(insert,SIGNAL(QAction::triggered(bool)),this,SLOT(handleShift()));
 
     ClickMenu.addAction("Insert Row",this,SLOT(handleInsertRow()));
     ClickMenu.addAction("Copy",this,SLOT(handleCopy()));
@@ -65,9 +70,18 @@ void MemTable::showClickOptions(const QPoint &pos)
     ClickMenu.addAction("Paste Over",this,SLOT(handlePasteOver()));
     ClickMenu.addAction(&shift);
 
-//    connect(shift,SIGNAL(triggered()),this, handleShift());
+    if(Computer::getDefault()->connectedAddress(row)!=row)
+    {
+        ClickMenu.addAction("Go to Connected",this,SLOT(scrollToSelected()));
+    }
+
+    //    connect(shift,SIGNAL(triggered()),this, handleShift());
     ClickMenu.exec(mapToGlobal(pos  ));
 
+}
+void MemTable::scrollToSelected()
+{
+    scrollToRow(Computer::getDefault()->connectedAddress(selectedIndexes().at(0).row()));
 }
 void MemTable::scrollToRow(val_t row)
 {
@@ -75,7 +89,7 @@ void MemTable::scrollToRow(val_t row)
     QString stylesheet = styleSheet();
     setStyleSheet("background-color:rgb(255,240,240)");
 
-//    qDebug("Scrolling to Row");
+    //    qDebug("Scrolling to Row");
     scrollTo(model->index(row,0),QAbstractItemView::PositionAtCenter);
     setStyleSheet(stylesheet);
 
@@ -89,12 +103,12 @@ void MemTable::handleInsertRow()
     int row = selected.at(0).row();
     Computer::getDefault()->Undos->beginMacro("Insert Row at " + getHexString(row));
     MASK
-    for( int i = 1000; i >= 0;i--)
+            for( int i = 1000; i >= 0;i--)
     {
         Computer::getDefault()->moveRow(row+i,row+i+1);
     }
     UNMASK
-    Computer::getDefault()->Undos->endMacro();
+            Computer::getDefault()->Undos->endMacro();
 }
 
 void MemTable::handleCopy()

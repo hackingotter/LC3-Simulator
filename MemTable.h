@@ -21,6 +21,7 @@ public slots:
     void handleCopy();
     void handlePasteOver();
     void handleCut();
+    void scrollToSelected();
 private slots:
 };
 

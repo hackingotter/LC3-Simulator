@@ -1463,7 +1463,10 @@ bool Computer::isBetween(val_t min, val_t max, val_t val )
 {
     return (val >= min)&&(val<= max);
 }
-
+mem_addr_t Computer::connectedAddress(mem_addr_t addr)
+{
+    return connectedAddress(_memory[addr]);
+}
 mem_addr_t Computer::connectedAddress(mem_loc_t mem)
 {
 
