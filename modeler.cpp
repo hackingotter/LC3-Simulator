@@ -10,6 +10,7 @@
 #include <QString>
 #include "Utility.h"
 #include "opcodes.h"
+#include "iostream"
 extern "C"
 {
 #include <string.h>
@@ -20,9 +21,9 @@ extern "C"
 }
 #include <QItemSelectionModel>
 
-#define TESTOFFSET 3
-#define TESTBEGIN  15
-#define TESTEND    20
+#define TESTOFFSET -3
+#define TESTBEGIN  10
+#define TESTEND    11
 
 using namespace Memory_Modulos;
 modeler::modeler(QObject *parent,bool* access): QStandardItemModel(parent),threadRunning(access)
@@ -34,7 +35,7 @@ modeler::modeler(QObject *parent,bool* access): QStandardItemModel(parent),threa
     {
         HeaderLabel.append("EMPTY");
     }
-    HeaderLabel.replace(BRCOLUMN,"BR");
+    HeaderLabel.replace(BRCOLUMN  ,"BR");
     HeaderLabel.replace(ADDRCOLUMN,"Addr");
     HeaderLabel.replace(VALUCOLUMN,"Value");
     HeaderLabel.replace(NAMECOLUMN,"Name");
@@ -130,6 +131,15 @@ QBrush modeler::column0Painter(mem_addr_t addr) const
     }
     return QBrush();
 }
+
+void modeler::setSelectMode(modeler::SelectMode mode, mem_addr_t begin, mem_addr_t end)
+{
+    this->currentMode = mode;
+    specialSelectStart = begin;
+    specialSelectEnd = end;
+
+
+}
 QBrush modeler::rowPainter(mem_addr_t addr,const QModelIndex &index) const
 {
 
@@ -139,8 +149,15 @@ QBrush modeler::rowPainter(mem_addr_t addr,const QModelIndex &index) const
     case 0: return column0Painter(addr);break;
     case 1:
     {
-        if(Computer::getDefault()->isBetween(TESTBEGIN,TESTEND,addr))
+        if(Computer::getDefault()->isBetween(specialSelectStart,specialSelectEnd,addr))
         {
+            switch(currentMode)
+            {
+            case SelectMode::Copy:
+                return QBrush(QColor(100,235,213));
+            case SelectMode::Cut:
+                return QBrush(QColor(12,230,20));
+            }
             return QBrush(QColor(157,157,20));
         }
 
@@ -152,7 +169,7 @@ QBrush modeler::rowPainter(mem_addr_t addr,const QModelIndex &index) const
         {
 
 
-            int value = Computer::getDefault()->proposedNewLocation(i,TESTOFFSET,TESTBEGIN,TESTEND);
+            int value = Computer::getDefault()->proposedNewLocation(i,TESTBEGIN,TESTEND,TESTOFFSET);
             if(addr == value)
             {
 
@@ -160,15 +177,19 @@ QBrush modeler::rowPainter(mem_addr_t addr,const QModelIndex &index) const
                 {
                     return QBrush(QColor(220,0,0));
                 }
+                else
                 if(addr > i)
                 {
                     return QBrush(QColor(0,220,0));
                 }
+                else
                 if(addr < i)
                 {
                     return QBrush(QColor(0,0,220));
                 }
             }
+
+
         }
     }
 
@@ -192,10 +213,7 @@ void modeler::setCopied(QModelIndexList *target)
 }
 
 
-mem_loc_t * modeler::getCopied()
-{
-    return copied;
-}
+
 QVariant modeler::data(const QModelIndex &index, int role) const
 {
 
@@ -240,15 +258,12 @@ QVariant modeler::data(const QModelIndex &index, int role) const
             return getHexString(addr);
             //        case BRCOLUMN:return /*(bool)getMemBreakPoint(addr);*/ 0;
         case VALUCOLUMN:
-            return getHexString(Computer::getDefault()->proposedNewLocation(addr,TESTOFFSET,TESTBEGIN,TESTEND));
-            return getHexString(Computer::getDefault()->getMemValue(addr));
+            return getHexString(Computer::getDefault()->proposedNewLocation(addr,TESTBEGIN,TESTEND,TESTOFFSET));
+//            return getHexString(Computer::getDefault()->getMemValue(addr));
         case NAMECOLUMN:
         {
 
-            label_t* l = Computer::getDefault()->getMemLabel(addr);
-            if (l)
-                return (l->name);
-            return QString();
+            return Computer::getDefault()->getMemNameSafe(addr);
 
         }
 
@@ -265,6 +280,10 @@ QVariant modeler::data(const QModelIndex &index, int role) const
         case VALUCOLUMN:
         {
             return getHexString(Computer::getDefault()->getMemValue(addr));
+        }
+        case NAMECOLUMN:
+        {
+            return Computer::getDefault()->getMemNameSafe(addr);
         }
         default:
             break;

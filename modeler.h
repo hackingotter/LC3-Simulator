@@ -12,14 +12,14 @@
 
 
 namespace Memory_Modulos {
-    enum modelColumn{
+enum modelColumn{
     BRCOLUMN = 0,
     ADDRCOLUMN = 1,
     NAMECOLUMN = 2,
     VALUCOLUMN = 3,
     MNEMCOLUMN = 4,
     COMMCOLUMN = 5
-    };
+};
 }
 
 class modeler : public QStandardItemModel
@@ -28,9 +28,12 @@ class modeler : public QStandardItemModel
 
 public:
 
-    
-    mem_loc_t * copied ;
+    enum SelectMode{Normal,Copy,Cut};
 
+    SelectMode currentMode = SelectMode::Normal;
+    mem_loc_t * copied ;
+    mem_addr_t specialSelectStart;
+    mem_addr_t specialSelectEnd;
     int copiedLength;
     QObject* paternal_Figure;
     bool* threadRunning;
@@ -65,8 +68,9 @@ public:
 
     QBrush rowPainter(mem_addr_t addr, const QModelIndex &index) const;
     void setCopied(QModelIndexList* target);
-    mem_loc_t * getCopied();
-      QBrush column0Painter(mem_addr_t addr) const;
+
+    QBrush column0Painter(mem_addr_t addr) const;
+    void setSelectMode(SelectMode mode, mem_addr_t begin, mem_addr_t end);
 signals:
 
     void dataChan(mem_addr_t);

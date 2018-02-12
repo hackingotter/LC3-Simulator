@@ -12,17 +12,25 @@ class MemTable : public QTableView
     void setupConnections();
     modeler * model;
     mem_loc_t * copied;
+    void selectedClickOptions(const QPoint &pos, QMenu *clickMenu);
 public:
     MemTable(modeler *model, QWidget *parent = 0);
+    void setupActions();
 public slots:
     void showClickOptions(const QPoint &pos);
     void scrollToRow(val_t row);
     void handleInsertRow();
     void handleCopy();
     void handlePasteOver();
-    void handleCut();
     void scrollToSelected();
+    void handleShift();
+    void handleCut();
 private slots:
+    void setCut();
+    void setCopied();
+    void swap();
+    void shiftUp();
+    void shiftDown();
 };
 
 #endif // MEMTABLE_H

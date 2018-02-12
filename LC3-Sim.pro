@@ -64,7 +64,8 @@ HEADERS += \
     WatchModel.h \
     MemTable.h \
     MemWindow.h \
-    FollowButton.h
+    FollowButton.h \
+    shortcutslisting.h
 
 SOURCES += \
     Bridge.cpp \
@@ -95,7 +96,8 @@ SOURCES += \
     WatchModel.cpp \
     MemTable.cpp \
     MemWindow.cpp \
-    FollowButton.cpp
+    FollowButton.cpp \
+    globaltypes.cpp
 
 DISTFILES += \
     Test.txt \

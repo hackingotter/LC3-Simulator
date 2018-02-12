@@ -4,6 +4,7 @@
 #include <QString>
 #include <QUndoCommand>
 #include <QLabel>
+#include "iostream"
 
 #define UNDOS
 
@@ -122,6 +123,7 @@ private:
 class changeMemLoc:public QUndoCommand
 {
 public:
+    bool fresh = true;
     changeMemLoc(mem_loc_t oldL,mem_loc_t newL):newLoc(newL),oldLoc(oldL){
         addr=oldLoc.addr;
         setText("movin'");
@@ -136,9 +138,14 @@ public:
 
     void redo()
     {
+        if(!fresh)
+        {
         Computer::getDefault()->remember++;
         Computer::getDefault()->setMemLoc(addr,newLoc);
         Computer::getDefault()->remember--;
+
+        }
+        fresh = false;
     }
 private:
     mem_loc_t newLoc;
@@ -174,12 +181,16 @@ private:
 };
 class changeMemValue: public QUndoCommand
 {
+
 public:
     changeMemValue(mem_addr_t addr,val_t oval,val_t nval):mem_addr(addr),oldValue(oval),newValue(nval)
     {
         qDebug("I am");
         setText(QString("Set " + getHexString(addr) + " to "+QString().setNum(newValue)));
-
+        if(oval==nval)
+        {
+            this->setObsolete(true);
+        }
 
     }
     void undo()
@@ -192,12 +203,15 @@ public:
     }
     void redo()
     {
-
+        if(!fresh)
+        {
         Computer::getDefault()->remember++;
         Computer::getDefault()->setMemValue(mem_addr,newValue);
         if(mem_addr == DDR)
             Computer::getDefault()->pushDisplay(newValue);
         Computer::getDefault()->remember--;
+        }
+        fresh = false;
     }
 
     ~changeMemValue() {;}
@@ -205,6 +219,7 @@ private:
     mem_addr_t mem_addr;
     val_t oldValue;
     val_t newValue;
+    bool fresh = true;
 };
 class changeMemLabel: public QUndoCommand
 {
@@ -478,7 +493,6 @@ mem_loc_t *Computer::getMemLocationsBlock(mem_addr_t addr, val_t blockSize)
 }
 
 
-
 void Computer::setMemValue(mem_addr_t addr, val_t val)
 {
     qDebug("Settin' Mem");
@@ -606,6 +620,9 @@ QString Computer::getMemComment(mem_addr_t addr)
 
 void Computer::setMemLoc(mem_addr_t addr, mem_loc_t loc_val)
 {
+//    qDebug("I am going to try to set memory");
+    if(_memory[addr]!= loc_val)
+    {
     qDebug("settin' loc");
 
 
@@ -619,7 +636,11 @@ void Computer::setMemLoc(mem_addr_t addr, mem_loc_t loc_val)
     TRY2PUSH(displaced,loc_val,changeMemLoc(displaced,loc_val));
 
     IFNOMASK(emit update();)
-
+    }
+    else
+    {
+//        qDebug("Guess not");
+    }
 }
 
 void Computer::setMemLocBlock(mem_addr_t addr, mem_loc_t *loc_val, val_t blockLen)
@@ -1355,22 +1376,20 @@ bool Computer::canShiftClean(mem_addr_t originStart, mem_addr_t originEnd,mem_ad
 
         if(connected!=index)//we don't care about normal lines
         {
-            mem_addr_t futureCurrent = proposedNewLocation(index,offset,originStart,originEnd);
-            mem_addr_t futureTarget  = proposedNewLocation(connected,offset,originStart,originEnd);
-
-
-
-
-
+            mem_addr_t futureCurrent = proposedNewLocation(index,originStart,originEnd,offset);
+            mem_addr_t futureTarget  = proposedNewLocation(connected,originStart,originEnd,offset);
+            mem_loc_t  temp ;
+            temp = (_memory[index]);
+            temp.addr = futureCurrent;
+            if(!canConnect(temp,futureTarget))
+                return false;
         }
 
     }
+    return true;
 
 }
-mem_loc_t Computer::makeShiftedLoc(mem_loc_t original,mem_addr_t newLocation, mem_addr_t newTarget)
-{
 
-}
 
 bool Computer::preventShiftProblems(mem_addr_t original, mem_addr_t destination,val_t lengthGroupMoved,bool force)
 {
@@ -1422,23 +1441,71 @@ bool Computer::stillInRange(mem_addr_t current, int32_t delta, mem_addr_t beginR
 bool Computer::betweenShifts(mem_addr_t addr,int32_t delta, mem_addr_t begin, mem_addr_t end)
 {
     //if you are after end but before begin + delta
-    //if you are before begin but after end + delta
-    int  boundsMin = end + ((delta>0)?0:delta);
-    int boundsMax = begin + ((delta>0)?delta:0);
+    //if you are after end + delta but before begin
+    /*
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     */
+
+    val_t  boundsMin = end + ((delta>0)?1:delta+1);
+    val_t boundsMax = begin + ((delta>0)?delta-1:-1);
     return isBetween(boundsMin,boundsMax,addr);
 }
-mem_addr_t Computer::proposedNewLocation(mem_addr_t addr,int32_t delta, mem_addr_t begin, mem_addr_t end)
+
+mem_addr_t Computer::proposedNewLocation(mem_addr_t addr,mem_addr_t begin, mem_addr_t end, int32_t delta)
 {
-    if(delta == 0) return addr;
+    int che = 8;
+    if(delta == 0) return addr;//if you aren't going anywhere, don't waste time
+
+
 
     if(isBetween(begin,end,addr))//if you are in the moved group, your location is just
         //the delta away
     {
+        if(addr==che)
+            qDebug("Why");
         return addr + delta;
     }
-    if(isBetween(begin,end,addr-delta) || betweenShifts(addr,delta,begin,end))
+    if(delta<0)
     {
-        return addr + ((delta<0)?1:-1)*(1+(end - begin));
+        if(addr>end)
+        {
+            if(addr==che)
+                qDebug("What");
+
+            return addr;
+        }
+    }
+    if(delta>0)
+    {
+        if(addr<begin)
+        {
+            if(addr==che)
+                qDebug("Where");
+            return addr;
+        }
+    }
+    if(isBetween(begin,end,addr-delta))
+    {
+        if(addr==che)
+            qDebug("Who");
+        return addr - delta+ ((delta>0)?1:-1)*((end - begin));//+((delta<0)?1:-1)*((end - begin));
+    }
+    if(betweenShifts(addr,delta,begin,end))
+    {
+        if(addr==che)
+        {
+            qDebug("how");
+            qDebug(QString().setNum(addr-delta).toLocal8Bit());
+        }
+        return addr - ((delta>0)?1:-1)*((end - begin));
     }
 
     return addr;
@@ -1454,14 +1521,84 @@ mem_loc_t Computer::createShiftedLoc(mem_loc_t original,mem_addr_t newAddress, m
 
 
 }
-mem_loc_t *Computer::slideMemory(mem_addr_t begin, mem_addr_t end, int32_t delta, bool* ok)
+void *Computer::slideMemory(mem_addr_t begin, mem_addr_t end, val_t delta, bool* ok)
 {
-
+    qDebug("Sliding memeory");
+//    if(canShiftClean(begin,end,begin+delta))
+    if(true)
+    {
+        qDebug("suc");
+        Undos->beginMacro("Shifting addresses " + getHexString(begin) +"-"+ getHexString(end) +" to "+getHexString(begin+delta));
+        mem_addr_t startSearch = (begin<=1024)?0:(begin-1024);
+        mem_addr_t endSearch = (end>=MEMSIZE-1023)?MEMSIZE:(end+1023);
+        int count = 0;
+        int* changed = (int*)calloc(endSearch-startSearch+1,sizeof(int));
+        int** changeTracker = &changed;
+        for(mem_addr_t index = startSearch;index<=endSearch;index++)
+        {
+            juggleShift(index,begin,end,delta,changed,startSearch);
+            //            mem_loc_t holder =
+//            qDebug(QString().setNum(index).toLocal8Bit()+" " +QString().setNum(count++).toLocal8Bit());
+        }
+        Undos->endMacro();
+    }
+    else
+    {
+        qDebug("coulnd'");
+    }
 }
+void Computer::juggleShift(mem_addr_t current, mem_addr_t begin, mem_addr_t end, val_t delta, int* changed, int offset)
+{
+    if(changed[current-offset])
+    {
+        qDebug("time saved");
+        return;
+    }else
+    {
+//        qDebug("new toy");
+    }
+    mem_loc_t curLoc = _memory[current];
+    if(proposedNewLocation(current,begin,end,delta)==current && proposedNewLocation(connectedAddress(curLoc),begin,end,delta)==connectedAddress(current))
+    {
+        changed[current-offset]=1;
+        std::cout<<"alternate ending"<<std::endl;
+        return;
+    }
+
+    bool b=0;
+    while(changed[curLoc.addr-offset]!=1)
+    {
+        changed[curLoc.addr-offset]=1;
+        mem_addr_t nextAddr = proposedNewLocation(curLoc.addr,begin,end,delta);
+        mem_addr_t target = proposedNewLocation(connectedAddress(curLoc),begin,end,delta);
+        mem_loc_t nextLoc =(_memory[nextAddr]);
+        val_t value= generateOffset(curLoc,target,&b);
+        std::cout<<curLoc.addr<<"->"<<nextLoc.addr<<"|"<<std::endl;
+        setMemLoc(nextAddr, curLoc);
+        setMemValue(nextAddr,value);
+//        changed[curLoc.addr-offset] = 1;
+        curLoc = nextLoc;
+    }
+}
+//bool Computer::doesShiftAffect(mem_addr_t source, mem_addr_t begin, mem_addr_t end, int32_t delta)
+//{
+//    mem_addr_t connected= connectedAddress(source);
+//    mem_addr_t future   = proposedNewLocation(source,begin,end,delta);
+//    mem_addr_t connectedfuture = proposedNewLocation()
+//    if(source == connected)
+//    {
+//        if(source == future)
+//            return false;
+//    }
+//    if(source==proposedNewLocation(source) && connectedAddress())
+
+//}
 
 bool Computer::isBetween(val_t min, val_t max, val_t val )
 {
-    return (val >= min)&&(val<= max);
+    bool b = (val >= min)&&(val<= max);
+//    std::cout<<b<<std::endl;
+    return b;
 }
 mem_addr_t Computer::connectedAddress(mem_addr_t addr)
 {
@@ -1525,15 +1662,16 @@ val_t Computer::targetOffset(mem_loc_t mem,mem_addr_t target)
 
 }
 
-val_t Computer::generateOffset(mem_loc_t mem, val_t difference, bool* ok)
+val_t Computer::generateOffset(mem_loc_t mem, mem_addr_t target, bool* ok)
 {
     *ok = true;
     int power =getPCOffsetNumber(mem);
-    if(!canConnect(mem,mem.addr+difference))
+    if(!canConnect(mem,target))
     {
         *ok = false;
         return 0;
     }
+    val_t difference = target-mem.addr;
     val_t mask = 0xFFFF>>(16-power);
     val_t maskedOffset = mask & difference;
     val_t nonOffsetProtector = mask<<power;
@@ -1552,6 +1690,18 @@ mem_addr_t Computer::findSpace(mem_addr_t startSearch,int minimumSize)
         
     }
 }
-
+QString Computer::getMemNameSafe(mem_addr_t addr)
+{
+    return getMemNameSafe(_memory[addr]);
+}
+QString Computer::getMemNameSafe(mem_loc_t loc)
+{
+    label_t* l = loc.label;
+    if(l)
+    {
+        return l->name;
+    }
+    return QString();
+}
 
 

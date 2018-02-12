@@ -37,7 +37,7 @@ public:
     /** Handles the clicking
      * \param ev the event
      */
-    void mousePressEvent(QMouseEvent *ev);
+    void mousePressEvent(QMouseEvent *);
     void Setup();
     QColor translater(int in);
 //

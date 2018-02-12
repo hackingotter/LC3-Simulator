@@ -94,9 +94,10 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
 
+    std::cout<<Computer::getDefault()->proposedNewLocation(8,5,10,-2)<<std::endl;
 
-//    std::cout<<Computer::getDefault()->betweenShifts(15,15,50,5,10)<<std::endl;
 
+    std::cout<<Computer::getDefault()->proposedNewLocation(9,5,10,-2)<<std::endl;
     Computer::getDefault()->setProgramStatus(cond_z);
 
     Utility::systemInfoDebug();//Just some fun info

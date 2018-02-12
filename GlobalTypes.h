@@ -97,7 +97,8 @@ typedef struct mem_loc_t {
         comment(QString()) {}
 } mem_loc_t;
 
-
+bool operator ==(mem_loc_t a, mem_loc_t b);
+bool operator !=(mem_loc_t a, mem_loc_t b);
 // helpers
 
 #define bitMask(x) (1 << x)

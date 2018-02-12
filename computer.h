@@ -14,7 +14,7 @@
     qDebug("Masking" + QString().setNum(Computer::getDefault()->updateMask).toLocal8Bit());\
     }
 
-#define UNMASK {(Computer::getDefault()->updateMask==0)?:Computer::getDefault()->updateMask--;qDebug("Unmasking"+ QString().setNum(Computer::getDefault()->updateMask).toLocal8Bit());}
+#define UNMASK {(Computer::getDefault()->updateMask==0)?1:Computer::getDefault()->updateMask--;qDebug("Unmasking"+ QString().setNum(Computer::getDefault()->updateMask).toLocal8Bit());}
 
 #define IFNOMASK(EXECUTE) {if(Computer::getDefault()->updateMask==0){EXECUTE;/*qDebug("Higher")*/;}}
 
@@ -251,10 +251,10 @@ public:
       * \param end The end of the area to be shifted
       * \return The shifted address.
       */
-    mem_addr_t proposedNewLocation(mem_addr_t addr, int32_t delta, mem_addr_t begin, mem_addr_t end);
+    mem_addr_t proposedNewLocation(mem_addr_t addr, mem_addr_t begin, mem_addr_t end, int32_t delta);
 
 
-    mem_loc_t * slideMemory(mem_addr_t begin, mem_addr_t end, int32_t delta, bool *ok);
+    void *slideMemory(mem_addr_t begin, mem_addr_t end, val_t delta, bool *ok);
 
 
     bool canConnect(mem_loc_t from, mem_addr_t to);
@@ -262,9 +262,13 @@ public:
     bool canShiftClean(mem_addr_t originStart, mem_addr_t originEnd, mem_addr_t destination);
     mem_loc_t createShiftedLoc(mem_loc_t original, mem_addr_t newAddress, mem_addr_t newTarget, bool *ok);
     val_t targetOffset(mem_loc_t mem, mem_addr_t target);
-    mem_loc_t makeShiftedLoc(mem_loc_t original, mem_addr_t newLocation, mem_addr_t newTarget);
-    val_t generateOffset(mem_loc_t mem, val_t difference, bool *ok);
+
+    val_t generateOffset(mem_loc_t mem, mem_addr_t target, bool *ok);
     mem_addr_t connectedAddress(mem_addr_t addr);
+    void juggleShift(mem_addr_t current, mem_addr_t begin, mem_addr_t end, val_t delta, int *changed, int offset);
+    QString getMemNameSafe(mem_loc_t loc);
+    QString getMemNameSafe(mem_addr_t addr);
+
 signals:
     void update();
     void hasCharacterToDisplay();

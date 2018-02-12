@@ -101,7 +101,7 @@ void Hope::mouseMoveEvent(QMouseEvent *ev)
     show();
 
 }
-void Hope::mousePressEvent(QMouseEvent *ev)
+void Hope::mousePressEvent(QMouseEvent *)
 {
     update();
 

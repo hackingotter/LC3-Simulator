@@ -3,7 +3,8 @@
 #include "computer.h"
 #include "iostream"
 #include "Utility.h"
-
+#include "QShortcut"
+#include "shortcutslisting.h"
 #define MEM_VIEW_BP_COL      0
 #define MEM_VIEW_ADR_COL     1
 #define MEM_VIEW_NAME_COL    2
@@ -33,12 +34,38 @@ MemTable::MemTable(modeler* model,QWidget* parent):QTableView(parent)
     setColumnWidth(MEM_VIEW_VAL_COL,HEX_COLUMN_WIDTH);
     horizontalHeader()->setSectionResizeMode(MEM_VIEW_VAL_COL,QHeaderView::Fixed);
 
-    setSelectionMode(QAbstractItemView::SingleSelection);
+    horizontalHeader()->setSectionResizeMode(MEM_VIEW_COMMENT_COL,QHeaderView::Stretch);
+    //    setSelectionMode(QAbstractItemView::SingleSelection);
     setSelectionBehavior(QAbstractItemView::SelectRows);
 
     setContextMenuPolicy(Qt::CustomContextMenu);
 
     setupConnections();
+
+    setupActions();
+}
+void MemTable::setupActions()
+{
+    qDebug("JJ");
+    QShortcut* copy = new QShortcut(this);
+    copy->setKey(Qt::CTRL + Qt::Key_C);
+    connect(copy,SIGNAL(activated()),this,SLOT(setCopied()));
+    copy->setContext(Qt::WidgetShortcut);
+
+    QShortcut* cut = new QShortcut(this);
+    cut->setKey(Qt::CTRL + Qt::Key_X);
+    connect(cut,SIGNAL(activated()),this,SLOT(setCut()));
+    cut->setContext(Qt::WidgetShortcut);
+
+    QShortcut* budgeUp = new QShortcut(this);
+    budgeUp->setKey(Qt::CTRL+Qt::SHIFT+Qt::Key_Up);
+    connect(budgeUp,SIGNAL(activated()),this, SLOT(shiftUp()));
+    budgeUp->setContext(Qt::WidgetShortcut);
+
+    QShortcut* budgeDown= new QShortcut(this);
+    budgeDown->setKey(Qt::CTRL+Qt::SHIFT+Qt::Key_Down);
+    connect(budgeDown,SIGNAL(activated()),this, SLOT(shiftDown()));
+    budgeDown->setContext(Qt::WidgetShortcut);
 
 
 }
@@ -50,7 +77,7 @@ void MemTable::setupConnections()
 void MemTable::showClickOptions(const QPoint &pos)
 {
     mem_addr_t row = rowAt(pos.y());
-    int column = columnAt(pos.x());
+
 
 
     qDebug("clicking!");
@@ -64,12 +91,13 @@ void MemTable::showClickOptions(const QPoint &pos)
 
     //    connect(insert,SIGNAL(QAction::triggered(bool)),this,SLOT(handleShift()));
 
-    ClickMenu.addAction("Insert Row",this,SLOT(handleInsertRow()));
+    ClickMenu.addAction("Insert Row",this,SLOT(handleInsertRow()),INSERTLINEABOVEKEY);
     ClickMenu.addAction("Copy",this,SLOT(handleCopy()));
     ClickMenu.addAction("Cut", this,SLOT(handleCut()));
     ClickMenu.addAction("Paste Over",this,SLOT(handlePasteOver()));
     ClickMenu.addAction(&shift);
-
+    //    ClickMenu.addMenu(&QMenu("Hello"));
+    selectedClickOptions(pos,&ClickMenu);
     if(Computer::getDefault()->connectedAddress(row)!=row)
     {
         ClickMenu.addAction("Go to Connected",this,SLOT(scrollToSelected()));
@@ -78,6 +106,32 @@ void MemTable::showClickOptions(const QPoint &pos)
     //    connect(shift,SIGNAL(triggered()),this, handleShift());
     ClickMenu.exec(mapToGlobal(pos  ));
 
+}
+void MemTable::selectedClickOptions(const QPoint &pos,QMenu* clickMenu)
+{
+    qDebug("am I in range?");
+    int32_t first = (selectedIndexes().constFirst().row());
+    int32_t last  = (selectedIndexes().constLast().row());
+    std::cout<<first<<","<<last<<","<<indexAt(pos).row()<<std::endl;
+
+    if((indexAt(pos).row() <= last )&& (indexAt(pos).row() >= first))
+    {
+        qDebug("Yes");
+        QMenu* shiftMenu = new QMenu("Shift ",this);
+        shiftMenu->addAction("Up", this, SLOT(handleShift()));
+        shiftMenu->addAction("Down",this,SLOT(handleShift()));
+        clickMenu->addMenu(shiftMenu);
+
+    }
+
+}
+void MemTable::handleShift()
+{
+    bool b = 0;
+    val_t start = selectedIndexes().constFirst().row();
+    //    val_t start
+
+    //       Computer::getDefault()->slideMemory(10,20,5,&b);
 }
 void MemTable::scrollToSelected()
 {
@@ -130,4 +184,62 @@ void MemTable::handlePasteOver()
     mem_addr_t addr = this->selectedIndexes().at(0).row();
 
     Computer::getDefault()->setMemLoc(addr,*copied);
+}
+void MemTable::swap()
+{
+    if(model->currentMode==modeler::SelectMode::Cut)
+    {
+        bool b = 0;
+        mem_addr_t begin = model->specialSelectStart;
+        mem_addr_t end = model->specialSelectEnd;
+        val_t delta = selectedIndexes().constFirst().row()-begin+1;
+        Computer::getDefault()->slideMemory(model->specialSelectStart,model->specialSelectEnd,delta,&b);
+    }
+}
+void MemTable::setCut()
+{
+    qDebug("setCut");
+    model->setSelectMode(modeler::SelectMode::Cut,selectedIndexes().constFirst().row(),
+                         selectedIndexes().constLast().row());
+    clearSelection();
+
+}
+void MemTable::setCopied()
+{
+    qDebug("setCopied");
+    model->setSelectMode(modeler::SelectMode::Copy,
+                         selectedIndexes().constFirst().row(),
+                         selectedIndexes().constLast().row());
+    clearSelection();
+
+}
+void MemTable::shiftUp()
+{
+    qDebug("shiftUp");
+    bool b = false;
+    if(selectedIndexes().size()>0)
+    {
+
+    mem_addr_t begin =  selectedIndexes().constFirst().row();
+    mem_addr_t end =    selectedIndexes().constLast().row();
+
+       Computer::getDefault()->slideMemory(begin,end,-1,&b);
+    selectRow(begin);
+    }
+
+}
+void MemTable::shiftDown()
+{
+    qDebug("shiftDown");
+    bool b = false;
+    if(selectedIndexes().size()>0)
+    {
+        qDebug("wor");
+    mem_addr_t begin =  selectedIndexes().constFirst().row();
+    mem_addr_t end =    selectedIndexes().constLast().row();
+    Computer::getDefault()->slideMemory(begin,end,1,&b);
+
+    selectRow(begin+1);
+    std::cout<<begin<<std::endl;
+    }
 }
