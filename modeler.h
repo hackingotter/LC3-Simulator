@@ -83,6 +83,8 @@ signals:
 private:
 
 
+    QVariant dataCheck(const QModelIndex &index) const;
+    QVariant dataBack(const QModelIndex &index) const;
 };
 
 #endif // MODELER_H

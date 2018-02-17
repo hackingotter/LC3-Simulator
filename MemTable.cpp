@@ -219,27 +219,47 @@ void MemTable::shiftUp()
     bool b = false;
     if(selectedIndexes().size()>0)
     {
+        QModelIndex original = currentIndex();
 
     mem_addr_t begin =  selectedIndexes().constFirst().row();
     mem_addr_t end =    selectedIndexes().constLast().row();
 
        Computer::getDefault()->slideMemory(begin,end,-1,&b);
-    selectRow(begin);
+
+
+    setCurrentIndex(model->index(begin-1,original.column()));
+
+
+    clearSelection();
+
+ selectRange(begin-1,end-1);
     }
 
+}
+void MemTable::selectRange(mem_addr_t begin, int32_t end)
+{
+
+    QItemSelection * select = new QItemSelection(model->index(begin,0),model->index(end,model->columnCount()-1));
+    selectionModel()->select(*select,QItemSelectionModel::Select);
 }
 void MemTable::shiftDown()
 {
     qDebug("shiftDown");
     bool b = false;
+
     if(selectedIndexes().size()>0)
     {
+    QModelIndex original = currentIndex();
         qDebug("wor");
     mem_addr_t begin =  selectedIndexes().constFirst().row();
     mem_addr_t end =    selectedIndexes().constLast().row();
     Computer::getDefault()->slideMemory(begin,end,1,&b);
+    QModelIndex newCurrent = QModelIndex();
 
-    selectRow(begin+1);
-    std::cout<<begin<<std::endl;
+    setCurrentIndex(model->index(begin+1,original.column()));
+    clearSelection();
+    selectRange(begin+1,end+1);
+
+
     }
 }

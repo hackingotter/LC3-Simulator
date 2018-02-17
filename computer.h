@@ -251,10 +251,10 @@ public:
       * \param end The end of the area to be shifted
       * \return The shifted address.
       */
-    mem_addr_t proposedNewLocation(mem_addr_t addr, mem_addr_t begin, mem_addr_t end, int32_t delta);
+    mem_addr_t proposedNewLocation(mem_addr_t addr, mem_addr_t begin, mem_addr_t end, int32_t delta, QString *code = new QString());
 
 
-    void *slideMemory(mem_addr_t begin, mem_addr_t end, val_t delta, bool *ok);
+    void *slideMemory(mem_addr_t begin, mem_addr_t end, int32_t delta, bool *ok);
 
 
     bool canConnect(mem_loc_t from, mem_addr_t to);
@@ -265,7 +265,7 @@ public:
 
     val_t generateOffset(mem_loc_t mem, mem_addr_t target, bool *ok);
     mem_addr_t connectedAddress(mem_addr_t addr);
-    void juggleShift(mem_addr_t current, mem_addr_t begin, mem_addr_t end, val_t delta, int *changed, int offset);
+    void juggleShift(mem_addr_t current, mem_addr_t begin, mem_addr_t end, int32_t delta, int *changed, int offset);
     QString getMemNameSafe(mem_loc_t loc);
     QString getMemNameSafe(mem_addr_t addr);
 

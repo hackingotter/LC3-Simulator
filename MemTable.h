@@ -16,6 +16,7 @@ class MemTable : public QTableView
 public:
     MemTable(modeler *model, QWidget *parent = 0);
     void setupActions();
+    void selectRange(mem_addr_t begin, int32_t end);
 public slots:
     void showClickOptions(const QPoint &pos);
     void scrollToRow(val_t row);
