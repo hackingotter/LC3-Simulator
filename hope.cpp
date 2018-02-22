@@ -35,7 +35,7 @@ Hope::Hope(QWidget *parent):QLabel(parent,0)
     {
         for(int j=0;j<128;j++)
         {
-            if(i%testinter ==0||j%testinter==0) p.drawLine(2*i,2*j,2*i+2,2*j+2);
+            if(i%testinter ==0||j%testinter==0) p.drawLine(2*i,2*j,2*i+1,2*j+1);
             p.drawPoint(2*i,2*j);
             if((i==0||i==123)&&(j==0||j==127))
             {

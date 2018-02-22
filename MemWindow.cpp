@@ -117,6 +117,7 @@ void MemWindow::setSpecialReg(reg_t reg)
 }
 void MemWindow::kick()
 {
+
     View->hide();
     View->show();
     if(followmode)

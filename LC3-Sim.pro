@@ -67,6 +67,7 @@ HEADERS += \
     FollowButton.h \
     shortcutslisting.h
 
+
 SOURCES += \
     Bridge.cpp \
     mainwindow.cpp \
@@ -97,7 +98,8 @@ SOURCES += \
     MemTable.cpp \
     MemWindow.cpp \
     FollowButton.cpp \
-    globaltypes.cpp
+    globaltypes.cpp \
+
 
 DISTFILES += \
     Test.txt \
