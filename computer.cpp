@@ -187,7 +187,10 @@ public:
     {
         qDebug("I am");
         setText(QString("Set " + getHexString(addr) + " to "+QString().setNum(newValue)));
-
+        if(oval==nval)
+        {
+            this->setObsolete(true);
+        }
 
     }
     void undo()
@@ -636,7 +639,7 @@ void Computer::setMemLoc(mem_addr_t addr, mem_loc_t loc_val)
     }
     else
     {
-        qDebug("Guess not");
+                qDebug("Guess not");
     }
 }
 
@@ -656,7 +659,10 @@ void Computer::moveRow(mem_addr_t origin, mem_addr_t destination)
     setMemLoc(destination,_memory[origin]);
 }
 
+void Computer::shiftMemory(mem_addr_t origin, val_t length,mem_addr_t destination )
+{
 
+}
 // loading
 
 size_t Computer::loadProgramFile(char* path) {
@@ -1424,21 +1430,32 @@ bool Computer::preventShiftProblems(mem_addr_t original, mem_addr_t destination,
 
 
 
-    return true;
+return true;
 }
 
 bool Computer::stillInRange(mem_addr_t current, int32_t delta, mem_addr_t beginRange,mem_addr_t endRange)
 {
 
-    return true;
+return true;
 }
 bool Computer::betweenShifts(mem_addr_t addr,int32_t delta, mem_addr_t begin, mem_addr_t end)
 {
-    //if you are after end +1      but before begin + delta - 1
-    //or
-    //if you are after end + delta but before begin - 1
-    val_t  boundsMin = end  + 1  +((delta>0)?0:delta);
-    val_t boundsMax = begin + -1 +((delta>0)?delta:0);
+    //if you are after end but before begin + delta
+    //if you are after end + delta but before begin
+    /*
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     */
+
+    val_t  boundsMin = end + ((delta>0)?1:delta+1);
+    val_t boundsMax = begin + ((delta>0)?delta-1:-1);
     return isBetween(boundsMin,boundsMax,addr);
 }
 
@@ -1452,59 +1469,73 @@ mem_addr_t Computer::proposedNewLocation(mem_addr_t addr,mem_addr_t begin, mem_a
     if(isBetween(begin,end,addr))//if you are in the moved group, your location is just
         //the delta away
     {
-        if(code!= nullptr) code->append("selected");
+        code->append("selected");
         return addr + delta;
     }
-    if((delta<0 && addr>end)||(delta>0 && addr>end+delta))//if you are past the furthest forward
+    if(delta<0)
     {
-        if(code!= nullptr)code->append("After");
-        return addr;
-
+        if(addr>end)
+        {
+            code->append("After");
+            return addr;
+        }
     }
-    if((delta>0 && addr<begin)||(delta<0 && addr<begin+delta))
+    if(delta>0)
     {
-        if(code!= nullptr)code->append("Before");
+        if(addr<begin)
+        {
 
-        return addr;
+            code->append("Before");
 
+            return addr;
+        }
     }
     if(isBetween(begin,end,addr-delta))
     {
 
-        if(code!= nullptr)code->append("destination");
-        return addr - ((delta>0)?1:-1)*((end - begin)+1);//+((delta<0)?1:-1)*((end - begin));
+        code->append("destination");
+        return addr - ((delta>0)?1:-1)*((end - begin+1));//+((delta<0)?1:-1)*((end - begin));
     }
     if(betweenShifts(addr,delta,begin,end))
     {
 
-        if(code!= nullptr)code->append("between");
-        return addr - ((delta>0)?1:-1)*((end - begin))-delta-1;
+        code->append("between");
+//        qDebug(QString().setNum(addr-delta).toLocal8Bit());
+
+        return addr - ((delta>0)?1:-1)*((end - begin)+1);
     }
-    if(code!= nullptr) code->append("unaccounted");
+    code->append("unaccounted");
     return addr;
 }
 
+mem_loc_t Computer::createShiftedLoc(mem_loc_t original,mem_addr_t newAddress, mem_addr_t newTarget, bool* ok)
+{
+    mem_loc_t out;
+    memcpy(&out,&original,sizeof(original));
+    out.addr = newAddress;
 
-void *Computer::slideMemory(mem_addr_t begin, mem_addr_t end, int32_t delta,bool makeAgreement, bool* ok)
+
+
+
+}
+void *Computer::slideMemory(mem_addr_t begin, mem_addr_t end, int32_t delta, bool* ok)
 {
     qDebug("Sliding memeory");
-    qDebug("I am beginning a shift");
-    qDebug("That shift is beginning at "+ getHexString(begin).toLocal8Bit()+":"+ QString().setNum(begin).toLocal8Bit());
-    qDebug("and is ending at "+getHexString(end).toLocal8Bit()+":"+QString().setNum(end).toLocal8Bit());
-
     //    if(canShiftClean(begin,end,begin+delta))
     if(true)
     {
         qDebug("suc");
         Undos->beginMacro("Shifting addresses " + getHexString(begin) +"-"+ getHexString(end) +" to "+getHexString(begin+delta));
-        //No point in searching before memory begins
-        mem_addr_t startSearch = (begin<=MAXOFFSET)?0:(begin-MAXOFFSET);
-        //No point in searching after memory ends
-        mem_addr_t endSearch = (end>=MEMSIZE-(MAXOFFSET-1))?MEMSIZE:(end+(MAXOFFSET-1));
+        mem_addr_t startSearch = (begin<=1024)?0:(begin-1024);
+        mem_addr_t endSearch = (end>=MEMSIZE-1023)?MEMSIZE:(end+1023);
+        int count = 0;
         int* changed = (int*)calloc(endSearch-startSearch+1,sizeof(int));
+        int** changeTracker = &changed;
         for(mem_addr_t index = startSearch;index<=endSearch;index++)
         {
-            juggleShift(index,begin,end,delta,changed,startSearch, makeAgreement);
+            juggleShift(index,begin,end,delta,changed,startSearch);
+            //            mem_loc_t holder =
+            //            qDebug(QString().setNum(index).toLocal8Bit()+" " +QString().setNum(count++).toLocal8Bit());
         }
         Undos->endMacro();
     }
@@ -1513,13 +1544,15 @@ void *Computer::slideMemory(mem_addr_t begin, mem_addr_t end, int32_t delta,bool
         qDebug("coulnd'");
     }
 }
-void Computer::juggleShift(mem_addr_t current, mem_addr_t begin, mem_addr_t end, int32_t delta, int* changed, int offset,bool makeAgreement)
+void Computer::juggleShift(mem_addr_t current, mem_addr_t begin, mem_addr_t end, int32_t delta, int* changed, int offset)
 {
-    //Gotta love memoization
     if(changed[current-offset])
     {
-        qDebug("time saved"+getHexString(current).toLocal8Bit());
+        qDebug("time saved");
         return;
+    }else
+    {
+        //        qDebug("new toy");
     }
     mem_loc_t curLoc = _memory[current];
     mem_addr_t curConnect = connectedAddress(curLoc);
@@ -1529,36 +1562,27 @@ void Computer::juggleShift(mem_addr_t current, mem_addr_t begin, mem_addr_t end,
     {
 
         changed[current-offset]=1;
-        //        std::cout<<"alternate ending"<<std::endl;
+//        std::cout<<"alternate ending"<<std::endl;
         return;
     }
-    if((proposedConnect!=curConnect) && (curLoc.addr==proposedNext) )
-    {
-        qDebug("H");
-    }
-    qDebug("Beginning Juggle");
+
+    qDebug("Beinging Juggle");
     bool b=0;
-    if(changed[curLoc.addr-offset]!=1)
-    {
-        qDebug("Apparently "+getHexString(curLoc.addr).toLocal8Bit()+" was already checked.");
-    }
     while(changed[curLoc.addr-offset]!=1)
     {
-        qDebug("Checking" + getHexString(curLoc.addr).toLocal8Bit());
         changed[curLoc.addr-offset]=1;
         mem_addr_t nextAddr = proposedNewLocation(curLoc.addr,begin,end,delta);
         mem_addr_t target = proposedNewLocation(connectedAddress(curLoc),begin,end,delta);
         mem_loc_t nextLoc;
         memcpy(&nextLoc,&_memory[nextAddr],sizeof(mem_loc_t));
+        val_t value= generateOffset(curLoc,target,&b);
+//        val_t value = curLoc.value;
+        qDebug(QString(QString().setNum(curLoc.addr)+"->"+QString().setNum(nextLoc.addr)+"|"+getHexString(value)).toLocal8Bit());
         setMemLoc(nextAddr, curLoc);
-        if(makeAgreement)
-        {
-        val_t value= generateOffset(_memory[nextAddr],target,&b);
         setMemValue(nextAddr,value);
-        }
+        //        changed[curLoc.addr-offset] = 1;
         curLoc = nextLoc;
     }
-
     qDebug("Ending Juggle");
 }
 //bool Computer::doesShiftAffect(mem_addr_t source, mem_addr_t begin, mem_addr_t end, int32_t delta)
@@ -1596,7 +1620,7 @@ mem_addr_t Computer::connectedAddress(mem_loc_t mem)
         addrOffset = getSignedOffset11(inst);
         break;
     case 9:
-        addrOffset = getSignedOffset9(inst)+1;
+        addrOffset = getSignedOffset9(inst);
         break;
     default:
 
@@ -1608,10 +1632,7 @@ mem_addr_t Computer::connectedAddress(mem_loc_t mem)
 
 int Computer::getPCOffsetNumber(mem_loc_t mem)
 {
-    if(mnemGen(mem)==BADOP)
-    {
-        return 0;
-    }
+
     val_t inst = mem.value;
     switch (inst & opMask) {
     //Offset9
@@ -1649,36 +1670,20 @@ val_t Computer::targetOffset(mem_loc_t mem,mem_addr_t target)
 val_t Computer::generateOffset(mem_loc_t mem, mem_addr_t target, bool* ok)
 {
     *ok = true;
-    int32_t difference = target-mem.addr;
-    if(difference==0)
-    {
-        return mem.value;//didn't move? no change needed
-    }
     int power =getPCOffsetNumber(mem);
-    if(power == 0)//aren't looking at anything else? no change needed
-    {
-        return mem.value;
-    }
-    //    if(!canConnect(mem,target))
-    //    {
-    //        *ok = false;
-    //        return 0;
-    //    }
-    qDebug(QString("Address: "+getHexString(mem.addr).toLocal8Bit()).toLocal8Bit());
-
-
-    qDebug(QString("Difference: "+QString().setNum(difference)).toLocal8Bit());
+//    if(!canConnect(mem,target))
+//    {
+//        *ok = false;
+//        return 0;
+//    }
+    val_t difference = target-mem.addr;
     val_t mask = 0xFFFF>>(16-power);
-    qDebug("Mask: "+getHexString(mask).toLocal8Bit());
     val_t maskedOffset = mask & difference;
-    qDebug("Masked Offset: "+getHexString(maskedOffset).toLocal8Bit());
     val_t nonOffsetProtector = mask<<power;
-    qDebug("nonOffsetProtector: "+getHexString(nonOffsetProtector).toLocal8Bit());
     val_t cleaned = mem.value & nonOffsetProtector;
-    qDebug("cleaned: "+getHexString(cleaned).toLocal8Bit());
     val_t offseted = cleaned | maskedOffset;
 
-    return offseted-1;
+    return offseted;
 }
 
 mem_addr_t Computer::findSpace(mem_addr_t startSearch,int minimumSize)
@@ -1704,190 +1709,4 @@ QString Computer::getMemNameSafe(mem_loc_t loc)
     return QString();
 }
 
-QString Computer::mnemGen(mem_addr_t addr) const
-{
-    return mnemGen(_memory[addr]);
-}
 
-
-QString Computer::mnemGen(mem_loc_t loc)const
-{
-    //    qDebug(QString().setNum(addr).toLocal8Bit());
-
-    val_t val = loc.value;
-
-    val_t addr = loc.addr+1;
-    QString out;
-    int imm5        =(val&0x001F);
-    int reg11       =((val&0x0E00) >> 9);
-    int reg8        =((val&0x01E0) >> 6);
-    int reg2        =((val&0x0007) >> 0);
-    //    bool zero543    =(val&0x0038);
-    bool imm5YN     =(val&0x0020) >> 5;
-
-    //It is much easier to be able to handle them without needing to account for names
-    switch(val&0xF000)
-    {
-    case andOpCode  :out.append("AND ");break;
-    case addOpCode  :out.append("ADD ");break;
-    case brOpCode   :out.append("BR");break;
-    case jmpOpCode  :out.append("JMP ");break;
-    case jsrOpCode  :out.append("JSR");break;
-    case ldOpCode   :out.append("LD ");break;
-    case ldiOpCode  :out.append("LDI ");break;
-    case ldrOpCode  :out.append("LDR ");break;
-    case leaOpCode  :out.append("LEA ");break;
-    case notOpCode  :out.append("NOT ");break;
-    case rtiOpCode  :out.append("RTI ");break;
-    case stOpCode   :out.append("ST ");break;
-    case stiOpCode  :out.append("STI ");break;
-    case strOpCode  :out.append("STR ");break;
-    case trapOpCode :out.append("TRAP ");break;
-    }
-
-    switch(val& 0xF000)
-    {
-    case addOpCode:
-        if((val&0x0038) ==0x0010)
-        {
-            out = QString("SUB ");
-
-        }
-
-    case andOpCode:
-    {
-        if((((val&0x0020)&&(val&0x0008))||(val&0x0020))) out = BADOP;
-        else
-        {
-            out.append("R" + QSTRNUM(reg11) + ", R"+QSTRNUM(reg8));
-            if(imm5YN)
-            {
-                out.append(", #").append(QSTRNUM(imm5));
-            }
-            else
-            {
-                out.append(", R").append(QSTRNUM(reg2));
-            }
-        }
-        break;
-    }
-    case brOpCode :
-    {
-        if((val&0x0E00)==0x0E00)//if all three are set, just display BR
-        {}
-        else
-            if(val&0x0E00)
-            {
-                if(val&0x0800) out.append("n");
-                if(val&0x0400) out.append("z");
-                if(val&0x0200) out.append("p");
-            }
-        if((val&0x0E00)==0x0000)
-        {
-            out = BADOP;
-        }
-        else
-        {
-            val_t offset = val&0x01FF;
-            if(val&0x0100) val|=0xFE00;
-            mem_addr_t target = addr + offset;
-            out.append(" ");
-            out.append(name_or_addr(target));
-        }
-        break;
-
-    }
-    case jmpOpCode:
-    {
-        if((val&0x0E3F))//if there are ones outside of the OpCode and BaseR
-            //Bad Op
-        {
-            out = BADOP;
-        }
-        else if(val&0x01C0)//if so, RET is the proper memn
-        {
-            out = "RET";
-        }
-        else
-        {
-            out = QString("JMP R%1").arg(reg8);
-        }
-
-        break;
-    }
-    case jsrOpCode:
-    {
-        qDebug("JSR");
-        if(val&0x0800)//11th slot 1 means jsr
-        {
-            val_t offset = val& 0x07FF;
-
-            if(offset&0x400)offset |= 0xF400;
-            mem_addr_t target = addr + (val & 0x07FF);
-            out.append(" " + name_or_addr(target));
-        }
-        else if(!(val&0x0E3F))//or, it could be jsrr
-        {
-            out.append("R R"+QSTRNUM(reg8));
-        }
-        else
-        {
-            out = BADOP;
-        }
-        break;
-    }
-    case ldOpCode :
-    case ldiOpCode:
-    case leaOpCode:
-    case stOpCode :
-    case stiOpCode:
-    {
-
-        val_t offset = this->getSignedOffset9(val);
-
-        val_t target = addr+offset;
-        out.append("R" + QSTRNUM(reg11) + ", "+ name_or_addr(target));
-        break;
-    }
-    case ldrOpCode:
-    case strOpCode:
-    {
-        out.append("R"+ QSTRNUM(reg11)+", R"+ QSTRNUM(reg8)+ ", "+QSTRNUM(val&0x003F));
-        break;
-    }
-    case rtiOpCode:
-    {if(val&0x0FFF) out = BADOP;break;}
-    case trapOpCode:
-    {
-        if(val&0x0F00)
-        {
-            out = BADOP;
-        }
-        else
-        {
-            name_or_addr(val&0x00FF);//TODO this code could be wrong
-        }
-        break;
-    }
-    }
-    return out;
-}
-
-QString Computer::name_or_addr(mem_loc_t target) const
-{
-    label_t* label = target.label;
-
-    if(label!= nullptr)
-    {
-        return QString(label->name);
-    }
-    else
-    {
-        return  getHexString(target.addr);
-    }
-    return "";
-}
-QString Computer::name_or_addr(mem_addr_t target) const
-{
-    return name_or_addr(_memory[target]);
-}

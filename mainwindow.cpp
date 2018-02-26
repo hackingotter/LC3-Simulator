@@ -227,6 +227,9 @@ void MainWindow::setupMenuBar()
     ui->menuFile->addActions(fileActions);
     CONNECT(actionLoad_File,triggered(),this,loadFile());
     CONNECT(actionAssemble_Load_File,triggered(),this, assembleNLoadFile());
+
+//    MainWindow::ui-
+
 }
 void MainWindow::setupControlButtons()
 {

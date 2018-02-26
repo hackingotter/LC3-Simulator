@@ -21,7 +21,7 @@ extern "C"
 }
 #include <QItemSelectionModel>
 
-#define TESTOFFSET 1
+#define TESTOFFSET -1
 #define TESTBEGIN  10
 #define TESTEND    10
 
@@ -125,7 +125,7 @@ QBrush modeler::column0Painter(mem_addr_t addr) const
     //the below doesn't work
     val_t pc = Computer::getDefault()->getRegister(PC);
 
-    if(addr == Computer::getDefault()->connectedAddress(pc))
+    if(addr == Computer::getDefault()->connectedAddress(PC))
     {
         return QBrush(QColor(230,230,230));
     }
@@ -138,7 +138,7 @@ void modeler::setSelectMode(modeler::SelectMode mode, mem_addr_t begin, mem_addr
     specialSelectStart = begin;
     specialSelectEnd = end;
 
-    emit change();
+
 }
 QBrush modeler::rowPainter(mem_addr_t addr,const QModelIndex &index) const
 {
@@ -165,37 +165,32 @@ QBrush modeler::rowPainter(mem_addr_t addr,const QModelIndex &index) const
     }break;
     case 2:
     {
-//        for(int i = 0; i < 30; i++)
-//        {
+        for(int i = 0; i < 30; i++)
+        {
 
 
-//            int value = Computer::getDefault()->proposedNewLocation(i,TESTBEGIN,TESTEND,TESTOFFSET);
-//            if(addr == value)
-//            {
+            int value = Computer::getDefault()->proposedNewLocation(i,TESTBEGIN,TESTEND,TESTOFFSET);
+            if(addr == value)
+            {
 
-//                if(addr == i)
-//                {
-//                    return QBrush(QColor(250,100,100));
-//                }
-//                else
-//                if(addr > i)
-//                {
-//                    return QBrush(QColor(100,220,100));
-//                }
-//                else
-//                if(addr < i)
-//                {
-//                    return QBrush(QColor(100,100,220));
-//                }
-
-//            }
-//            if(Computer::getDefault()->connectedAddress(addr)==value)
-//            {
-//                return QBrush(QColor(150,150,200));
-//            }
+                if(addr == i)
+                {
+                    return QBrush(QColor(250,100,100));
+                }
+                else
+                if(addr > i)
+                {
+                    return QBrush(QColor(100,220,100));
+                }
+                else
+                if(addr < i)
+                {
+                    return QBrush(QColor(100,100,220));
+                }
+            }
 
 
-//        }
+        }
     }
 
     }
@@ -215,7 +210,6 @@ void modeler::setCopied(QModelIndexList *target)
 {
     copiedLength = target->length();
     copied = Computer::getDefault()->getMemLocationsBlock(target->at(0).row(),copiedLength);
-    emit change();
 }
 
 
@@ -265,19 +259,19 @@ QVariant modeler::data(const QModelIndex &index, int role) const
             return getHexString(Computer::getDefault()->getMemValue(addr));
         case NAMECOLUMN:
         {
-//            if(addr<30)
-//            {
-//                QString* er = new QString();
-//                Computer::getDefault()->proposedNewLocation(addr,TESTBEGIN,TESTEND,TESTOFFSET,er);
-//                return *er;
-//            }
+            if(addr<30)
+            {
+                QString* er = new QString();
+                Computer::getDefault()->proposedNewLocation(addr,TESTBEGIN,TESTEND,TESTOFFSET,er);
+                return *er;
+            }
 
             return Computer::getDefault()->getMemNameSafe(addr);
 
         }
 
         case MNEMCOLUMN:
-            return Computer::getDefault()->mnemGen(addr);
+            return this->addr2Mnem(addr);
         case COMMCOLUMN:
             return Computer::getDefault()->getMemComment(addr);
         }
@@ -349,7 +343,6 @@ bool modeler::setData(const QModelIndex &index, const QVariant &value, int role)
         {
 
             Computer::getDefault()->setMemLabelText(addr,value.toString());
-
         }
 
 
@@ -384,7 +377,7 @@ bool modeler::setData(const QModelIndex &index, const QVariant &value, int role)
     emit layoutChanged();
     emit dataChanged(index, index, QVector<int>() << role);
     emit itemChanged(item(addr,column));
-    emit change();
+
     return true;
 
 }
@@ -413,6 +406,196 @@ Qt::ItemFlags modeler::flags(const QModelIndex &index) const
 void modeler::update()
 {
 
+}
+QString modeler::mnemonicGen(mem_addr_t addr)const
+{
+    QString out;
+    val_t instruction = Computer::getDefault()->getMemValue(addr);
+    //    BATHTIME(getHexString(instruction>>12))
+    //    BATHTIME(getHexString(andOpCode>>12))
+
+
+    out = addr2Mnem(instruction);
+    return out;
+}
+
+
+QString modeler::addr2Mnem(mem_addr_t addr)const
+{
+    //    qDebug(QString().setNum(addr).toLocal8Bit());
+
+    val_t val = Computer::getDefault()->getMemValue(addr);
+    addr +=1;
+    QString out;
+    int imm5        =(val&0x001F);
+    int reg11       =((val&0x0E00) >> 9);
+    int reg8        =((val&0x01E0) >> 6);
+    int reg2        =((val&0x0007) >> 0);
+    //    bool zero543    =(val&0x0038);
+    bool imm5YN     =(val&0x0020) >> 5;
+
+    //It is much easier to be able to handle them without needing to account for names
+    switch(val&0xF000)
+    {
+    case andOpCode  :out.append("AND ");break;
+    case addOpCode  :out.append("ADD ");break;
+    case brOpCode   :out.append("BR");break;
+    case jmpOpCode  :out.append("JMP ");break;
+    case jsrOpCode  :out.append("JSR");break;
+    case ldOpCode   :out.append("LD ");break;
+    case ldiOpCode  :out.append("LDI ");break;
+    case ldrOpCode  :out.append("LDR ");break;
+    case leaOpCode  :out.append("LEA ");break;
+    case notOpCode  :out.append("NOT ");break;
+    case rtiOpCode  :out.append("RTI ");break;
+    case stOpCode   :out.append("ST ");break;
+    case stiOpCode  :out.append("STI ");break;
+    case strOpCode  :out.append("STR ");break;
+    case trapOpCode :out.append("TRAP ");break;
+    }
+
+    switch(val& 0xF000)
+    {
+    case addOpCode:
+        if((val&0x0038) ==0x0010)
+        {
+            out = QString("SUB ");
+
+        }
+
+    case andOpCode:
+    {
+        if((((val&0x0020)&&(val&0x0008))||(val&0x0020))) out = BADOP;
+        else
+        {
+            out.append("R" + QSTRNUM(reg11) + ", R"+QSTRNUM(reg8));
+            if(imm5YN)
+            {
+                out.append(", #").append(QSTRNUM(imm5));
+            }
+            else
+            {
+                out.append(", R").append(QSTRNUM(reg2));
+            }
+        }
+        break;
+    }
+    case brOpCode :
+    {
+        if((val&0x0E00)==0x0E00)//if all three are set, just display BR
+        {}
+        else
+            if(val&0x0E00)
+            {
+                if(val&0x0800) out.append("n");
+                if(val&0x0400) out.append("z");
+                if(val&0x0200) out.append("p");
+            }
+        if((val&0x0E00)==0x0000)
+        {
+            out = BADOP;
+        }
+        else
+        {
+            val_t offset = val&0x01FF;
+            if(val&0x0100) val|=0xFE00;
+            mem_addr_t target = addr + offset;
+            out.append(" ");
+            out.append(name_or_addr(target));
+        }
+        break;
+
+    }
+    case jmpOpCode:
+    {
+        if((val&0x0E3F))//if there are ones outside of the OpCode and BaseR
+            //Bad Op
+        {
+            out = BADOP;
+        }
+        else if(val&0x01C0)//if so, RET is the proper memn
+        {
+            out = "RET";
+        }
+        else
+        {
+            out = QString("JMP R%1").arg(reg8);
+        }
+
+        break;
+    }
+    case jsrOpCode:
+    {
+        qDebug("JSR");
+        if(val&0x0800)//11th slot 1 means jsr
+        {
+            val_t offset = val& 0x07FF;
+
+            if(offset&0x400)offset |= 0xF400;
+            mem_addr_t target = addr + (val & 0x07FF);
+            out.append(" " + name_or_addr(target));
+        }
+        else if(!(val&0x0E3F))//or, it could be jsrr
+        {
+            out.append("R R"+QSTRNUM(reg8));
+        }
+        else
+        {
+            out = BADOP;
+        }
+        break;
+    }
+    case ldOpCode :
+    case ldiOpCode:
+    case leaOpCode:
+    case stOpCode :
+    case stiOpCode:
+    {
+        val_t offset = val&0x01FF;
+        if(val&0x0100) val|=0xFE00;
+
+        val_t target = addr+offset;
+        out.append("R" + QSTRNUM(reg11) + ", "+ name_or_addr(target));
+        break;
+    }
+    case ldrOpCode:
+    case strOpCode:
+    {
+        out.append("R"+ QSTRNUM(reg11)+", R"+ QSTRNUM(reg8)+ ", "+QSTRNUM(val&0x003F));
+        break;
+    }
+    case rtiOpCode:
+    {if(val&0x0FFF) out = BADOP;break;}
+    case trapOpCode:
+    {
+        if(val&0x0F00)
+        {
+            out = BADOP;
+        }
+        else
+        {
+            name_or_addr(val&0x00FF);//TODO this code could be wrong
+        }
+        break;
+    }
+    }
+    return out;
+}
+
+
+QString modeler::name_or_addr(mem_addr_t target) const
+{
+    label_t* label = Computer::getDefault()->getMemLabel(target);
+
+    if(label!= nullptr)
+    {
+        return QString(label->name);
+    }
+    else
+    {
+        return  getHexString(target);
+    }
+    return "";
 }
 
 

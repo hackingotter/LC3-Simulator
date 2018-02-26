@@ -28,7 +28,6 @@
 #define MCR  0xFFFE
 #define MCC  0xFFFF
 
-#define MAXOFFSET 1024
 class Computer : public QObject
 {
     Q_OBJECT
@@ -226,9 +225,9 @@ public:
 
     mem_addr_t findSpace(mem_addr_t startSearch, int minimumSize);
     bool insertBlankRow(mem_addr_t addr);
-    static val_t getSignedOffset6(val_t inst);
-    static val_t getSignedOffset9(val_t inst);
-    static val_t getSignedOffset11(val_t inst);
+    val_t getSignedOffset6(val_t inst);
+    val_t getSignedOffset9(val_t inst);
+    val_t getSignedOffset11(val_t inst);
     /**
       * One of the tools that makes figuring out if a line needs its value
       * changed due to a potential line shift is the ability to find out
@@ -255,7 +254,7 @@ public:
     mem_addr_t proposedNewLocation(mem_addr_t addr, mem_addr_t begin, mem_addr_t end, int32_t delta, QString *code = new QString());
 
 
-    void *slideMemory(mem_addr_t begin, mem_addr_t end, int32_t delta, bool makeAgreement, bool *ok);
+    void *slideMemory(mem_addr_t begin, mem_addr_t end, int32_t delta, bool *ok);
 
 
     bool canConnect(mem_loc_t from, mem_addr_t to);
@@ -266,13 +265,10 @@ public:
 
     val_t generateOffset(mem_loc_t mem, mem_addr_t target, bool *ok);
     mem_addr_t connectedAddress(mem_addr_t addr);
-    void juggleShift(mem_addr_t current, mem_addr_t begin, mem_addr_t end, int32_t delta, int *changed, int offset, bool makeAgreement);
+    void juggleShift(mem_addr_t current, mem_addr_t begin, mem_addr_t end, int32_t delta, int *changed, int offset);
     QString getMemNameSafe(mem_loc_t loc);
     QString getMemNameSafe(mem_addr_t addr);
-    QString mnemGen(mem_loc_t loc) const;
-    QString name_or_addr(mem_addr_t target) const;
-    QString name_or_addr(mem_loc_t target) const;
-    QString mnemGen(mem_addr_t addr) const;
+
 signals:
     void update();
     void hasCharacterToDisplay();

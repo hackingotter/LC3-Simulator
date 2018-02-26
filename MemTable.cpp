@@ -16,22 +16,12 @@
 
 
 #define HEX_COLUMN_WIDTH 60
-
-#define ADDSHORTCUT(NAME,KEY,FUNCTION)\
-{\
-    QShortcut* cut = new QShortcut(this);\
-    cut->setKey(KEY);\
-    connect(cut,SIGNAL(activated()),this,SLOT(FUNCTION));\
-    cut->setContext(Qt::WidgetShortcut);\
-    cut->setObjectName(NAME);\
-    }
 MemTable::MemTable(modeler* model,QWidget* parent):QTableView(parent)
 {
 
     showGrid();
     setModel(model);
     this->model = model;
-    connect(this->model, SIGNAL(change()),this, SLOT(kick()));
     verticalHeader()->hide();
     setColumnWidth(MEM_VIEW_BP_COL,30);
     horizontalHeader()->setSectionResizeMode(MEM_VIEW_BP_COL,QHeaderView::Fixed);
@@ -54,8 +44,6 @@ MemTable::MemTable(modeler* model,QWidget* parent):QTableView(parent)
 
     setupActions();
 }
-
-
 void MemTable::setupActions()
 {
     qDebug("JJ");
@@ -78,10 +66,7 @@ void MemTable::setupActions()
     budgeDown->setKey(Qt::CTRL+Qt::SHIFT+Qt::Key_Down);
     connect(budgeDown,SIGNAL(activated()),this, SLOT(shiftDown()));
     budgeDown->setContext(Qt::WidgetShortcut);
-    ADDSHORTCUT("Paste"     ,Qt::CTRL + Qt::Key_V                          ,paste());
-    ADDSHORTCUT("Paste Above",Qt::CTRL+ Qt::SHIFT + Qt::Key_V              ,pasteAbove());
-    ADDSHORTCUT("Force Down",Qt::CTRL + Qt::SHIFT + Qt::ALT + Qt::Key_Down ,shiftDownBrute());
-    ADDSHORTCUT("Force Up"  ,Qt::CTRL + Qt::SHIFT + Qt::ALT + Qt::Key_Up   ,shiftUpBrute());
+
 
 }
 void MemTable::setupConnections()
@@ -120,14 +105,6 @@ void MemTable::showClickOptions(const QPoint &pos)
 
     //    connect(shift,SIGNAL(triggered()),this, handleShift());
     ClickMenu.exec(mapToGlobal(pos  ));
-
-}
-void MemTable::paste(bool above)
-{
-
-}
-void MemTable::pasteAbove()
-{
 
 }
 void MemTable::selectedClickOptions(const QPoint &pos,QMenu* clickMenu)
@@ -201,12 +178,6 @@ void MemTable::handleCut()
 {
 
 }
-
-void MemTable::kick()
-{
-    hide();
-    show();
-}
 void MemTable::handlePasteOver()
 {
     qDebug("Handling Paste");
@@ -222,7 +193,7 @@ void MemTable::swap()
         mem_addr_t begin = model->specialSelectStart;
         mem_addr_t end = model->specialSelectEnd;
         val_t delta = selectedIndexes().constFirst().row()-begin+1;
-        //        Computer::getDefault()->slideMemory(model->specialSelectStart,model->specialSelectEnd,,delta,&b);
+        Computer::getDefault()->slideMemory(model->specialSelectStart,model->specialSelectEnd,delta,&b);
     }
 }
 void MemTable::setCut()
@@ -241,19 +212,8 @@ void MemTable::setCopied()
                          selectedIndexes().constLast().row());
     clearSelection();
 
-
 }
-void MemTable::shiftUpBrute()
-{
-    shiftUp(false);
-}
-void MemTable::shiftDownBrute()
-{
-    qDebug("Shift Down Force");
-    shiftDown(false);
-}
-
-void MemTable::shiftUp(bool makeAgreement)
+void MemTable::shiftUp()
 {
     qDebug("shiftUp");
     bool b = false;
@@ -261,20 +221,19 @@ void MemTable::shiftUp(bool makeAgreement)
     {
         QModelIndex original = currentIndex();
 
-        mem_addr_t begin =  selectedIndexes().constFirst().row();
-        mem_addr_t end =    selectedIndexes().constLast().row();
+    mem_addr_t begin =  selectedIndexes().constFirst().row();
+    mem_addr_t end =    selectedIndexes().constLast().row();
 
-        Computer::getDefault()->slideMemory(begin,end,-1,makeAgreement,&b);
-
-
-        setCurrentIndex(model->index(begin-1,original.column()));
+       Computer::getDefault()->slideMemory(begin,end,-1,&b);
 
 
-        clearSelection();
+    setCurrentIndex(model->index(begin-1,original.column()));
 
-        selectRange(begin-1,end-1);
+
+    clearSelection();
+
+ selectRange(begin-1,end-1);
     }
-
 
 }
 void MemTable::selectRange(mem_addr_t begin, int32_t end)
@@ -283,41 +242,24 @@ void MemTable::selectRange(mem_addr_t begin, int32_t end)
     QItemSelection * select = new QItemSelection(model->index(begin,0),model->index(end,model->columnCount()-1));
     selectionModel()->select(*select,QItemSelectionModel::Select);
 }
-void MemTable::shiftDown(bool makeAgreement)
+void MemTable::shiftDown()
 {
     qDebug("shiftDown");
     bool b = false;
 
     if(selectedIndexes().size()>0)
     {
-        QModelIndex original = currentIndex();
+    QModelIndex original = currentIndex();
         qDebug("wor");
-        mem_addr_t begin =  selectedIndexes().constFirst().row();
-        mem_addr_t end =    selectedIndexes().constLast().row();
-        Computer::getDefault()->slideMemory(begin,end,1,makeAgreement,&b);
-        setCurrentIndex(model->index(begin+1,original.column()));
-        clearSelection();
-        selectRange(begin+1,end+1);
-    }
-}
-void MemTable::hide()
-{
-    if(!isHidden())
-    {
-        savedCurrentFocusIndex = currentIndex();
-        this->QTableView::hide();
-    }
-}
-void MemTable::show()
-{
-    if(isHidden())
-    {
-        this->QTableView::show();
-        if(savedCurrentFocusIndex==QModelIndex())
-        {
-            savedCurrentFocusIndex= currentIndex();
-        }
-        setCurrentIndex(savedCurrentFocusIndex);
+    mem_addr_t begin =  selectedIndexes().constFirst().row();
+    mem_addr_t end =    selectedIndexes().constLast().row();
+    Computer::getDefault()->slideMemory(begin,end,1,&b);
+    QModelIndex newCurrent = QModelIndex();
+
+    setCurrentIndex(model->index(begin+1,original.column()));
+    clearSelection();
+    selectRange(begin+1,end+1);
+
 
     }
 }
