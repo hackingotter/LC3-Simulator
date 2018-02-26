@@ -1490,19 +1490,18 @@ mem_addr_t Computer::proposedNewLocation(mem_addr_t addr,mem_addr_t begin, mem_a
             return addr;
         }
     }
+
     if(isBetween(begin,end,addr-delta))
     {
 
-        code->append("destination");
-        return addr - ((delta>0)?1:-1)*((end - begin+1));//+((delta<0)?1:-1)*((end - begin));
+        if(code!= nullptr)code->append("destination");
+        return addr - ((delta>0)?1:-1)*((end - begin)+1);//+((delta<0)?1:-1)*((end - begin));
     }
     if(betweenShifts(addr,delta,begin,end))
     {
 
-        code->append("between");
-//        qDebug(QString().setNum(addr-delta).toLocal8Bit());
-
-        return addr - ((delta>0)?1:-1)*((end - begin)+1);
+        if(code!= nullptr)code->append("between");
+        return addr - ((delta>0)?1:-1)*((end - begin))-delta-1;
     }
     code->append("unaccounted");
     return addr;
