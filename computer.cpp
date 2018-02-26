@@ -1487,6 +1487,7 @@ mem_addr_t Computer::proposedNewLocation(mem_addr_t addr,mem_addr_t begin, mem_a
 
 void *Computer::slideMemory(mem_addr_t begin, mem_addr_t end, int32_t delta,bool makeAgreement, bool* ok)
 {
+    MASK
     qDebug("Sliding memeory");
     qDebug("I am beginning a shift");
     qDebug("That shift is beginning at "+ getHexString(begin).toLocal8Bit()+":"+ QString().setNum(begin).toLocal8Bit());
@@ -1497,10 +1498,32 @@ void *Computer::slideMemory(mem_addr_t begin, mem_addr_t end, int32_t delta,bool
     {
         qDebug("suc");
         Undos->beginMacro("Shifting addresses " + getHexString(begin) +"-"+ getHexString(end) +" to "+getHexString(begin+delta));
-        //No point in searching before memory begins
-        mem_addr_t startSearch = (begin<=MAXOFFSET)?0:(begin-MAXOFFSET);
-        //No point in searching after memory ends
-        mem_addr_t endSearch = (end>=MEMSIZE-(MAXOFFSET-1))?MEMSIZE:(end+(MAXOFFSET-1));
+
+
+
+
+        mem_addr_t startSearch;
+        mem_addr_t endSearch;
+        mem_addr_t smallestInShiftRange = begin+((delta>0)?0:delta);
+        mem_addr_t largestInShiftRange  = end  +((delta>0)?delta:0);
+
+        if(makeAgreement)
+        {
+             //No point in searching before memory begins
+            startSearch = (smallestInShiftRange<=MAXOFFSET)?0:(smallestInShiftRange-MAXOFFSET);
+            //No point in searching after memory ends
+            endSearch = (largestInShiftRange>=MEMSIZE-(MAXOFFSET-1))?MEMSIZE:(largestInShiftRange+(MAXOFFSET-1));
+        }
+        else
+        {
+            startSearch = smallestInShiftRange;
+            endSearch   = largestInShiftRange;
+        }
+
+
+        /**
+         * changed keeps track of the addresses already visited.
+         */
         int* changed = (int*)calloc(endSearch-startSearch+1,sizeof(int));
         for(mem_addr_t index = startSearch;index<=endSearch;index++)
         {
@@ -1512,6 +1535,9 @@ void *Computer::slideMemory(mem_addr_t begin, mem_addr_t end, int32_t delta,bool
     {
         qDebug("coulnd'");
     }
+    UNMASK
+
+            IFNOMASK(update(););
 }
 void Computer::juggleShift(mem_addr_t current, mem_addr_t begin, mem_addr_t end, int32_t delta, int* changed, int offset,bool makeAgreement)
 {
@@ -1522,26 +1548,29 @@ void Computer::juggleShift(mem_addr_t current, mem_addr_t begin, mem_addr_t end,
         return;
     }
     mem_loc_t curLoc = _memory[current];
-    mem_addr_t curConnect = connectedAddress(curLoc);
     mem_addr_t proposedNext = proposedNewLocation(current,begin,end,delta);
-    mem_addr_t proposedConnect = proposedNewLocation(curConnect,begin,end,delta);
-    if((proposedNext==current) && (proposedConnect==curConnect))
+    bool connectionChanged;
+    if(!makeAgreement)//if you don't care about making agreement
     {
-
+        connectionChanged=false;
+    }
+    else //if you do care about making agreement
+    {
+        mem_addr_t curConnect = connectedAddress(curLoc);
+        mem_addr_t proposedConnect = proposedNewLocation(curConnect,begin,end,delta);
+        connectionChanged=(proposedConnect==curConnect);
+    }
+    if((proposedNext==current) && (!connectionChanged))
+    {
         changed[current-offset]=1;
-        //        std::cout<<"alternate ending"<<std::endl;
         return;
     }
-    if((proposedConnect!=curConnect) && (curLoc.addr==proposedNext) )
-    {
-        qDebug("H");
-    }
+    executeShiftCycle(curLoc, begin, end, delta,changed,offset,makeAgreement);
+}
+void Computer::executeShiftCycle(mem_loc_t curLoc, mem_addr_t begin, mem_addr_t end, int32_t delta, int* changed, int offset,bool makeAgreement)
+{
+    MASK
     qDebug("Beginning Juggle");
-    bool b=0;
-    if(changed[curLoc.addr-offset]!=1)
-    {
-        qDebug("Apparently "+getHexString(curLoc.addr).toLocal8Bit()+" was already checked.");
-    }
     while(changed[curLoc.addr-offset]!=1)
     {
         qDebug("Checking" + getHexString(curLoc.addr).toLocal8Bit());
@@ -1551,30 +1580,18 @@ void Computer::juggleShift(mem_addr_t current, mem_addr_t begin, mem_addr_t end,
         mem_loc_t nextLoc;
         memcpy(&nextLoc,&_memory[nextAddr],sizeof(mem_loc_t));
         setMemLoc(nextAddr, curLoc);
+        bool b;
         if(makeAgreement)
         {
-        val_t value= generateOffset(_memory[nextAddr],target,&b);
-        setMemValue(nextAddr,value);
+            val_t value= generateOffset(_memory[nextAddr],target,&b);
+            setMemValue(nextAddr,value);
         }
         curLoc = nextLoc;
     }
-
     qDebug("Ending Juggle");
+    UNMASK
+            IFNOMASK(update(););
 }
-//bool Computer::doesShiftAffect(mem_addr_t source, mem_addr_t begin, mem_addr_t end, int32_t delta)
-//{
-//    mem_addr_t connected= connectedAddress(source);
-//    mem_addr_t future   = proposedNewLocation(source,begin,end,delta);
-//    mem_addr_t connectedfuture = proposedNewLocation()
-//    if(source == connected)
-//    {
-//        if(source == future)
-//            return false;
-//    }
-//    if(source==proposedNewLocation(source) && connectedAddress())
-
-//}
-
 bool Computer::isBetween(val_t min, val_t max, val_t val )
 {
     bool b = (val >= min)&&(val<= max);

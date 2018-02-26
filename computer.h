@@ -314,6 +314,7 @@ private:
     void executeCycle();
 
     bool connectedToRange(mem_addr_t start, mem_addr_t end, mem_addr_t pov);
+    void executeShiftCycle(mem_loc_t curLoc, mem_addr_t begin, mem_addr_t end, int32_t delta, int *changed, int offset, bool makeAgreement);
 };
 
 #endif // COMPUTER_H

@@ -135,8 +135,8 @@ QBrush modeler::column0Painter(mem_addr_t addr) const
 void modeler::setSelectMode(modeler::SelectMode mode, mem_addr_t begin, mem_addr_t end)
 {
     this->currentMode = mode;
-    specialSelectStart = begin;
-    specialSelectEnd = end;
+    Utility::Utilit::specialSelectStart = begin;
+    Utility::Utilit::specialSelectEnd = end;
 
     emit change();
 }
@@ -149,7 +149,8 @@ QBrush modeler::rowPainter(mem_addr_t addr,const QModelIndex &index) const
     case 0: return column0Painter(addr);break;
     case 1:
     {
-        if(Computer::getDefault()->isBetween(specialSelectStart,specialSelectEnd,addr))
+        if(Utility::Utilit::specialSelectStart<=Utility::Utilit::specialSelectEnd)
+        if(Computer::getDefault()->isBetween(Utility::Utilit::specialSelectStart,Utility::Utilit::specialSelectEnd,addr))
         {
             switch(currentMode)
             {
@@ -157,8 +158,10 @@ QBrush modeler::rowPainter(mem_addr_t addr,const QModelIndex &index) const
                 return QBrush(QColor(100,235,213));
             case SelectMode::Cut:
                 return QBrush(QColor(12,230,20));
-            }
+            default:
+
             return QBrush(QColor(157,157,20));
+            }
         }
 
 
@@ -316,7 +319,7 @@ QVariant modeler::dataCheck(const QModelIndex &index)const
 }
 QVariant modeler::dataBack(const QModelIndex &index)const
 {
-    int column = index.column();
+//    int column = index.column();
     mem_addr_t addr = index.row();
 
     return rowPainter(addr,index);

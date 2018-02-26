@@ -1,9 +1,9 @@
 #include "Utility.h"
 #include "opcodes.h"
 
+
+
 namespace Utility {
-
-
 
 
 
@@ -74,6 +74,7 @@ val_t unifiedInput2Val(QString input,bool* ok = Q_NULLPTR)
         {
             *ok = true;
             return 0;
+            //When I wrote this code, I forgot something.
             //I think this edge case has been missed
             //for months now.  Fixed 1/4/2018
             //-Melberg
@@ -109,6 +110,14 @@ val_t unifiedInput2Val(QString input,bool* ok = Q_NULLPTR)
     *ok = false;
     return 0;
 }
+
+void Utilit::setup()
+{
+
+}
+mem_addr_t Utilit::specialSelectStart = 0;
+mem_addr_t Utilit::specialSelectEnd = 0;
+
 
 
 

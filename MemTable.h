@@ -14,6 +14,7 @@ class MemTable : public QTableView
     mem_loc_t * copied;
     QModelIndex savedCurrentFocusIndex = QModelIndex();
     void selectedClickOptions(const QPoint &pos, QMenu *clickMenu);
+    void saveSettings();
 public:
     MemTable(modeler *model, QWidget *parent = 0);
     void setupActions();
@@ -64,8 +65,8 @@ private slots:
      * this function calls for the data to be shifted up 'as is.'
      */
     void shiftUpBrute();
-    void paste(bool above = false);
-    void pasteAbove();
+    void paste(bool makeAgreement = true);
+    void pasteBrute();
 };
 
 #endif // MEMTABLE_H

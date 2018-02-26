@@ -101,7 +101,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     Computer::getDefault()->setProgramStatus(cond_z);
 
     Utility::systemInfoDebug();//Just some fun info
-
+    Utility::Utilit::setup();
     setupThreadManager();//QED
 
 
@@ -160,7 +160,11 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
-
+MemWindow* MainWindow::makeNConnectNewMemWindow(modeler* model)
+{
+    MemWindow* Newest = new MemWindow(model,Saturn->generateBar());
+    CONNECT(this,signalUpdate(),Newest,kick());
+}
 void MainWindow::setupViews()
 {
     qDebug("Setting Up Views");
@@ -177,7 +181,11 @@ void MainWindow::setupViews()
         MemWindow* memy = new MemWindow(model,Saturn->generateBar());
     CONNECT(this,signalUpdate(),memy,kick());
     ui->MemorySplitter->addWidget(memy);
-}
+};
+
+
+
+
 //    setupMemView(ui->MemView1View);
     setupMemView(ui->MemView3View);
     setupStackView(ui->StackViewView);
@@ -472,6 +480,7 @@ void MainWindow::setupStackView(QTableView* view)
 
     CONNECT(MainWindow::ui->actionFlip,triggered(),StackModel,flip());
     CONNECT(StackModel,flip(),this,update());
+
 }
 
 void MainWindow::setupRegisterView()
@@ -656,7 +665,7 @@ void MainWindow::readSettings()
 }
 void MainWindow::saveSettings()
 {
-    QSettings settings("Melberg & Ott","PennSim++");
+    QSettings settings(ORGANIZATION,APPNAME);
     settings.beginGroup("MainWindow");
     settings.setValue("Window Height",this->height());
     settings.setValue("Window Width",this->width());
