@@ -1507,18 +1507,18 @@ void *Computer::slideMemory(mem_addr_t begin, mem_addr_t end, int32_t delta,bool
         mem_addr_t smallestInShiftRange = begin+((delta>0)?0:delta);
         mem_addr_t largestInShiftRange  = end  +((delta>0)?delta:0);
 
-        if(makeAgreement)
-        {
+//        if(makeAgreement)
+//        {
              //No point in searching before memory begins
             startSearch = (smallestInShiftRange<=MAXOFFSET)?0:(smallestInShiftRange-MAXOFFSET);
             //No point in searching after memory ends
             endSearch = (largestInShiftRange>=MEMSIZE-(MAXOFFSET-1))?MEMSIZE:(largestInShiftRange+(MAXOFFSET-1));
-        }
-        else
-        {
-            startSearch = smallestInShiftRange;
-            endSearch   = largestInShiftRange;
-        }
+//        }
+//        else
+//        {
+//            startSearch = smallestInShiftRange;
+//            endSearch   = largestInShiftRange;
+//        }
 
 
         /**
@@ -1529,6 +1529,7 @@ void *Computer::slideMemory(mem_addr_t begin, mem_addr_t end, int32_t delta,bool
         {
             juggleShift(index,begin,end,delta,changed,startSearch, makeAgreement);
         }
+
         Undos->endMacro();
     }
     else
