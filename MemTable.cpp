@@ -246,14 +246,14 @@ void MemTable::handlePasteOver()
 }
 void MemTable::swap()
 {
-    if(model->currentMode==modeler::SelectMode::Cut)
-    {
-        bool b = 0;
-        mem_addr_t begin = model->specialSelectStart;
-        mem_addr_t end = model->specialSelectEnd;
-        val_t delta = selectedIndexes().constFirst().row()-begin+1;
-        //        Computer::getDefault()->slideMemory(model->specialSelectStart,model->specialSelectEnd,,delta,&b);
-    }
+//    if(model->currentMode==modeler::SelectMode::Cut)
+//    {
+//        bool b = 0;
+//        mem_addr_t begin = model->specialSelectStart;
+//        mem_addr_t end = model->specialSelectEnd;
+//        val_t delta = selectedIndexes().constFirst().row()-begin+1;
+//        //        Computer::getDefault()->slideMemory(model->specialSelectStart,model->specialSelectEnd,,delta,&b);
+//    }
 }
 void MemTable::setCut()
 {

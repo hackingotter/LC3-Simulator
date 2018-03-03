@@ -94,6 +94,7 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
 
+    Computer::getDefault()->lowerBoundTimes();
     std::cout<<Computer::getDefault()->proposedNewLocation(8,5,10,-2)<<std::endl;
 
 

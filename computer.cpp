@@ -4,6 +4,7 @@
 #include <QString>
 #include <QUndoCommand>
 #include <QLabel>
+#include <time.h>
 #include "iostream"
 
 #define UNDOS
@@ -296,7 +297,26 @@ private:
     QString oldComment;
     QString newComment;
 };
+class changeMemConnect: public QUndoCommand
+{
+public:
+    changeMemConnect(mem_addr_t pointee, mem_addr_t pointer):mem_addr(pointee)
+    {
 
+
+    }
+    void undo()
+    {
+
+    }
+    void redo()
+    {
+
+    }
+private:
+     mem_addr_t mem_addr;
+     connector_t** link;
+}
 
 
 
@@ -308,14 +328,27 @@ Computer::Computer(QObject *parent) : QObject(parent)
     Undos = new HistoryHandler();
     Undos->setUndoLimit(65535);
     //critical for being able to undo the moves
+
     for(int i = 0;i<=65535;i++)
     {
         _memory[i].addr=i;
     }
-
     savedSSP = 0;
     savedUSP = 0;
     activeStack = supervisorStack;
+}
+void Computer::lowerBoundTimes()
+{
+    clock_t t;
+    t = clock();
+    for(int i = 0;i<=65535;i++)
+    {
+        _memory[i].addr=i;
+    }
+    t = clock()- t;
+
+
+    std::cout<<"The amound of time it takes to look through the memory: "<<t<<std::endl;
 }
 
 // default
@@ -1485,9 +1518,10 @@ mem_addr_t Computer::proposedNewLocation(mem_addr_t addr,mem_addr_t begin, mem_a
 }
 
 
-void *Computer::slideMemory(mem_addr_t begin, mem_addr_t end, int32_t delta,bool makeAgreement, bool* ok)
+void *Computer::slideMemory(mem_addr_t begin, mem_addr_t end, int32_t delta,bool makeAgreement, bool*)
 {
     MASK
+            clock_t t = clock();
     qDebug("Sliding memeory");
     qDebug("I am beginning a shift");
     qDebug("That shift is beginning at "+ getHexString(begin).toLocal8Bit()+":"+ QString().setNum(begin).toLocal8Bit());
@@ -1507,18 +1541,18 @@ void *Computer::slideMemory(mem_addr_t begin, mem_addr_t end, int32_t delta,bool
         mem_addr_t smallestInShiftRange = begin+((delta>0)?0:delta);
         mem_addr_t largestInShiftRange  = end  +((delta>0)?delta:0);
 
-//        if(makeAgreement)
-//        {
-             //No point in searching before memory begins
+        if(makeAgreement)
+        {
+            //No point in searching before memory begins
             startSearch = (smallestInShiftRange<=MAXOFFSET)?0:(smallestInShiftRange-MAXOFFSET);
             //No point in searching after memory ends
             endSearch = (largestInShiftRange>=MEMSIZE-(MAXOFFSET-1))?MEMSIZE:(largestInShiftRange+(MAXOFFSET-1));
-//        }
-//        else
-//        {
-//            startSearch = smallestInShiftRange;
-//            endSearch   = largestInShiftRange;
-//        }
+        }
+        else
+        {
+            startSearch = smallestInShiftRange;
+            endSearch   = largestInShiftRange;
+        }
 
 
         /**
@@ -1536,6 +1570,8 @@ void *Computer::slideMemory(mem_addr_t begin, mem_addr_t end, int32_t delta,bool
     {
         qDebug("coulnd'");
     }
+    t = clock()-t;
+    std::cout<<t<<std::endl;
     UNMASK
 
             IFNOMASK(update(););
@@ -1559,7 +1595,7 @@ void Computer::juggleShift(mem_addr_t current, mem_addr_t begin, mem_addr_t end,
     {
         mem_addr_t curConnect = connectedAddress(curLoc);
         mem_addr_t proposedConnect = proposedNewLocation(curConnect,begin,end,delta);
-        connectionChanged=(proposedConnect==curConnect);
+        connectionChanged=(proposedConnect!=curConnect);
     }
     if((proposedNext==current) && (!connectionChanged))
     {
@@ -1571,7 +1607,7 @@ void Computer::juggleShift(mem_addr_t current, mem_addr_t begin, mem_addr_t end,
 void Computer::executeShiftCycle(mem_loc_t curLoc, mem_addr_t begin, mem_addr_t end, int32_t delta, int* changed, int offset,bool makeAgreement)
 {
     MASK
-    qDebug("Beginning Juggle");
+            qDebug("Beginning Juggle");
     while(changed[curLoc.addr-offset]!=1)
     {
         qDebug("Checking" + getHexString(curLoc.addr).toLocal8Bit());
@@ -1657,12 +1693,7 @@ bool Computer::canConnect(mem_loc_t from, mem_addr_t to)
     int power = getPCOffsetNumber(from);
     return (isBetween(-1*2^(power-1),2^(power-1)-1,from.addr-to));
 }
-val_t Computer::targetOffset(mem_loc_t mem,mem_addr_t target)
-{
 
-    int pcOffsetNumber = getPCOffsetNumber(mem);
-
-}
 
 val_t Computer::generateOffset(mem_loc_t mem, mem_addr_t target, bool* ok)
 {

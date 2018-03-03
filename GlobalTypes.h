@@ -79,7 +79,17 @@ typedef struct label_t {
     mem_addr_t addr; /** the address the label is at. */
     label_t() : name(QString()), addr(0) {}
 } label_t;
-
+typedef struct connector_t{
+    connector_t* before;
+    connector_t* after;
+    mem_addr_t connected;
+    connecter_t(mem_addr_t addr)
+        :
+          connected(addr),
+          before(nullptr),
+          after(nullptr)
+    {}
+} connector_t;
 
 /** type used to get memory.
  */
@@ -88,12 +98,15 @@ typedef struct mem_loc_t {
     val_t value; /** the value stored at that location */
     label_t *label; /** a pointer to the label for that position. might be null. */
     breakpoint_t *breakpt; /** a pointer to the breakpoint set at that position. might be null. */
+    connector_t* connectors;/** a pointer to a list of addresses which connect to it.*/
     QString comment; /** a pointer to a possible comment string. might be null. */
     mem_loc_t() :
         addr(0),
         value(0),
         label(nullptr),
         breakpt(nullptr),
+        connectors(nullptr),
+        num_Of_connections(0),
         comment(QString()) {}
 } mem_loc_t;
 

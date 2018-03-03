@@ -115,7 +115,7 @@ void Utilit::setup()
 {
 
 }
-mem_addr_t Utilit::specialSelectStart = 0;
+mem_addr_t Utilit::specialSelectStart = 1;
 mem_addr_t Utilit::specialSelectEnd = 0;
 
 

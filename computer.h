@@ -255,15 +255,13 @@ public:
     mem_addr_t proposedNewLocation(mem_addr_t addr, mem_addr_t begin, mem_addr_t end, int32_t delta, QString *code = new QString());
 
 
-    void *slideMemory(mem_addr_t begin, mem_addr_t end, int32_t delta, bool makeAgreement, bool *ok);
+    void *slideMemory(mem_addr_t begin, mem_addr_t end, int32_t delta, bool makeAgreement, bool *);
 
 
     bool canConnect(mem_loc_t from, mem_addr_t to);
     int getPCOffsetNumber(mem_loc_t mem);
     bool canShiftClean(mem_addr_t originStart, mem_addr_t originEnd, mem_addr_t destination);
     mem_loc_t createShiftedLoc(mem_loc_t original, mem_addr_t newAddress, mem_addr_t newTarget, bool *ok);
-    val_t targetOffset(mem_loc_t mem, mem_addr_t target);
-
     val_t generateOffset(mem_loc_t mem, mem_addr_t target, bool *ok);
     mem_addr_t connectedAddress(mem_addr_t addr);
     void juggleShift(mem_addr_t current, mem_addr_t begin, mem_addr_t end, int32_t delta, int *changed, int offset, bool makeAgreement);
@@ -273,6 +271,7 @@ public:
     QString name_or_addr(mem_addr_t target) const;
     QString name_or_addr(mem_loc_t target) const;
     QString mnemGen(mem_addr_t addr) const;
+    void lowerBoundTimes();
 signals:
     void update();
     void hasCharacterToDisplay();
