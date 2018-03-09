@@ -1,3 +1,11 @@
+//
+//  HistoryHandler.cpp
+//  LC3-Sim
+//
+//  Created by Joseph Melberg on 1/1/18.
+//  Copyright © 2018 EIU. All rights reserved.
+//
+
 #include "HistoryHandler.h"
 #include "Utility.h"
 #include "QUndoStack"

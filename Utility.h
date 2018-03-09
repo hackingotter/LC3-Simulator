@@ -8,6 +8,11 @@
 #include <QColor>
 #include <QDebug>
 
+
+#define ORGANIZATION "Melberg & Ott"
+#define APPNAME "PennSim++"
+
+
 #define RUBBERDUCKY true
 #define BUBBLES true
 
@@ -16,6 +21,16 @@
 #define OBJECT_SUFFIX ".obj"
 
 #define SYMBOL_SUFFIX ".sym"
+
+#define ADDSHORTCUT(NAME,KEYCOMBO,ACTION)\
+{\
+    QShortcut* newCut= new QShortcut(this);\
+    newCut->setKey(KEYCOMBO);\
+    connect(newCut,SIGNAL(activated()),this, SLOT(ACTION));\
+    newCut->setContext(Qt::WidgetShortcut);\
+    newCut->setObjectName(NAME);\
+}
+
 
 #define PCCOLOR (QColor(255,255,0))
 #define R0COLOR (QColor(0,102,204))
@@ -40,6 +55,14 @@
 
 namespace Utility {
 //static bool remember = false;
+class Utilit
+{
+public:
+    static mem_addr_t specialSelectStart;
+    static mem_addr_t specialSelectEnd;
+    static void setup();
+};
+
 
 int QSTRING2INTBASE(QString source,int suggestedBase);
 

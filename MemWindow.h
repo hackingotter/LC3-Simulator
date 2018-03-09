@@ -28,7 +28,7 @@ class MemWindow : public QWidget
     reg_t SpecialReg=PC;
 
     /*
-     * PC-Follow Feature
+     * SR-Follow Feature
      *
      * There is a special action that the user can evoke from the program.
      *
@@ -44,7 +44,7 @@ class MemWindow : public QWidget
     int getScrollOffset(val_t row, bool *ok);
 public:
     explicit MemWindow(modeler* model, HighlightScrollBar *scroll, QWidget *parent = nullptr,QString* buttonName = new QString("PC"));
-
+    MemTable* getMemView();
 signals:
 
 public slots:
@@ -53,7 +53,7 @@ public slots:
     void handleTracking();
     void setSpecialReg(reg_t reg);
 private slots:
-    void handlePCPress();
+    void handleSRPress();
     void handleGotoPress();
 };
 

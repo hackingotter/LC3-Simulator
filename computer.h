@@ -255,19 +255,24 @@ public:
 
 
     void *slideMemory(mem_addr_t begin, mem_addr_t end, int32_t delta, bool *ok);
+    void *slideMemory(mem_addr_t begin, mem_addr_t end, int32_t delta, bool makeAgreement, bool *);
+
 
 
     bool canConnect(mem_loc_t from, mem_addr_t to);
     int getPCOffsetNumber(mem_loc_t mem);
     bool canShiftClean(mem_addr_t originStart, mem_addr_t originEnd, mem_addr_t destination);
     mem_loc_t createShiftedLoc(mem_loc_t original, mem_addr_t newAddress, mem_addr_t newTarget, bool *ok);
-    val_t targetOffset(mem_loc_t mem, mem_addr_t target);
-
     val_t generateOffset(mem_loc_t mem, mem_addr_t target, bool *ok);
     mem_addr_t connectedAddress(mem_addr_t addr);
-    void juggleShift(mem_addr_t current, mem_addr_t begin, mem_addr_t end, int32_t delta, int *changed, int offset);
+    void juggleShift(mem_addr_t current, mem_addr_t begin, mem_addr_t end, int32_t delta, int *changed, bool makeAgreement, int offset);
     QString getMemNameSafe(mem_loc_t loc);
     QString getMemNameSafe(mem_addr_t addr);
+    QString mnemGen(mem_loc_t loc) const;
+    QString name_or_addr(mem_addr_t target) const;
+    QString name_or_addr(mem_loc_t target) const;
+    QString mnemGen(mem_addr_t addr) const;
+    void lowerBoundTimes();
 
 signals:
     void update();
@@ -310,6 +315,9 @@ private:
     void executeCycle();
 
     bool connectedToRange(mem_addr_t start, mem_addr_t end, mem_addr_t pov);
+    void executeShiftCycle(mem_loc_t curLoc, mem_addr_t begin, mem_addr_t end, int32_t delta, int *changed, int offset, bool makeAgreement);
+    void connectAddressTo(mem_addr_t pointee, mem_addr_t pointer);
+    void connectMemLocToAddr(mem_loc_t pointee, mem_addr_t pointer);
 };
 
 #endif // COMPUTER_H

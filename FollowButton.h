@@ -10,7 +10,7 @@ class FollowButton: public QPushButton
 {
     Q_OBJECT
 public:
-    void mouseDoubleClickEvent(QMouseEvent *event);
+    void mouseDoubleClickEvent(QMouseEvent *);
     FollowButton(QString text);
 signals:
     void doubleClicked();

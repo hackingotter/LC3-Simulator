@@ -16,8 +16,8 @@ MemWindow::MemWindow(modeler *model, HighlightScrollBar* scroll, QWidget *parent
     Input->setMaximumHeight(20);
 
     GotoButton = new QPushButton("GOTO",this);
-    GotoButton->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Fixed);
-    GotoButton->setMinimumWidth(42);
+    GotoButton->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
+    GotoButton->setMinimumWidth(40);
     GotoButton->setContentsMargins(0,0,0,0);
 
     /*
@@ -65,7 +65,7 @@ MemWindow::MemWindow(modeler *model, HighlightScrollBar* scroll, QWidget *parent
 
 
     //Making the Input Buttons Function
-    connect(SpecialButton,SIGNAL(pressed()),this,SLOT(handlePCPress()));
+    connect(SpecialButton,SIGNAL(pressed()),this,SLOT(handleSRPress()));
     connect(GotoButton,SIGNAL(pressed()),this,SLOT(handleGotoPress()));
     connect(SpecialButton,SIGNAL(doubleClicked()), this,SLOT(handleTracking()));
     //
@@ -78,9 +78,14 @@ MemWindow::MemWindow(modeler *model, HighlightScrollBar* scroll, QWidget *parent
 
 
 }
-void MemWindow::handlePCPress()
+
+MemTable *MemWindow::getMemView()
 {
-    View->scrollToRow(Computer::getDefault()->getRegister(PC));
+    return View;
+}
+void MemWindow::handleSRPress()
+{
+    View->scrollToRow(Computer::getDefault()->getRegister(SpecialReg));
 }
 void MemWindow::handleGotoPress()
 {
@@ -121,7 +126,7 @@ void MemWindow::kick()
     View->show();
     if(followmode)
     {
-        handlePCPress();
+        handleSRPress();
     }
 }
 

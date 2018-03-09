@@ -18,6 +18,7 @@
 #include "ScrollBarHandler.h"
 #include "InOutSet.h"
 #include "WatchWatcher.h"
+#include "MemWindow.h"
 #define BRSLOT 0
 #define ADDRSLOT 1
 #define NAMESLOT 2
@@ -55,6 +56,7 @@ class MainWindow : public QMainWindow
     Ui::MainWindow *ui;
 
 
+    MemWindow *makeNConnectNewMemWindow(modeler *model);
 public:
     /**
      * @brief model The main model for the memory tables
