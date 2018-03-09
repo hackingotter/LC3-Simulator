@@ -316,7 +316,7 @@ public:
 private:
      mem_addr_t mem_addr;
      connector_t** link;
-}
+};
 
 
 

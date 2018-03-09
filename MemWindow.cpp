@@ -7,7 +7,7 @@ MemWindow::MemWindow(modeler *model, HighlightScrollBar* scroll, QWidget *parent
 {
     QHBoxLayout* hLayout = new QHBoxLayout();
     hLayout->setContentsMargins(0,0,0,0);
-    Label = new QLabel("name");
+    Label = new QLabel("Memory View");
     Label->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
 
 

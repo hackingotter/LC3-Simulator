@@ -83,7 +83,7 @@ typedef struct connector_t{
     connector_t* before;
     connector_t* after;
     mem_addr_t connected;
-    connecter_t(mem_addr_t addr)
+    connector_t(mem_addr_t addr)
         :
           connected(addr),
           before(nullptr),
@@ -106,7 +106,7 @@ typedef struct mem_loc_t {
         label(nullptr),
         breakpt(nullptr),
         connectors(nullptr),
-        num_Of_connections(0),
+
         comment(QString()) {}
 } mem_loc_t;
 
