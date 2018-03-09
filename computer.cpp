@@ -319,7 +319,11 @@ public:
     }
 private:
      mem_addr_t mem_addr;
+<<<<<<< HEAD
      connector_t* link;
+=======
+     connector_t** link;
+>>>>>>> Not-Working-Copy
 };
 
 
