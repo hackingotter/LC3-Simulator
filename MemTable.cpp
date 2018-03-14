@@ -27,14 +27,7 @@
 
 #define HEX_COLUMN_WIDTH 60
 
-#define ADDSHORTCUT(NAME,KEY,FUNCTION)\
-{\
-    QShortcut* cut = new QShortcut(this);\
-    cut->setKey(KEY);\
-    connect(cut,SIGNAL(activated()),this,SLOT(FUNCTION));\
-    cut->setContext(Qt::WidgetShortcut);\
-    cut->setObjectName(NAME);\
-    }
+
 MemTable::MemTable(modeler* model,QWidget* parent):QTableView(parent)
 {
 
@@ -177,14 +170,6 @@ void MemTable::selectedClickOptions(const QPoint &pos,QMenu* clickMenu)
 
     }
 
-}
-void MemTable::handleShift()
-{
-    bool b = 0;
-    val_t start = selectedIndexes().constFirst().row();
-    //    val_t start
-
-    //       Computer::getDefault()->slideMemory(10,20,5,&b);
 }
 void MemTable::scrollToSelected()
 {

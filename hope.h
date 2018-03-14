@@ -51,6 +51,11 @@ public slots:
     void update(mem_addr_t addr);
 signals:
     void mouseMoved(QString);
+private slots:
+    void left();
+    void right();
+    void up();
+    void down();
 private:
     void customCursor(int x, int y);
 

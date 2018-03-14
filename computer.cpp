@@ -37,7 +37,7 @@ enum doPriority{
     userLevel = 1,
 
 };
-static bool remember;
+
 class PrioritizedCommand: public QUndoCommand
 {
 public:
@@ -526,9 +526,10 @@ mem_loc_t *Computer::getMemLocationsBlock(mem_addr_t addr, val_t blockSize)
 void Computer::setMemValue(mem_addr_t addr, val_t val)
 {
     qDebug("Settin' Mem");
+
     val_t oval = _memory[addr].value;
     _memory[addr].value = val;
-
+    if(oval== val)return;
     if(addr>=0xfe00)    qDebug(getHexString(addr).toLocal8Bit());
 
 
@@ -773,6 +774,7 @@ val_t getImm5(val_t inst) {
 }
 
 void Computer::add(val_t inst) {
+    incrementPC();
     reg_t dr = getRegister_9_10_11(inst);
     reg_t sr1 = getRegister_6_7_8(inst);
     val_t a = getRegister(sr1);
@@ -825,6 +827,7 @@ void Computer::add(val_t inst) {
 }
 
 void Computer::and_op(val_t inst) {
+    incrementPC();
     reg_t dr = getRegister_9_10_11(inst);
     reg_t sr1 = getRegister_6_7_8(inst);
     val_t a = getRegister(sr1);
@@ -860,6 +863,7 @@ void Computer::and_op(val_t inst) {
 }
 
 void Computer::mul(val_t inst) {
+    incrementPC();
     reg_t dr = getRegister_9_10_11(inst);
     reg_t sr1 = getRegister_6_7_8(inst);
     val_t a = getRegister(sr1);
@@ -911,6 +915,7 @@ void Computer::mul(val_t inst) {
 }
 
 void Computer::not_op(val_t inst) {
+    incrementPC();
     reg_t dr = getRegister_9_10_11(inst);
     reg_t sr = getRegister_6_7_8(inst);
     val_t a = getRegister(sr);
@@ -956,6 +961,7 @@ void Computer::br(val_t inst) {
             return;
         }
     }
+    incrementPC();
     // no op
 }
 
@@ -968,7 +974,9 @@ void Computer::executeBr(val_t inst) {
         offset |= 0xFE00;
     }
     pc += offset;
+
     setRegister(PC,pc);
+    incrementPC();
 }
 
 void Computer::executeCycle()
@@ -977,7 +985,6 @@ void Computer::executeCycle()
     mem_loc_t instLoc = getMemLocation(pcAddr);
     val_t inst = instLoc.value;
     Undos->beginMacro("Executing "+getHexString(pcAddr));
-    setRegister(PC, pcAddr + 1);
     switch (inst & opMask) {
     case addOpCode:
         add(inst);
@@ -1057,13 +1064,15 @@ void Computer::jmp(val_t inst) {
 
 void Computer::jsr(val_t inst) {
 
-    mem_addr_t jsrAddr;
+
+    incrementPC();
+    mem_addr_t jsrAddr ;
     mem_addr_t tmpPc = getRegister(PC);
 
     if (bitMask(11) & inst) {
         // offset mode
         val_t offset = getSignedOffset11(inst);
-        jsrAddr += offset;
+        jsrAddr = tmpPc + offset;
 
     } else {
         // link mode
@@ -1082,8 +1091,9 @@ void Computer::jsr(val_t inst) {
 }
 
 void Computer::ld(val_t inst) {
+    incrementPC();
     reg_t dr = getRegister_9_10_11(inst);
-    val_t offset = getOffset9(inst);
+    val_t offset = getSignedOffset9(inst);
 
 
     mem_addr_t addr = getRegister(PC) + offset;
@@ -1104,6 +1114,7 @@ void Computer::ld(val_t inst) {
 }
 
 void Computer::ldi(val_t inst) {
+    incrementPC();
     reg_t dr = getRegister_9_10_11(inst);
     val_t offset = getSignedOffset9(inst);
 
@@ -1149,10 +1160,11 @@ void Computer::ldr(val_t inst) {
     }
 
     checkSpecialAddressRead(addr);
+    incrementPC();
 }
 
 void Computer::lea(val_t inst) {
-
+    incrementPC();
     reg_t dr = getRegister_9_10_11(inst);
     val_t offset = getSignedOffset9(inst);
 
@@ -1190,6 +1202,7 @@ void Computer::rti(val_t inst) {
 }
 
 void Computer::st(val_t inst) {
+    incrementPC();
     reg_t sr = getRegister_9_10_11(inst);
     val_t offset = getSignedOffset9(inst);
     mem_addr_t addr = getRegister(PC) + offset;
@@ -1200,6 +1213,7 @@ void Computer::st(val_t inst) {
 }
 
 void Computer::sti(val_t inst) {
+    incrementPC();
     val_t offset = getSignedOffset9(inst);
     mem_addr_t pc = getRegister(PC);
     mem_addr_t innerAddr = pc + offset;
@@ -1222,6 +1236,7 @@ void Computer::str(val_t inst) {
     setMemValue(addr, srVal);
 
     checkSpecialAddressWrite(addr);
+    incrementPC();
 }
 
 void Computer::trap(val_t inst) {
@@ -1243,7 +1258,7 @@ val_t Computer::getSignedOffset11(val_t inst)
     val_t offset = getOffset11(inst);
     if (offset & bitMask(10)) {
         // sign extend
-        offset |= 0xF400;
+        offset |= 0xF800;
     }
     return offset;
 }
@@ -1273,9 +1288,9 @@ void Computer::checkMemAccess(mem_addr_t addr)
         val_t sector = addr & 0xF000; // select first 4 bits
         sector >>= 12; // move the bits so they become a number
         val_t sectorMap = 1 << sector;
-        //        if ((sectorMap & _memory[MPR].value) == 0) {
-        //            throw 'Privilege Mode Exception: Trying to address blocked memory';
-        //        }
+//                if ((sectorMap & _memory[MPR].value) == 0) {
+//                    throw 'Privilege Mode Exception: Trying to address blocked memory';
+//                }
     }
 }
 
@@ -1330,6 +1345,17 @@ void Computer::startExecution()
         executeCycle();
     }
 
+}
+void Computer::continueExecution()
+{
+    Undos->beginMacro("Begining Execution at "+getHexString(getRegister(PC)));
+    setRunning(true);
+    do
+    {
+        executeCycle();
+    } while(getMemBreakPoint(getRegister(PC)) == 0);
+    setRunning(false);
+    Undos->endMacro();
 }
 
 void Computer::executeUntilAddress(mem_addr_t addr)
@@ -1418,47 +1444,7 @@ bool Computer::canShiftClean(mem_addr_t originStart, mem_addr_t originEnd,mem_ad
 }
 
 
-bool Computer::preventShiftProblems(mem_addr_t original, mem_addr_t destination,val_t lengthGroupMoved,bool force)
-{
-    //It is understandable that people will want the ablility to shift their
-    //code around.  This presents a problem, once labels are allowed, as
-    //they don't do well when you move one end and not the other.
 
-    mem_addr_t startSearch = (original<=1024)?0:(original-1024);
-    mem_addr_t endSearch = (original>=MEMSIZE-1023)?MEMSIZE:(original+1023);
-
-
-
-
-    return startSearch==destination==lengthGroupMoved==endSearch;
-    /*
-     * We don't need to seach outside what is visible to the original section
-     * right now, we are only keeping track of the beginning.
-     */
-
-    //now, we search for anything that cares about offset.
-
-    /* the simplest case arises when either of two things is true:
-         *
-         * Case 1: The line doesn't care about where anything else is.
-         *
-         * Case 2: The line does care about where another line is, but that
-         * line is within the group being moved.
-         *
-         *
-         * For these cases, we simply pass them by
-         */
-
-    //It turns out that it only matters when the connections go from in/out
-    //side of the group to the out/inside of the
-    //        if(connectedToRange())
-
-
-
-
-
-    return true;
-}
 
 bool Computer::stillInRange(mem_addr_t current, int32_t delta, mem_addr_t beginRange,mem_addr_t endRange)
 {
@@ -1635,10 +1621,7 @@ bool Computer::isBetween(val_t min, val_t max, val_t val )
     //    std::cout<<b<<std::endl;
     return b;
 }
-mem_addr_t Computer::connectedAddress(mem_addr_t addr)
-{
-    return connectedAddress(_memory[addr]);
-}
+
 mem_addr_t Computer::connectedAddress(mem_loc_t mem)
 {
 
@@ -1739,11 +1722,8 @@ mem_addr_t Computer::findSpace(mem_addr_t startSearch,int minimumSize)
         
     }
 }
-QString Computer::getMemNameSafe(mem_addr_t addr)
-{
-    return getMemNameSafe(_memory[addr]);
-}
-QString Computer::getMemNameSafe(mem_loc_t loc)
+
+QString Computer::getMemNameSafe(mem_loc_t loc) const
 {
     label_t* l = loc.label;
     if(l)
@@ -1751,6 +1731,11 @@ QString Computer::getMemNameSafe(mem_loc_t loc)
         return l->name;
     }
     return QString();
+}
+
+QString Computer::getMemNameSafe(mem_addr_t addr) const
+{
+    return getMemNameSafe(_memory[addr]);
 }
 
 QString Computer::mnemGen(mem_addr_t addr) const
@@ -1833,7 +1818,7 @@ QString Computer::mnemGen(mem_loc_t loc)const
             }
         if((val&0x0E00)==0x0000)
         {
-            out = BADOP;
+//            out = BADOP;
         }
         else
         {
@@ -1851,7 +1836,7 @@ QString Computer::mnemGen(mem_loc_t loc)const
         if((val&0x0E3F))//if there are ones outside of the OpCode and BaseR
             //Bad Op
         {
-            out = BADOP;
+//            out = BADOP;
         }
         else if(val&0x01C0)//if so, RET is the proper memn
         {
@@ -1866,7 +1851,6 @@ QString Computer::mnemGen(mem_loc_t loc)const
     }
     case jsrOpCode:
     {
-        qDebug("JSR");
         if(val&0x0800)//11th slot 1 means jsr
         {
             val_t offset = val& 0x07FF;
@@ -1881,7 +1865,7 @@ QString Computer::mnemGen(mem_loc_t loc)const
         }
         else
         {
-            out = BADOP;
+
         }
         break;
     }
@@ -1910,7 +1894,7 @@ QString Computer::mnemGen(mem_loc_t loc)const
     {
         if(val&0x0F00)
         {
-            out = BADOP;
+//            out = BADOP;
         }
         else
         {
@@ -1918,8 +1902,17 @@ QString Computer::mnemGen(mem_loc_t loc)const
         }
         break;
     }
+    case notOpCode:
+    {
+        out.append("R"+QSTRNUM(reg11)+", R"+QSTRNUM(reg8));
+    }
     }
     return out;
+}
+
+QString Computer::name_or_addr(mem_addr_t target) const
+{
+    return name_or_addr(_memory[target]);
 }
 
 QString Computer::name_or_addr(mem_loc_t target) const
@@ -1936,7 +1929,8 @@ QString Computer::name_or_addr(mem_loc_t target) const
     }
     return "";
 }
-QString Computer::name_or_addr(mem_addr_t target) const
+
+void Computer::incrementPC()
 {
-    return name_or_addr(_memory[target]);
+    setRegister(PC, getRegister(PC) + 1);
 }

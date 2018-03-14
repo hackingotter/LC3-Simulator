@@ -67,12 +67,7 @@
 
 
 #define SETUPDISPLAY(UI,THIS)\
-    qDebug("Setting up the display");\
-    disp = new Hope(THIS);\
-    UI->verticalLayout_11->addWidget(disp,0,Qt::AlignCenter);\
-    disp->autoFillBackground();\
-    disp->setMinimumSize(SCREEN_WIDTH,SCREEN_HEIGHT);\
-    disp->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);\
+    qDebug("Setting up the display");
 
 #define FINISHING_TOUCHES(DISP,MODEL)\
     disp->update();
@@ -119,7 +114,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     qDebug("About to setup ui");
     ui->setupUi(this);//this puts everything in place
 
-    SETUPDISPLAY(ui,this)
+    setupDisplay();
     setupMenuBar();
     setupRegisterView();
     setupViews();
@@ -134,7 +129,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 //    QObject::connect(Computer::getDefault() ,SIGNAL(update()),disp,SLOT(update()));
     QObject::connect(Computer::getDefault() ,SIGNAL(update()),this,SLOT(update()));
-    QObject::connect(disp,SIGNAL(mouseMoved(QString)),ui->statusBar,SLOT(showMessage(QString)));
+    QObject::connect(disp,SIGNAL(mouseMoved(QString)),ui->Mouseposition,SLOT(setText(QString)));
     qDebug("Connecting ");
 
     QObject::connect(ui->actionClear,SIGNAL(triggered()),disp,SLOT(clearScreen()));
@@ -240,6 +235,7 @@ void MainWindow::setupMenuBar()
 void MainWindow::setupControlButtons()
 {
 CONNECT(ui->haltButton,pressed(),manager,requestHalt());
+
 }
 bool MainWindow::loadFile(QString path)
 {
@@ -387,6 +383,20 @@ void MainWindow::handleFiles()
     Bill.assembleFile(inputPath.toLatin1().data(),"LC3Maybe.obj");
     Computer::getDefault()->loadProgramFile("LC3Maybe.obj");
     IFNOMASK(emit update();)
+}
+
+void MainWindow::setupDisplay()
+
+{
+
+    disp = new Hope();
+    QHBoxLayout* qhbl= new QHBoxLayout();
+         qhbl->addWidget(disp,0,Qt::AlignCenter);
+            ui->verticalLayout_11->addLayout(qhbl);
+    disp->autoFillBackground();
+    disp->setMinimumSize(SCREEN_WIDTH,SCREEN_HEIGHT);
+    disp->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
+
 }
 
 void MainWindow::setupMemView(QTableView* view, bool setmodel, bool setScroll)
@@ -711,3 +721,8 @@ void MainWindow::on_consoleEnterButton_pressed()
 
 
 
+
+void MainWindow::on_continueButton_pressed()
+{
+    manager->activate(Bridge::Break);
+}

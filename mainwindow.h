@@ -25,8 +25,8 @@
 
 #define VIDEO_ADDR (0xC000)
 
-#define DISPLAY_WIDTH  124
-#define DISPLAY_HEIGHT 128
+#define DISPLAY_WIDTH  128
+#define DISPLAY_HEIGHT 124
 #define DISPLAY_SCALE  2
 
 #define SCREEN_WIDTH   DISPLAY_WIDTH *DISPLAY_SCALE
@@ -148,6 +148,7 @@ public slots:
 
     void on_StackViewGotoButton_pressed();
 
+    void setupDisplay();
     void setupViews();
     void setupWatches();
 
@@ -218,6 +219,7 @@ private slots:
     void on_undoButton_pressed();
     void on_redoButton_pressed();
     void on_consoleEnterButton_pressed();
+    void on_continueButton_pressed();
 };
 
 #endif // MAINWINDOW_H

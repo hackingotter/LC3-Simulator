@@ -21,7 +21,7 @@ QVariant WatchModel::data(const QModelIndex &index, int role) const
 bool WatchModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
 //    qDebug("The index of ("+index.row() + "," + index.column()+") is pointing at (" + Offset->indexOf(index.row())+","+index.column());
-     modeler* that = (modeler*)this;
+//     modeler* that = (modeler*)this;
 
     const QModelIndex offsetIndex = QAbstractItemModel::createIndex((int)(Offset->at(index.row())),index.column(),index.internalPointer());
     qDebug(QString().setNum(index.row()).toLocal8Bit());

@@ -7,7 +7,7 @@
 #include "Util.h"
 #include <QColor>
 #include <QDebug>
-
+#include "QShortcut"
 
 #define ORGANIZATION "Melberg & Ott"
 #define APPNAME "PennSim++"
@@ -43,6 +43,14 @@
 
 #define CHARPTR2QSTRING(CHARPTR)(QString::fromLocal8Bit(CHARPTR))
 
+#define ADDSHORTCUT(NAME,KEY,FUNCTION)\
+{\
+    QShortcut* cut = new QShortcut(this);\
+    cut->setKey(KEY);\
+    connect(cut,SIGNAL(activated()),this,SLOT(FUNCTION));\
+    cut->setContext(Qt::WidgetShortcut);\
+    cut->setObjectName(NAME);\
+    }
 namespace Utility {
 //static bool remember = false;
 class Utilit

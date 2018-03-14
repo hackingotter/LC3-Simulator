@@ -51,6 +51,7 @@ Assembler::Assembler() : parserRegex(regex(
 }
 
 void Assembler::assembleFile(const char *inFile, const char *outFile) {
+    MASK
     std::ifstream iStream(inFile, std::ios_base::in);
     std::ofstream oStream(outFile, std::ios_base::out | std::ios_base::binary);
 
@@ -92,6 +93,8 @@ void Assembler::assembleFile(const char *inFile, const char *outFile) {
 
     iStream.close();
     oStream.close();
+    UNMASK
+
 }
 
 std::map<QString, uint16_t>* Assembler::labelDictCopy()
@@ -539,7 +542,7 @@ uint16_t Assembler::getConstantBits(const string &instruction, int nOfRegs, NumO
             break;
         case 2:
             if (instruction == "NOT") {
-                op |= 0x007F;
+                op |= 0x003F;
             } else if (instruction == "AND") {
                 if (nOrL != none) {
                     // add, and, mul with number not register

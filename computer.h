@@ -241,7 +241,7 @@ public:
 
     mem_addr_t connectedAddress(mem_loc_t mem);
     bool previewShift(mem_addr_t originStart, mem_addr_t originEnd, mem_addr_t destination);
-    bool preventShiftProblems(mem_addr_t original, mem_addr_t destination, val_t lengthGroupMoved, bool force);
+
     bool isBetween(val_t min, val_t max, val_t val);
     bool stillInRange(mem_addr_t current, int32_t delta, mem_addr_t beginRange, mem_addr_t endRange);
     bool betweenShifts(mem_addr_t addr, int32_t delta, mem_addr_t begin, mem_addr_t end);
@@ -263,15 +263,16 @@ public:
     bool canShiftClean(mem_addr_t originStart, mem_addr_t originEnd, mem_addr_t destination);
     mem_loc_t createShiftedLoc(mem_loc_t original, mem_addr_t newAddress, mem_addr_t newTarget, bool *ok);
     val_t generateOffset(mem_loc_t mem, mem_addr_t target, bool *ok);
-    mem_addr_t connectedAddress(mem_addr_t addr);
+    mem_addr_t connectedAddress(mem_addr_t addr){return connectedAddress(_memory[addr]);}
     void juggleShift(mem_addr_t current, mem_addr_t begin, mem_addr_t end, int32_t delta, int *changed, int offset, bool makeAgreement);
-    QString getMemNameSafe(mem_loc_t loc);
-    QString getMemNameSafe(mem_addr_t addr);
+    QString getMemNameSafe(mem_loc_t loc) const;
+    QString getMemNameSafe(mem_addr_t addr) const;
     QString mnemGen(mem_loc_t loc) const;
     QString name_or_addr(mem_addr_t target) const;
     QString name_or_addr(mem_loc_t target) const;
     QString mnemGen(mem_addr_t addr) const;
     void lowerBoundTimes();
+    void incrementPC();
 signals:
     void update();
     void hasCharacterToDisplay();
@@ -279,6 +280,7 @@ signals:
     void popDisplay();
 public slots:
 
+    void continueExecution();
 private:
     val_t registers[11];
     mem_loc_t _memory[0xFFFF+1];

@@ -40,7 +40,6 @@ public slots:
     void handleCopy();
     void handlePasteOver();
     void scrollToSelected();
-    void handleShift();
     void handleCut();
     void kick();
 private slots:

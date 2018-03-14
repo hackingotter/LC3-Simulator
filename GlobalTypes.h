@@ -80,15 +80,18 @@ typedef struct label_t {
     label_t() : name(QString()), addr(0) {}
 } label_t;
 typedef struct connector_t{
+
+    mem_addr_t connected;
     connector_t* before;
     connector_t* after;
-    mem_addr_t connected;
+
     connector_t(mem_addr_t addr)
         :
           connected(addr),
           before(nullptr),
           after(nullptr)
     {}
+
 } connector_t;
 
 /** type used to get memory.

@@ -64,6 +64,11 @@ void Bridge::process()
         qDebug(QString().setNum(*ok).toLocal8Bit());
         break;
     }
+    case Break:
+    {
+        qDebug("Until Break");
+        Computer::getDefault()->continueExecution();
+    }
     default:qDebug("Welp");
 
     }

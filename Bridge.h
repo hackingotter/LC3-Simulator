@@ -14,7 +14,8 @@ public:
     {
         Step = 0,
         Next = 1,
-        Done = 2
+        Done = 2,
+        Break = 3
     };
 
     Bridge(int run);
