@@ -981,6 +981,7 @@ void Computer::executeBr(val_t inst) {
 
 void Computer::executeCycle()
 {
+    MASK
     mem_addr_t pcAddr = getRegister(PC);
     mem_loc_t instLoc = getMemLocation(pcAddr);
     val_t inst = instLoc.value;
@@ -1042,6 +1043,8 @@ void Computer::executeCycle()
         break;
     }
     Undos->endMacro();
+    UNMASK
+            IFNOMASK(update();)
 }
 
 void Computer::jmp(val_t inst) {
@@ -1348,6 +1351,7 @@ void Computer::startExecution()
 }
 void Computer::continueExecution()
 {
+    MASK
     Undos->beginMacro("Begining Execution at "+getHexString(getRegister(PC)));
     setRunning(true);
     do
@@ -1356,10 +1360,13 @@ void Computer::continueExecution()
     } while(getMemBreakPoint(getRegister(PC)) == 0);
     setRunning(false);
     Undos->endMacro();
+    UNMASK
+            IFNOMASK(update();)
 }
 
 void Computer::executeUntilAddress(mem_addr_t addr)
 {
+    MASK
     Undos->beginMacro("Executing from " + getHexString(getRegister(PC)) + " until "+getHexString(addr));
     setRunning(true);
 
@@ -1369,7 +1376,8 @@ void Computer::executeUntilAddress(mem_addr_t addr)
 
     setRunning(false);
     Undos->endMacro();
-
+    UNMASK
+            IFNOMASK(update();)
 }
 
 bool Computer::setKeyboardCharacter(char c, bool force)

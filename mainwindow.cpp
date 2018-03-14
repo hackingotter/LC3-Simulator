@@ -726,3 +726,14 @@ void MainWindow::on_continueButton_pressed()
 {
     manager->activate(Bridge::Break);
 }
+
+void MainWindow::on_RestoreButton_pressed()
+{
+    MASK
+}
+
+void MainWindow::on_SaveButton_pressed()
+{
+    UNMASK
+            IFNOMASK(update();)
+}

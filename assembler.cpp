@@ -118,6 +118,7 @@ QString Assembler::labelForAddress(mem_addr_t addr)
 
 void Assembler::passLabelsToComputer(Computer *comp)
 {
+    MASK
     if (startingAddress == 0xFFFF) {
         return;
     }
@@ -134,6 +135,7 @@ void Assembler::passLabelsToComputer(Computer *comp)
             comp->setMemLabelText(addr,text);
         }
     }
+    UNMASK
 }
 
 QString Assembler::commentForAddress(mem_addr_t addr)
@@ -149,9 +151,11 @@ QString Assembler::commentForAddress(mem_addr_t addr)
 
 void Assembler::passCommentsToComputer(Computer *comp)
 {
+    MASK
     foreach (const auto n, commentDict) {
         comp->setMemComment(n.first,n.second);
     }
+    UNMASK
 }
 
 uint16_t Assembler::processLine(string &line, RunType runType, uint16_t pc, ofstream &oStream) {
