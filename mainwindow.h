@@ -13,6 +13,7 @@
 #include "hope.h"
 #include "Utility.h"
 #include "Bridge.h"
+#include "QSettings"
 #include "ThreadManager.h"
 #include "StackModeler.h"
 #include "ScrollBarHandler.h"
@@ -32,7 +33,8 @@
 #define SCREEN_WIDTH   DISPLAY_WIDTH *DISPLAY_SCALE
 #define SCREEN_HEIGHT  DISPLAY_HEIGHT*DISPLAY_SCALE
 
-
+#define DEFAULT_WINDOW_WIDTH 1163
+#define DEFAULT_WINDOW_HEIGHT 694
 
 
 
@@ -57,6 +59,9 @@ class MainWindow : public QMainWindow
 
 
     MemWindow *makeNConnectNewMemWindow(modeler *model);
+    int getScreenWidth();
+    int getScreenHeight();
+
 public:
     /**
      * @brief model The main model for the memory tables
@@ -133,6 +138,7 @@ public:
 
 
 
+    void setupConnections();
 public slots:
     /**
      * on_MemView2GotoButton_pressed
@@ -163,7 +169,7 @@ public slots:
 
     void setupRegisterView();
 
-    void setupStackView(QTableView* view);
+    void setupStackView();
 
     void setupThreadManager();
 

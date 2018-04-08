@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" binding="early" name="State Chart" qt:editorversion="4.4.0" xmlns:qt="http://www.qt.io/2015/02/scxml-ext">
+    <state id="Normal">
+        <qt:editorinfo geometry="288.53;158.59;-60;-50;120;100" scenegeometry="288.53;158.59;228.53;108.59;120;100"/>
+        <transition type="external" event="Transition_1">
+            <qt:editorinfo localGeometry="0;292.62;-37.86;292.62;-37.86;292.62;-21.49;324.34;-21.49;324.34;-21.49;324.34;131.99;324.34"/>
+        </transition>
+    </state>
+    <state id="Doing">
+        <qt:editorinfo geometry="276.25;476.79;-60;-50;120;100" scenegeometry="276.25;476.79;216.25;426.79;120;100"/>
+    </state>
+</scxml>

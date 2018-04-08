@@ -49,6 +49,7 @@ modeler::modeler(QObject *parent,bool* access): QStandardItemModel(parent),threa
 }
 
 
+
 QVariant modeler::headerData(int section, Qt::Orientation orientation, int role) const
 {
     return QStandardItemModel::headerData(section,orientation,role);
@@ -67,6 +68,10 @@ bool modeler::setHeaderData(int section, Qt::Orientation orientation, const QVar
 
 QModelIndex modeler::index(int row, int column, const QModelIndex &parent) const
 {
+    if(this->isFlipped)
+    {
+        row = 0xBFFF-row;
+    }
     return QStandardItemModel::index(row,column,parent);
 }
 

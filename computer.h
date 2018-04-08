@@ -226,6 +226,7 @@ public:
 
     mem_addr_t findSpace(mem_addr_t startSearch, int minimumSize);
     bool insertBlankRow(mem_addr_t addr);
+    static int getSignedImm6(val_t inst);
     static val_t getSignedOffset6(val_t inst);
     static val_t getSignedOffset9(val_t inst);
     static val_t getSignedOffset11(val_t inst);
@@ -274,10 +275,13 @@ public:
     void lowerBoundTimes();
     void incrementPC();
 signals:
+    void updateDisplay();
     void update();
     void hasCharacterToDisplay();
     void pushDisplay(val_t character);
     void popDisplay();
+    void memChanged(mem_addr_t addr);
+    void memValueChanged(mem_addr_t addr);
 public slots:
 
     void continueExecution();

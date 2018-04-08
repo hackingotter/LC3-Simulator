@@ -1,3 +1,4 @@
+#include "QScreen"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QStandardItemModel>
@@ -25,9 +26,11 @@
 #include "StackModeler.h"
 #include "DoUndo.h"
 #include "FileHandler.h"
+#include "UndoStackView.h"
 #include <QSettings>
 #include <QMessageBox>
 #include <QFileDialog>
+#include "HelpMenu.h"
 #include "MemTable.h"
 #include <QDataStream>
 #include "Assembler.h"
@@ -40,8 +43,8 @@
 #include <QCoreApplication>
 #define REGISTERVIEWNUMCOLUMN 2
 #define SCROLLTO(VIEW,INPUT)\
-    {\
-        (VIEW)->scrollTo((VIEW)->model()->index(INPUT,0),QAbstractItemView::PositionAtTop);\
+{\
+    (VIEW)->scrollTo((VIEW)->model()->index(INPUT,0),QAbstractItemView::PositionAtTop);\
     }
 
 #define MEMVIEWSETUPPERCENT 20
@@ -79,15 +82,19 @@
 #define UPDATE_COND_DISPLAY(UI)\
     switch(getProgramStatus())\
 {\
-        case cond_n:UI->RegisterView->item((int)PSR,REGISTERVIEWNUMCOLUMN)->setText("N");break;\
-        case cond_z:UI->RegisterView->item((int)PSR,REGISTERVIEWNUMCOLUMN)->setText("Z");break;\
-        case cond_p:UI->RegisterView->item((int)PSR,REGISTERVIEWNUMCOLUMN)->setText("P");break;\
-        case cond_none:UI->RegisterView->item((int)PSR,REGISTERVIEWNUMCOLUMN)->setText("ERR");break;\
-        default:UI->RegisterView->item((int)PSR,REGISTERVIEWNUMCOLUMN)->setText("P");\
-}
+    case cond_n:UI->RegisterView->item((int)PSR,REGISTERVIEWNUMCOLUMN)->setText("N");break;\
+    case cond_z:UI->RegisterView->item((int)PSR,REGISTERVIEWNUMCOLUMN)->setText("Z");break;\
+    case cond_p:UI->RegisterView->item((int)PSR,REGISTERVIEWNUMCOLUMN)->setText("P");break;\
+    case cond_none:UI->RegisterView->item((int)PSR,REGISTERVIEWNUMCOLUMN)->setText("ERR");break;\
+    default:UI->RegisterView->item((int)PSR,REGISTERVIEWNUMCOLUMN)->setText("P");\
+    }
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
+
+    HelpMenu* help = new HelpMenu();
+    help->show();
+    help->activateWindow();
 
     Computer::getDefault()->lowerBoundTimes();
     std::cout<<Computer::getDefault()->proposedNewLocation(8,5,10,-2)<<std::endl;
@@ -113,7 +120,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     qDebug("About to setup ui");
     ui->setupUi(this);//this puts everything in place
-
+    setupConnections();
     setupDisplay();
     setupMenuBar();
     setupRegisterView();
@@ -127,7 +134,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     Bridge::doWork();
     qDebug("Connecting Disp");
 
-//    QObject::connect(Computer::getDefault() ,SIGNAL(update()),disp,SLOT(update()));
+    //    QObject::connect(Computer::getDefault() ,SIGNAL(update()),disp,SLOT(update()));
     QObject::connect(Computer::getDefault() ,SIGNAL(update()),this,SLOT(update()));
     QObject::connect(disp,SIGNAL(mouseMoved(QString)),ui->Mouseposition,SLOT(setText(QString)));
     qDebug("Connecting ");
@@ -135,20 +142,24 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     QObject::connect(ui->actionClear,SIGNAL(triggered()),disp,SLOT(clearScreen()));
 
     ui->undoStackSpot->addWidget(new QUndoView(Computer::getDefault()->Undos));
-//    QObject::connect(ui->NextButton,SIGNAL(on_NextButton_pressed()),ui->RegisterView,SLOT(update()));
+    //    QObject::connect(ui->NextButton,SIGNAL(on_NextButton_pressed()),ui->RegisterView,SLOT(update()));
     readSettings();
-//    setupMenuBar();
-//    Computer::getDefault()->loadProgramFile(QString("testing.asm").toLocal8Bit().data());
+    //    setupMenuBar();
+    //    Computer::getDefault()->loadProgramFile(QString("testing.asm").toLocal8Bit().data());
 
     update();
-//    qDebug(QString().setNum(th->processId()).toLocal8Bit());
+    //    qDebug(QString().setNum(th->processId()).toLocal8Bit());
 
 
 
 
-//    ui->MemView1->layout()->addWidget(new MemWindow(model));
+    //    ui->MemView1->layout()->addWidget(new MemWindow(model));
 
+    Computer::getDefault()->setMemValue(0,0x1FFF);
+    Computer::getDefault()->setMemValue(1,0x7fc0);
+    Computer::getDefault()->setMemValue(2,0x0FFD);
 
+    Computer::getDefault()->setRegister(R7,0xBFFF);
 
 
 }
@@ -166,6 +177,7 @@ void MainWindow::setupViews()
     qDebug("Setting Up Views");
     qDebug("Now will be making the model");
     this->model = new modeler(this, threadRunning);
+
     this->StackModel = new StackModeler(this,threadRunning);
     qInfo("Header made");
     qInfo("Size Set");
@@ -173,23 +185,13 @@ void MainWindow::setupViews()
     Saturn = new ScrollBarHandler();
     for(int i = 0;i<3;i++)
     {
-
         MemWindow* memy = new MemWindow(model,Saturn->generateBar());
-    CONNECT(this,signalUpdate(),memy,kick());
-    ui->MemorySplitter->addWidget(memy);
-};
-
-
-
-
-//    setupMemView(ui->MemView1View);
+        CONNECT(this,signalUpdate(),memy,kick());
+        ui->MemorySplitter->addWidget(memy);
+    };
     setupMemView(ui->MemView3View);
-    setupStackView(ui->StackViewView);
-//    MEMVIEWSETUP(ui->MemView2View,model);
-//    MEMVIEWSETUP(ui->MemView3View,model);
 
-
-
+    setupStackView();
     qDebug("Model Created");
     /*
      * There is an assumption that hitting enter will cause an input to be entered.
@@ -197,9 +199,9 @@ void MainWindow::setupViews()
      */
     qDebug("Connecting View interfaces");
     {
-     //   connect(ui->MemView1Input,SIGNAL(returnPressed()),ui->MemView1GotoButton,SLOT(click()));
+        //   connect(ui->MemView1Input,SIGNAL(returnPressed()),ui->MemView1GotoButton,SLOT(click()));
         connect(ui->MemView3Input,SIGNAL(returnPressed()),ui->MemView3GotoButton,SLOT(click()));
-        connect(ui->StackViewInput,SIGNAL(returnPressed()),ui->StackViewGotoButton,SLOT(click()));
+        //        connect(ui->StackViewInput,SIGNAL(returnPressed()),ui->StackViewGotoButton,SLOT(click()));
 
 
     }
@@ -234,8 +236,14 @@ void MainWindow::setupMenuBar()
 }
 void MainWindow::setupControlButtons()
 {
-CONNECT(ui->haltButton,pressed(),manager,requestHalt());
+    CONNECT(ui->haltButton,pressed(),manager,requestHalt());
 
+}
+void MainWindow::setupConnections()
+
+{
+    qRegisterMetaType<mem_addr_t>("mem_addr_t");
+    //    qRegisterMetaType<ProcessHandle*>("ProcessHandle*const");
 }
 bool MainWindow::loadFile(QString path)
 {
@@ -256,13 +264,13 @@ bool MainWindow::loadFile(QString path)
         }
         catch(const std::string& e)
         {
-        std::cout<<e<<std::endl;
-        success = false;
+            std::cout<<e<<std::endl;
+            success = false;
         }
         catch(...)
         {
-        std::cout<<"An unexpected error has occurred"<<std::endl;
-        success = false;
+            std::cout<<"An unexpected error has occurred"<<std::endl;
+            success = false;
         }
 
     }
@@ -299,13 +307,13 @@ QString MainWindow::assembleFile(QString path)
     }
     catch(const std::string& e)
     {
-    std::cout<<e<<std::endl;
-    return "";
+        std::cout<<e<<std::endl;
+        return "";
     }
     catch(...)
     {
-    std::cout<<"An unforseen error has occured"<<endl;
-    return "";
+        std::cout<<"An unforseen error has occured"<<endl;
+        return "";
     }
 
     return "Test.obj";
@@ -344,22 +352,22 @@ void MainWindow::assembleNLoadFile(QString path)
     }
     catch(const std::string& e)
     {
-    std::cout<<e<<std::endl;
-    Computer::getDefault()->Undos->endMacro();
-    Computer::getDefault()->Undos->undo();//no need in saving this
-    return;
+        std::cout<<e<<std::endl;
+        Computer::getDefault()->Undos->endMacro();
+        Computer::getDefault()->Undos->undo();//no need in saving this
+        return;
     }
     catch(...)
     {
 
-    std::cout<<"An unforseen error has occured"<<std::endl;
-    Computer::getDefault()->Undos->endMacro();
-    Computer::getDefault()->Undos->undo();//no need in saving this
-    return;
+        std::cout<<"An unforseen error has occured"<<std::endl;
+        Computer::getDefault()->Undos->endMacro();
+        Computer::getDefault()->Undos->undo();//no need in saving this
+        return;
     }
     try{
-    embler.passLabelsToComputer(Computer::getDefault());
-    embler.passCommentsToComputer(Computer::getDefault());
+        embler.passLabelsToComputer(Computer::getDefault());
+        embler.passCommentsToComputer(Computer::getDefault());
     }
     catch(const std::string& e)
     {
@@ -373,7 +381,7 @@ void MainWindow::assembleNLoadFile(QString path)
     }
 
     Computer::getDefault()->Undos->endMacro();
-//    embler.assembleFile();
+    //    embler.assembleFile();
 
 }
 void MainWindow::handleFiles()
@@ -391,8 +399,8 @@ void MainWindow::setupDisplay()
 
     disp = new Hope();
     QHBoxLayout* qhbl= new QHBoxLayout();
-         qhbl->addWidget(disp,0,Qt::AlignCenter);
-            ui->verticalLayout_11->addLayout(qhbl);
+    qhbl->addWidget(disp,0,Qt::AlignCenter);
+    ui->verticalLayout_11->addLayout(qhbl);
     disp->autoFillBackground();
     disp->setMinimumSize(SCREEN_WIDTH,SCREEN_HEIGHT);
     disp->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
@@ -408,13 +416,13 @@ void MainWindow::setupMemView(QTableView* view, bool setmodel, bool setScroll)
 
     if(setmodel)
     {
-    qDebug("Setting Model");
-    view->setModel(model);
+        qDebug("Setting Model");
+        view->setModel(model);
     }
     if(setScroll){
-    HighlightScrollBar* scroll = new HighlightScrollBar(Qt::Vertical,this);
-    Saturn->addScrollBar(scroll);
-    view->setVerticalScrollBar(scroll);
+        HighlightScrollBar* scroll = new HighlightScrollBar(Qt::Vertical,this);
+        Saturn->addScrollBar(scroll);
+        view->setVerticalScrollBar(scroll);
     }
 
 
@@ -442,23 +450,19 @@ void MainWindow::setupMemView(QTableView* view, bool setmodel, bool setScroll)
     view->setSelectionBehavior(QAbstractItemView::SelectRows);
 
 
-//    view->setContextMenuPolicy(Qt::CustomContextMenu);
+    //    view->setContextMenuPolicy(Qt::CustomContextMenu);
 
-//    connect(view, SIGNAL(customContextMenuRequested(const QPoint &)),
-//            this, SLOT(showClickOptions(const QPoint &,view)));
+    //    connect(view, SIGNAL(customContextMenuRequested(const QPoint &)),
+    //            this, SLOT(showClickOptions(const QPoint &,view)));
 
-//    QObject::connect(Computer::getDefault(),SIGNAL(update()),view,SLOT(repaint()));
+    //    QObject::connect(Computer::getDefault(),SIGNAL(update()),view,SLOT(repaint()));
 }
 
 void MainWindow::setupInOut()
 {
-
     InOutPut = new InOutSet(this);
     ui->inOutHome->addWidget(InOutPut);
     CONNECT(this, reCheck(), InOutPut, update());
-
-
-
 }
 void MainWindow::onTableClicked(const QModelIndex & current)
 {
@@ -469,14 +473,20 @@ void MainWindow::onTableClicked(const QModelIndex & current)
 
 }
 
-void MainWindow::setupStackView(QTableView* view)
+void MainWindow::setupStackView()
 {
     qDebug("Setting up Stack View");
     qDebug("Showing Grid");
+    MemWindow* StackWindow = new MemWindow(StackModel,Saturn->generateBar());
 
-    qDebug("Setting Model");
-    view->setModel(StackModel);
-    //view->resizeColumnsToContents();
+    ui->StackBox->layout()->addWidget(StackWindow);
+    MemTable* view = StackWindow->getMemView();
+
+    //    qDebug("Setting Model");
+    //    view->hide();
+    //    view->setModel(StackModel);
+    //    StackModel->flip();
+    view->resizeColumnsToContents();
     view->verticalHeader()->hide();
 
     view->setColumnWidth(STACK_VIEW_ADR_COL,HEX_COLUMN_WIDTH);
@@ -485,13 +495,14 @@ void MainWindow::setupStackView(QTableView* view)
     view->setColumnWidth(STACK_VIEW_VAL_COL,HEX_COLUMN_WIDTH);
     view->horizontalHeader()->setSectionResizeMode(MEM_VIEW_VAL_COL,QHeaderView::Fixed);
     view->showGrid();
-    // set row height and fix it
+    //    // set row height and fix it
     view->verticalHeader()->setDefaultSectionSize(20);
     view->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-
+    view->setSelectionBehavior(QAbstractItemView::SelectRows);
     CONNECT(MainWindow::ui->actionFlip,triggered(),StackModel,flip());
     CONNECT(StackModel,flip(),this,update());
-
+    QObject::connect(Computer::getDefault(),SIGNAL(memValueChanged(mem_addr_t)),StackModel,SLOT(stackFrameListener(mem_addr_t)));
+    CONNECT(this,update(),StackWindow,update());
 }
 
 void MainWindow::setupRegisterView()
@@ -562,26 +573,26 @@ void MainWindow::on_MemView3GotoButton_pressed()
     int target = Utility::unifiedInput2Val(ui->MemView3Input->text(),&ok);
     if(ok)
     {
-    SCROLLTO(ui->MemView3View,target)
+        SCROLLTO(ui->MemView3View,target)
     }
     CLEAR(ui->MemView3Input)
 }
 void MainWindow::on_StackViewGotoButton_pressed()
 {
-    bool ok = true;
-    int target =Utility::unifiedInput2Val(ui->StackViewInput->text(),&ok);
-    if(ok)
-    {
-        SCROLLTO(ui->StackViewView,target);
-    }
-    CLEAR(ui->StackViewInput)
+    //    bool ok = true;
+    //    int target =Utility::unifiedInput2Val(ui->StackViewInput->text(),&ok);
+    //    if(ok)
+    //    {
+    //        SCROLLTO(ui->StackViewView,target);
+    //    }
+    //    CLEAR(ui->StackViewInput)
 }
 void MainWindow::on_NextButton_pressed()
 {
     qDebug("Executing Single instruction");
-//    executeSingleInstruction();
+    //    executeSingleInstruction();
     manager->activate(1);
-//    update();
+    //    update();
 
 }
 void MainWindow::update()
@@ -589,7 +600,7 @@ void MainWindow::update()
     emit signalUpdate();
     disp->update();
     UPDATEVIEW(ui->MemView3View);
-    UPDATEVIEW(ui->StackViewView);
+    //    UPDATEVIEW();
     UPDATEVIEW(ui->RegisterView);
     UPDATEVIEW(Clockmaker->Coat);
     Saturn->update();
@@ -598,12 +609,12 @@ void MainWindow::update()
 
 void MainWindow::threadTest(QString name)
 {
-       qDebug()<< name << QThread::currentThread();
-       for(int i = 0;i<1000;i++)
-       {
+    qDebug()<< name << QThread::currentThread();
+    for(int i = 0;i<1000;i++)
+    {
 
-       }
-       qDebug()<< name << QThread::currentThread();
+    }
+    qDebug()<< name << QThread::currentThread();
 }
 
 void MainWindow::on_pushButton_7_clicked()
@@ -617,7 +628,7 @@ void MainWindow::gotoRunningMode()
     *threadRunning = true;
     ui->NextButton->setEnabled(false);
     IFNOMASK(emit update();)
-    MASK
+            MASK
 }
 void MainWindow::gotoUserMode()
 {
@@ -625,7 +636,7 @@ void MainWindow::gotoUserMode()
     *threadRunning = false;
     ui->NextButton->setEnabled(true);
     UNMASK
-    IFNOMASK(emit update();)
+            IFNOMASK(emit update();)
 }
 void MainWindow::prepWork()
 {
@@ -661,8 +672,16 @@ void MainWindow::readSettings()
     QSettings settings("Melberg & Ott","PennSim++");
     settings.beginGroup("MainWindow");
     qDebug("heylo");
-    int width = settings.value("Window Width",QVariant(1163)).toInt();
-    int height= settings.value("Window Height",QVariant(694)).toInt();
+
+    int width = settings.value("Window Width",QVariant(DEFAULT_WINDOW_WIDTH)).toInt();
+    int height= settings.value("Window Height",QVariant(DEFAULT_WINDOW_HEIGHT)).toInt();
+    int defaultX = (getScreenWidth()-DEFAULT_WINDOW_WIDTH)/2;
+    int defaultY = (getScreenHeight()-DEFAULT_WINDOW_HEIGHT)/4;
+
+    int x     = settings.value("Window X",QVariant(defaultX)).toInt();
+    int y     = settings.value("Window Y",QVariant(defaultY)).toInt();
+
+    this->setGeometry(x,y,geometry().width(),geometry().height());
     int MemoryBoxHeight = settings.value("Memory Box Height",QVariant(635)).toInt();
     int MemoryBoxWidth  = settings.value("Memory Box Width" ,QVariant(354)).toInt();
     ui->MemorySplitter->restoreState(settings.value("Memory Splitter State").toByteArray());
@@ -674,6 +693,18 @@ void MainWindow::readSettings()
 
 
 }
+
+
+int MainWindow::getScreenWidth()
+{
+    QScreen* screen = QGuiApplication::primaryScreen();
+    return screen->geometry().width();
+}
+int MainWindow::getScreenHeight()
+{
+    QScreen* screen = QGuiApplication::primaryScreen();
+    return screen->geometry().height();
+}
 void MainWindow::saveSettings()
 {
     QSettings settings(ORGANIZATION,APPNAME);
@@ -684,6 +715,8 @@ void MainWindow::saveSettings()
     settings.setValue("Memory Box Width",ui->MemoryBox->width());
     settings.setValue("Memory Splitter State",ui->MemorySplitter->saveState());
     settings.setValue("Window State",static_cast<int>(windowState()));
+    settings.setValue("Window X",geometry().x());
+    settings.setValue("Window Y",geometry().y());
     settings.endGroup();
 
     qDebug("done saving");
@@ -712,15 +745,10 @@ void MainWindow::on_redoButton_pressed()
     Computer::getDefault()->Undos->redo();
 }
 
-
-
 void MainWindow::on_consoleEnterButton_pressed()
 {
     qDebug("I want to take the input");
 }
-
-
-
 
 void MainWindow::on_continueButton_pressed()
 {

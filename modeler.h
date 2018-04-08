@@ -35,6 +35,7 @@ public:
     mem_addr_t specialSelectStart;
     mem_addr_t specialSelectEnd;
     int copiedLength;
+    bool isFlipped = false;
     QObject* paternal_Figure;
     bool* threadRunning;
     explicit modeler(QObject *parent = 0,bool* access= Q_NULLPTR);

@@ -168,7 +168,7 @@ void Hope::fillScreen(val_t val)
 }
 void Hope::update()
 {
-    IFNOMASK(
+    IFCANUPDATE(
     qDebug("Hope is updating");
 //    QPainter qpp(&pi);
     for(mem_addr_t i = VIDEO_ADDR;i<0xFE00;i++)

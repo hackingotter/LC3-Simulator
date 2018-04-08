@@ -343,7 +343,7 @@
                </sizepolicy>
               </property>
               <property name="text">
-               <string>Save</string>
+               <string>Save (Unmask)</string>
               </property>
              </widget>
             </item>
@@ -356,7 +356,7 @@
                </sizepolicy>
               </property>
               <property name="text">
-               <string>Restore</string>
+               <string>Restore (Mask)</string>
               </property>
              </widget>
             </item>
@@ -465,102 +465,7 @@
        <property name="title">
         <string>Stack</string>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_4">
-        <item>
-         <layout class="QHBoxLayout" name="StackViewInputBar">
-          <property name="spacing">
-           <number>5</number>
-          </property>
-          <item>
-           <widget class="QLineEdit" name="StackViewInput"/>
-          </item>
-          <item>
-           <widget class="QPushButton" name="StackViewGotoButton">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>60</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="baseSize">
-             <size>
-              <width>36</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>GOTO</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="StackViewSPButton">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>50</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>SP</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <widget class="QTableView" name="StackViewView">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>116</height>
-           </size>
-          </property>
-          <property name="verticalScrollBarPolicy">
-           <enum>Qt::ScrollBarAlwaysOn</enum>
-          </property>
-          <property name="sizeAdjustPolicy">
-           <enum>QAbstractScrollArea::AdjustToContents</enum>
-          </property>
-          <property name="dragDropOverwriteMode">
-           <bool>false</bool>
-          </property>
-          <property name="alternatingRowColors">
-           <bool>false</bool>
-          </property>
-          <attribute name="horizontalHeaderMinimumSectionSize">
-           <number>65</number>
-          </attribute>
-          <attribute name="verticalHeaderDefaultSectionSize">
-           <number>0</number>
-          </attribute>
-         </widget>
-        </item>
-       </layout>
+       <layout class="QVBoxLayout" name="verticalLayout_4"/>
       </widget>
       <widget class="QGroupBox" name="MemoryBox">
        <property name="title">

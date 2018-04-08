@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" binding="early" name="United" qt:editorversion="4.4.0" xmlns:qt="http://www.qt.io/2015/02/scxml-ext">
+    <state id="Normal">
+        <qt:editorinfo geometry="315.13;124.82;-60;-50;120;100" scenegeometry="315.13;124.82;255.13;74.82;120;100"/>
+    </state>
+    <state id="Re/Undoing">
+        <qt:editorinfo geometry="336.62;407.21;-60;-50;120;100" scenegeometry="336.62;407.21;276.62;357.21;120;100"/>
+        <onentry>
+            <raise/>
+            <send/>
+        </onentry>
+    </state>
+</scxml>

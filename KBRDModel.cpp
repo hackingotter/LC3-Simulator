@@ -9,6 +9,8 @@ KBRDModel::KBRDModel(QObject *parent): QStandardItemModel(parent)
 }
 QVariant KBRDModel::data(const QModelIndex &index, int role) const
 {
+    if(role)
+
     return Computer::getDefault()->getMemValue(KBDR);
 
 }

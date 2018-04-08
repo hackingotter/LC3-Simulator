@@ -65,7 +65,10 @@ HEADERS += \
     MemTable.h \
     MemWindow.h \
     FollowButton.h \
-    shortcutslisting.h
+    shortcutslisting.h \
+    UndoStackView.h \
+    HelpMenu.h \
+    StateMachine.h
 
 
 SOURCES += \
@@ -99,6 +102,9 @@ SOURCES += \
     MemWindow.cpp \
     FollowButton.cpp \
     globaltypes.cpp \
+    UndoStackView.cpp \
+    HelpMenu.cpp \
+    StateMachine.cpp
 
 
 DISTFILES += \
@@ -107,4 +113,8 @@ DISTFILES += \
     lc3os.asm \
     Commitment \
     pennCompilertest.asm
+
+STATECHARTS += \
+    State Chart.scxml \
+    United.scxml
 

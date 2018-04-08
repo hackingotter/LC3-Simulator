@@ -12,14 +12,25 @@
 
 HistoryHandler::HistoryHandler()
 {
-doing = 0;
+    HistoryHandler::doing = 0;
 }
+
+void HistoryHandler::setIndex(int idx)
+{
+    qDebug("Helloooooo");
+    HistoryHandler::doing++;
+    QUndoStack::setIndex(idx);
+    doing--;
+}
+ int HistoryHandler::doing = 0;
 void HistoryHandler::undo(int level)
 {
 //    if(dont)return;
     doing++;
+
     QUndoStack::undo();
-    qDebug(QString().setNum(count()).toLocal8Bit());
+
+            qDebug(QString().setNum(count()).toLocal8Bit());
     doing--;
 }
 void HistoryHandler::redo(int level)
@@ -36,4 +47,5 @@ if(doing==0)this->QUndoStack::push(cmd);
 //qDebug("hy");
 return true;
 }
+
 

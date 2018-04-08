@@ -314,8 +314,8 @@ public:
 
     }
 private:
-     mem_addr_t mem_addr;
-     connector_t** link;
+    mem_addr_t mem_addr;
+    connector_t** link;
 };
 
 
@@ -385,8 +385,10 @@ void Computer::setRegister(reg_t reg, val_t val) {
     //will implement an identification method
     val_t oval = registers[reg];
     registers[reg] = val;
-    TRY2PUSH(oval, val,changeRegValue(reg,oval,val));
-
+    if(oval != val)
+    {
+        TRY2PUSH(oval, val,changeRegValue(reg,oval,val));
+    }
     IFNOMASK(emit update();)
 }
 
@@ -534,7 +536,7 @@ void Computer::setMemValue(mem_addr_t addr, val_t val)
 
 
     TRY2PUSH(oval,val,changeMemValue(addr,oval,val));
-
+    emit memValueChanged(addr);
     IFNOMASK(emit update();)
 }
 
@@ -982,7 +984,7 @@ void Computer::executeBr(val_t inst) {
 void Computer::executeCycle()
 {
     MASK
-    mem_addr_t pcAddr = getRegister(PC);
+            mem_addr_t pcAddr = getRegister(PC);
     mem_loc_t instLoc = getMemLocation(pcAddr);
     val_t inst = instLoc.value;
     Undos->beginMacro("Executing "+getHexString(pcAddr));
@@ -1291,9 +1293,9 @@ void Computer::checkMemAccess(mem_addr_t addr)
         val_t sector = addr & 0xF000; // select first 4 bits
         sector >>= 12; // move the bits so they become a number
         val_t sectorMap = 1 << sector;
-//                if ((sectorMap & _memory[MPR].value) == 0) {
-//                    throw 'Privilege Mode Exception: Trying to address blocked memory';
-//                }
+        //                if ((sectorMap & _memory[MPR].value) == 0) {
+        //                    throw 'Privilege Mode Exception: Trying to address blocked memory';
+        //                }
     }
 }
 
@@ -1352,7 +1354,7 @@ void Computer::startExecution()
 void Computer::continueExecution()
 {
     MASK
-    Undos->beginMacro("Begining Execution at "+getHexString(getRegister(PC)));
+            Undos->beginMacro("Begining Execution at "+getHexString(getRegister(PC)));
     setRunning(true);
     do
     {
@@ -1367,7 +1369,7 @@ void Computer::continueExecution()
 void Computer::executeUntilAddress(mem_addr_t addr)
 {
     MASK
-    Undos->beginMacro("Executing from " + getHexString(getRegister(PC)) + " until "+getHexString(addr));
+            Undos->beginMacro("Executing from " + getHexString(getRegister(PC)) + " until "+getHexString(addr));
     setRunning(true);
 
     while (isRunning() && getRegister(PC) != addr) {
@@ -1423,6 +1425,14 @@ bool Computer::insertBlankRow(mem_addr_t addr)
     {
 
     }
+}
+
+int Computer::getSignedImm6(val_t inst)
+{
+    val_t out = inst&0x001F;
+    if(out&0x0010)out|=0xFFE0;
+    return out;
+
 }
 bool Computer::canShiftClean(mem_addr_t originStart, mem_addr_t originEnd,mem_addr_t destination)
 {
@@ -1798,13 +1808,20 @@ QString Computer::mnemGen(mem_loc_t loc)const
 
     case andOpCode:
     {
-        if((((val&0x0020)&&(val&0x0008))||(val&0x0020))) out = BADOP;
-        else
+
+
+//        if((val&0x0020)&&(vall&0x0008))
+//        {
+//            out =
+//        }
+//        if((((val&0x0020)&&(val&0x0008))||(val&0x0020))) out = BADOP;
+//        else
         {
             out.append("R" + QSTRNUM(reg11) + ", R"+QSTRNUM(reg8));
             if(imm5YN)
             {
-                out.append(", #").append(QSTRNUM(imm5));
+
+                out.append(", #").append(QString().setNum((int16_t)getSignedImm6(val)));
             }
             else
             {
@@ -1815,6 +1832,7 @@ QString Computer::mnemGen(mem_loc_t loc)const
     }
     case brOpCode :
     {
+
         if((val&0x0E00)==0x0E00)//if all three are set, just display BR
         {}
         else
@@ -1826,12 +1844,12 @@ QString Computer::mnemGen(mem_loc_t loc)const
             }
         if((val&0x0E00)==0x0000)
         {
-//            out = BADOP;
+            //            out = BADOP;
         }
         else
         {
             val_t offset = val&0x01FF;
-            if(val&0x0100) val|=0xFE00;
+            if(val&0x0100) offset|=0xFE00;
             mem_addr_t target = addr + offset;
             out.append(" ");
             out.append(name_or_addr(target));
@@ -1844,7 +1862,7 @@ QString Computer::mnemGen(mem_loc_t loc)const
         if((val&0x0E3F))//if there are ones outside of the OpCode and BaseR
             //Bad Op
         {
-//            out = BADOP;
+            //            out = BADOP;
         }
         else if(val&0x01C0)//if so, RET is the proper memn
         {
@@ -1902,7 +1920,7 @@ QString Computer::mnemGen(mem_loc_t loc)const
     {
         if(val&0x0F00)
         {
-//            out = BADOP;
+            //            out = BADOP;
         }
         else
         {
