@@ -1089,6 +1089,10 @@ void Computer::jsr(val_t inst) {
 
         reg_t baseR = getRegister_6_7_8(inst);
         jsrAddr = getRegister(baseR);
+        if(baseR == R6)
+        {
+            emit subRoutineCalled();
+        }
     }
 
     setRegister(PC, jsrAddr);

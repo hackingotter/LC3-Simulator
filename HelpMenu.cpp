@@ -1,5 +1,6 @@
 #include "HelpMenu.h"
 #include "QWindow"
+#include "QLabel"
 #include "QHBoxLayout"
 HelpMenu::HelpMenu(QWidget *parent) : QDialog(parent)
 {
@@ -44,7 +45,18 @@ QWidget* HelpMenu::generateMemViewTab()
 QWidget* HelpMenu::generateStackViewTab()
 {
     QWidget* stackTab = new QWidget();
+    QTabWidget* stackInfo = new QTabWidget();
+    QHBoxLayout* QHB = new QHBoxLayout();
+    stackTab->setLayout(QHB);
+    stackTab->layout()->addWidget(stackInfo);
+    QWidget* TipsNTricks = new QWidget();
+    TipsNTricks->setLayout(new QHBoxLayout());
+    QLabel * tips = new QLabel("You might have noticed that the Stack View has some weird discoloration.\n This is because, whenever a value is changed in that range,"
+                               "a color is generated based on the value of ");
 
+    TipsNTricks->layout()->addWidget(tips);
+
+    stackInfo->addTab(TipsNTricks,"Tips && Tricks");
     return stackTab;
 }
 QWidget* HelpMenu::generateRegViewTab()

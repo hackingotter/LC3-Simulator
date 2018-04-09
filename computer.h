@@ -282,6 +282,7 @@ signals:
     void popDisplay();
     void memChanged(mem_addr_t addr);
     void memValueChanged(mem_addr_t addr);
+    void subRoutineCalled();
 public slots:
 
     void continueExecution();

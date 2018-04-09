@@ -478,7 +478,7 @@ void MainWindow::setupStackView()
     qDebug("Setting up Stack View");
     qDebug("Showing Grid");
     MemWindow* StackWindow = new MemWindow(StackModel,Saturn->generateBar());
-
+    CONNECT(this,signalUpdate(),StackWindow,kick());
     ui->StackBox->layout()->addWidget(StackWindow);
     MemTable* view = StackWindow->getMemView();
 
@@ -502,6 +502,8 @@ void MainWindow::setupStackView()
     CONNECT(MainWindow::ui->actionFlip,triggered(),StackModel,flip());
     CONNECT(StackModel,flip(),this,update());
     QObject::connect(Computer::getDefault(),SIGNAL(memValueChanged(mem_addr_t)),StackModel,SLOT(stackFrameListener(mem_addr_t)));
+//    QObject::connect(Computer::getDefault(),SIGNAL(subRoutineCalled()),StackModel,SLOT(increaseStackFrameCounter()));
+//QObject::connect(Computer::getDefault(),SIGNAL(memValueChanged(mem_addr_t)),StackModel,SLOT(stackFrameListener(mem_addr_t)));
     CONNECT(this,update(),StackWindow,update());
 }
 

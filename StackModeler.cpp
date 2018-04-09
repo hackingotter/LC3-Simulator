@@ -5,13 +5,14 @@
 using namespace Stack_Modulos;
 StackModeler::StackModeler(QObject* parent,bool* access):modeler(parent,access)
 {
-
+    stackFrameColorCounter = 0;
     qDebug("StackView Initialzing");
     QStringList HeaderLabel;
     HeaderLabel.append("Addr");
     HeaderLabel.append("Offset");
     setHorizontalHeaderLabels(HeaderLabel);
     setRowCount(0xC000 - 0x3000);
+    QObject::connect(Computer::getDefault(),SIGNAL(memValueChanged(mem_addr_t)),this,SLOT(stackFrameListener(mem_addr_t)));
     stackFrameColors = new val_t[0xC000 - 0x3000];
 //    for(val_t i = 0; i<0xff;i++)
 //    {
@@ -38,7 +39,7 @@ QVariant StackModeler::data(const QModelIndex &index,int role) const
             return QVariant((abs(addr - Computer::getDefault()->getRegister(R6)) < 256) ? QString().setNum(addr - Computer::getDefault()->getRegister(R6)):"");
 
         case VALUECOLUMN:
-            return QVariant(stackFrameColors[index.row()]/*Computer::getDefault()->getMemValue(addr)*/);
+            return QVariant(Computer::getDefault()->getMemValue(addr));
         }
     }
     if(role == Qt::BackgroundRole)
@@ -60,15 +61,26 @@ void StackModeler::stackFrameListener(mem_addr_t addr)
     {
         qDebug("jel");
 //        qDebug(getHexString(colorHash(Computer::getDefault()->getRegister(R7))).toLocal8Bit());
-        stackFrameColors[addr-0x3000]=colorHash(Computer::getDefault()->getRegister(R7));
+        stackFrameColors[addr-0x3000]=colorHash(Computer::getDefault()->getRegister(R6));
     }
+}
+
+void StackModeler::increaseStackFrameCounter()
+{
+    stackFrameColorCounter++;
+}
+void StackModeler::decreaseStackFrameCounter()
+{
+    stackFrameColorCounter--;
 }
 QBrush StackModeler::stackFramePainter(mem_addr_t addr) const
 
 {
-    int c = 256-( stackFrameColors[addr-0x3000]%255);
+    int c = 256-((( stackFrameColors[addr-0x3000])^37)%255);
 //    int c = addr%256;
-    return QBrush(QColor(100+(6*c%6),(200-9*(c%17))%255,(31*(c^5))%255));
+    //there is no real rhythm or rhyme to this, it just psuedo randomizes the color a stack frame will get.
+    return QBrush(QColor(50+(((67*6*(c%29))^3)%206),50+((200-9*(c%17))%206),50+((89*(c^5))%206)));
+    return QBrush(QColor(c,c,c));
 }
 val_t StackModeler::colorHash(val_t val)
 {
@@ -103,6 +115,8 @@ val_t StackModeler::colorHash(val_t val)
     qDebug(getHexString(out).toLocal8Bit());
     return out;
 }
+
+
 
 bool StackModeler::setData(const QModelIndex &index, const QVariant &value, int role)
 

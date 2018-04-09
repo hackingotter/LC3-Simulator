@@ -18,7 +18,7 @@ enum StackColumn{
 class StackModeler :public modeler
 {
     Q_OBJECT
-
+    int stackFrameColorCounter;
     val_t * stackFrameColors;
 public:
 
@@ -34,6 +34,8 @@ public slots:
     void flip();
     void setTopBig(bool ghost);
     void stackFrameListener(mem_addr_t addr);
+    void increaseStackFrameCounter();
+    void decreaseStackFrameCounter();
 private:
     bool * bigTop = new bool(true);
 };
