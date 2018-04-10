@@ -31,7 +31,12 @@ void HistoryHandler::undo(int level)
     QUndoStack::undo();
 
             qDebug(QString().setNum(count()).toLocal8Bit());
-    doing--;
+            doing--;
+}
+
+const QUndoCommand *HistoryHandler::command(int index) const
+{
+    return  QUndoStack::command(index);
 }
 void HistoryHandler::redo(int level)
 {
@@ -47,5 +52,6 @@ if(doing==0)this->QUndoStack::push(cmd);
 //qDebug("hy");
 return true;
 }
+
 
 

@@ -1331,6 +1331,7 @@ void Computer::checkSpecialAddressWrite(mem_addr_t addr)
 
 void Computer::executeSingleInstruction() {
 
+    Undos->beginMacro("Executing "+getHexString(getRegister(PC)));
     MASK
 
             setRunning(true);
@@ -1358,14 +1359,18 @@ void Computer::startExecution()
 void Computer::continueExecution()
 {
     MASK
-            Undos->beginMacro("Begining Execution at "+getHexString(getRegister(PC)));
+            val_t valuePC = getRegister(PC);
+    Undos->beginMacro("continue ");
     setRunning(true);
     do
     {
         executeCycle();
-    } while(getMemBreakPoint(getRegister(PC)) == 0);
+    } while((getMemBreakPoint(getRegister(PC)) == 0)&&isRunning());
     setRunning(false);
     Undos->endMacro();
+
+    //    comm->setText("j")
+    //    Undos->command(Undos->index())->setText(QString("Executed from").append(getHexString(valuePC)).append(getHexString(getRegister(PC))));
     UNMASK
             IFNOMASK(update();)
 }
@@ -1814,12 +1819,12 @@ QString Computer::mnemGen(mem_loc_t loc)const
     {
 
 
-//        if((val&0x0020)&&(vall&0x0008))
-//        {
-//            out =
-//        }
-//        if((((val&0x0020)&&(val&0x0008))||(val&0x0020))) out = BADOP;
-//        else
+        //        if((val&0x0020)&&(vall&0x0008))
+        //        {
+        //            out =
+        //        }
+        //        if((((val&0x0020)&&(val&0x0008))||(val&0x0020))) out = BADOP;
+        //        else
         {
             out.append("R" + QSTRNUM(reg11) + ", R"+QSTRNUM(reg8));
             if(imm5YN)

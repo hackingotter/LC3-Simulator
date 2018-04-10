@@ -287,6 +287,8 @@ public slots:
 
     void continueExecution();
 private:
+
+
     val_t registers[11];
     mem_loc_t _memory[0xFFFF+1];
 
@@ -294,6 +296,7 @@ private:
     val_t savedSSP;
     stack_type activeStack;
 
+    bool shouldHalt = false;
     void add(val_t inst);
     void and_op(val_t inst);
     void mul(val_t inst);
@@ -321,6 +324,8 @@ private:
 
     bool connectedToRange(mem_addr_t start, mem_addr_t end, mem_addr_t pov);
     void executeShiftCycle(mem_loc_t curLoc, mem_addr_t begin, mem_addr_t end, int32_t delta, int *changed, int offset, bool makeAgreement);
+
+
 };
 
 #endif // COMPUTER_H

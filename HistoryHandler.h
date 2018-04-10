@@ -23,8 +23,11 @@ public:
     HistoryHandler();
     void redo(int level = 0);
     void undo(int level = 0);
+    const QUndoCommand *command(int index) const ;
     void update(){qDebug("Stack has been changed; update");};
     bool add(QUndoCommand *cmd);
+
+
 public slots:
     void setIndex(int idx) ;
 };

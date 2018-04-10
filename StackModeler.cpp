@@ -39,7 +39,7 @@ QVariant StackModeler::data(const QModelIndex &index,int role) const
             return QVariant((abs(addr - Computer::getDefault()->getRegister(R6)) < 256) ? QString().setNum(addr - Computer::getDefault()->getRegister(R6)):"");
 
         case VALUECOLUMN:
-            return QVariant(Computer::getDefault()->getMemValue(addr));
+            return QVariant(getHexString(Computer::getDefault()->getMemValue(addr)));
         }
     }
     if(role == Qt::BackgroundRole)

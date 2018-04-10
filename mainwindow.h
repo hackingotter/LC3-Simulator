@@ -228,6 +228,7 @@ private slots:
     void on_continueButton_pressed();
     void on_RestoreButton_pressed();
     void on_SaveButton_pressed();
+    void on_haltButton_pressed();
 };
 
 #endif // MAINWINDOW_H

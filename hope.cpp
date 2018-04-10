@@ -185,9 +185,6 @@ void Hope::update()
 }
 void Hope::update(mem_addr_t addr)
 {
-    IFNOMASK(
-    qDebug("Updating point");
-
     if(VIDEO_ADDR<= addr && addr<0xfe00)
     {
     QPainter qpp(&pi);
@@ -201,7 +198,7 @@ void Hope::update(mem_addr_t addr)
     setPixmap(pix);
     }
     qDebug("done updating");
-    )
+
 }
 void Hope::setPoint(int x, int y,QRgb rgb, QImage*image)
 {

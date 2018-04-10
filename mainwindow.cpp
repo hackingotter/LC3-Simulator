@@ -404,6 +404,7 @@ void MainWindow::setupDisplay()
     disp->autoFillBackground();
     disp->setMinimumSize(SCREEN_WIDTH,SCREEN_HEIGHT);
     disp->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
+    QObject::connect(Computer::getDefault(),SIGNAL(memValueChanged(mem_addr_t)),disp,SLOT(update(mem_addr_t)));
 
 }
 
@@ -504,7 +505,7 @@ void MainWindow::setupStackView()
     QObject::connect(Computer::getDefault(),SIGNAL(memValueChanged(mem_addr_t)),StackModel,SLOT(stackFrameListener(mem_addr_t)));
 //    QObject::connect(Computer::getDefault(),SIGNAL(subRoutineCalled()),StackModel,SLOT(increaseStackFrameCounter()));
 //QObject::connect(Computer::getDefault(),SIGNAL(memValueChanged(mem_addr_t)),StackModel,SLOT(stackFrameListener(mem_addr_t)));
-    CONNECT(this,update(),StackWindow,update());
+    CONNECT(this,update(),StackWindow,kick());
 }
 
 void MainWindow::setupRegisterView()
@@ -766,4 +767,9 @@ void MainWindow::on_SaveButton_pressed()
 {
     UNMASK
             IFNOMASK(update();)
+}
+
+void MainWindow::on_haltButton_pressed()
+{
+    Computer::getDefault()->setRunning(false);
 }
