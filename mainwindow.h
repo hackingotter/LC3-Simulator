@@ -113,7 +113,7 @@ public:
      * doubly_linkedlist combo
      * which enables the redoing and undoing of actions.
      */
-//    HistoryHandler* Undos;
+    HistoryHandler* Undos;
 
     ScrollBarHandler* Saturn;
 
@@ -211,8 +211,8 @@ signals:
     void signalUpdate();
     void reCheck();
     void requestUndo();
-public slots:
     void requestHalt();
+public slots:
     void onTableClicked(const QModelIndex & current);
     void gotoRunningMode();
     void gotoUserMode();
@@ -229,7 +229,6 @@ private slots:
     void on_RestoreButton_pressed();
     void on_SaveButton_pressed();
     void on_haltButton_pressed();
-    void on_DeleteButton_pressed();
 };
 
 #endif // MAINWINDOW_H

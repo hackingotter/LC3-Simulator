@@ -26,7 +26,7 @@ Hope::Hope(QWidget *parent):QLabel(parent,0)
     qDebug("Setting up screen");
 
 //    model = guardin->get
-    mag = new QImage(DISPLAY_WIDTH*DISPLAY_SCALE+5,DISPLAY_HEIGHT*DISPLAY_SCALE+5,QImage::Format_RGB32);
+    mag = new QImage(DISPLAY_WIDTH*DISPLAY_SCALE,DISPLAY_HEIGHT*DISPLAY_SCALE,QImage::Format_RGB32);
 
     setMouseTracking(true);
     QPainter p(&pi);
@@ -168,7 +168,6 @@ void Hope::fillScreen(val_t val)
 }
 void Hope::update()
 {
-//    return;
     IFCANUPDATE(
     qDebug("Hope is updating");
 //    QPainter qpp(&pi);
@@ -179,7 +178,6 @@ void Hope::update()
 
         setPoint(ADDR2X(i),ADDR2Y(i),translater(Computer::getDefault()->getMemValue(i)).rgb(),mag);
     }
-//    mag->scaled();
     setPixmap(QPixmap::fromImage(*mag));
 //    qpp.end();
 //    setPicture(pi);
@@ -204,7 +202,7 @@ void Hope::update(mem_addr_t addr)
 }
 void Hope::setPoint(int x, int y,QRgb rgb, QImage*image)
 {
-image->setPixel(2*x  ,2*y  ,rgb);
+image->setPixel(x  ,y  ,rgb);
 //image->setPixel(2*x  ,2*y+1,rgb);
 //image->setPixel(2*x+1,2*y+1,rgb);
 //image->setPixel(2*x+1,2*y  ,rgb);

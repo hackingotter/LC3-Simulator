@@ -12,74 +12,46 @@
 
 HistoryHandler::HistoryHandler()
 {
-    connect(this,SIGNAL(indexChanged(int)),this,SLOT(unmask()));
+    HistoryHandler::doing = 0;
 }
-void HistoryHandler::mask()
-{
 
-    doing++;
-    qDebug("Masking level:" + QString().setNum(doing).toLocal8Bit());
-
-}
-void HistoryHandler::unmask()
-{
-
-    qDebug("UnMasking level:"+QString().setNum(doing).toLocal8Bit());
-doing--;
-    if(doing<=0)
-        doing = 0;
-
-
-    if(doing==0)emit flare();
-
-
-}
 void HistoryHandler::setIndex(int idx)
 {
-
     qDebug("Helloooooo");
-    mask();
+    HistoryHandler::doing++;
     QUndoStack::setIndex(idx);
-    qDebug("Byeeeeeeeeee");
+    doing--;
 }
  int HistoryHandler::doing = 0;
-void HistoryHandler::undo()
+void HistoryHandler::undo(int level)
 {
 //    if(dont)return;
-    mask();
-qDebug("UNDOING");
+    doing++;
+
     QUndoStack::undo();
 
             qDebug(QString().setNum(count()).toLocal8Bit());
-
+            doing--;
 }
 
-void HistoryHandler::push(QUndoCommand *cmd)
+const QUndoCommand *HistoryHandler::command(int index) const
 {
-    qDebug(QString().setNum(doing).toLocal8Bit());
-    if(doing==0)
-    {
-        mask();
-        qDebug("Pushing");
-        this->QUndoStack::push(cmd);
-        unmask();
-    }
+    return  QUndoStack::command(index);
 }
-void HistoryHandler::redo()
+void HistoryHandler::redo(int level)
 {
 //    if(doing)return;
     doing++;
-    qDebug("DOING");
     QUndoStack::redo();
     doing--;
 }
-//bool HistoryHandler::add(QUndoCommand *cmd)
-//{
-////qDebug(cmd->actionText().toLocal8Bit()+ " " +QString().setNum(this->index()).toLocal8Bit());
-//if(doing==0)this->QUndoStack::push(cmd);
-////qDebug("hy");
-//return true;
-//}
+bool HistoryHandler::add(QUndoCommand *cmd)
+{
+//qDebug(cmd->actionText().toLocal8Bit()+ " " +QString().setNum(this->index()).toLocal8Bit());
+if(doing==0)this->QUndoStack::push(cmd);
+//qDebug("hy");
+return true;
+}
 
 
 

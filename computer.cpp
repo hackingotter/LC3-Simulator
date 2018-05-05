@@ -9,7 +9,7 @@
 
 #define UNDOS
 
-#define TRY2PUSH(OLD,NEW,DO) {if((Computer::getDefault()->remember==0))Computer::Undos->push(new Action::DO);}
+#define TRY2PUSH(OLD,NEW,DO) {if((Computer::remember==0))Computer::Undos->add(new Action::DO);}
 #define INITFUNC(TEXT,STUFF) \
 {\
     setText(TEXT);\
@@ -80,19 +80,15 @@ public:
     void undo()
     {
         Computer::getDefault()->remember++;
-//        MASK
         Computer::getDefault()->setProgramStatus(oldCondt);
-//        UNMASK
         Computer::getDefault()->remember--;
     }
 
     void redo()
     {
-//        MASK
         Computer::getDefault()->remember++;
         Computer::getDefault()->setProgramStatus(newCondt);
         Computer::getDefault()->remember--;
-//        UNMASK
     }
 private:
     cond_t newCondt;
@@ -330,7 +326,6 @@ private:
 Computer::Computer(QObject *parent) : QObject(parent)
 {
     Undos = new HistoryHandler();
-
     Undos->setUndoLimit(65535);
     //critical for being able to undo the moves
 
@@ -627,7 +622,6 @@ label_t* Computer::getMemLabel(mem_addr_t addr)
 }
 
 void Computer::setMemBreakPoint(mem_addr_t addr,breakpoint_t* breakpt){
-
     breakpoint_t* obreakptr =_memory[addr].breakpt;
     _memory[addr].breakpt = breakpt;
     TRY2PUSH(obreakptr,breakpt,changeMemBreak(addr,obreakptr,breakpt));
@@ -1974,9 +1968,4 @@ QString Computer::name_or_addr(mem_loc_t target) const
 void Computer::incrementPC()
 {
     setRegister(PC, getRegister(PC) + 1);
-}
-
-void Computer::promptUpdate()
-{
-IFNOMASK(update();)
 }

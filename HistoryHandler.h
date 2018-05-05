@@ -21,22 +21,15 @@ class HistoryHandler: public QUndoStack
 public:
     static int doing;
     HistoryHandler();
-
+    void redo(int level = 0);
+    void undo(int level = 0);
+    const QUndoCommand *command(int index) const ;
     void update(){qDebug("Stack has been changed; update");};
-    void push(QUndoCommand *cmd);
-signals:
-    void flare();
-    void masked(int);
-    void maskedQString(QString&);
-    void unmasked(int);
-    void unmaskedQString(QString*);
-public slots:
-    void redo();
+    bool add(QUndoCommand *cmd);
 
-    void undo();
+
+public slots:
     void setIndex(int idx) ;
-    void unmask();
-    void mask();
 };
 
 
