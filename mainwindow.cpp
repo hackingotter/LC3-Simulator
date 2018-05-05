@@ -20,6 +20,7 @@
 #include <QThread>
 #include "RegisterModel.h"
 #include "status.h"
+#include "HistoryModel.h"
 #include "modeler.h"
 #include "Bridge.h"
 #include <QFuture>
@@ -35,6 +36,7 @@
 #include <QDataStream>
 #include "Assembler.h"
 #include <QUndoView>
+#include <UndoStackMasker.h>
 #include <QItemSelectionModel>
 #include <map>
 #include <QFile>
@@ -141,7 +143,19 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     QObject::connect(ui->actionClear,SIGNAL(triggered()),disp,SLOT(clearScreen()));
 
-    ui->undoStackSpot->addWidget(new QUndoView(Computer::getDefault()->Undos));
+//    UndoView* HV = new UndoView(Computer::getDefault()->Undos,this);
+//    UndoStackView* USV = new UndoStackView(Computer::getDefault()->Undos);
+//    USV->dumpObjectInfo();
+//    Computer::getDefault()->Undos->dumpObjectInfo();
+    UndoStackMasker* USM = new UndoStackMasker(Computer::getDefault()->Undos);
+    ui->undoStackSpot->addWidget(USM);
+    connect(USM,&UndoStackMasker::signalFlare,Computer::getDefault(),&Computer::promptUpdate);
+    QPushButton* spacer = new QPushButton("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh");
+//    connect(Computer::getDefault()->Undos,&HistoryHandler::maskedQString,spacer,&QPushButton::setText);
+        ui->undoStackSpot->addWidget(spacer);
+
+//    dumpObjectInfo();
+
     //    QObject::connect(ui->NextButton,SIGNAL(on_NextButton_pressed()),ui->RegisterView,SLOT(update()));
     readSettings();
     //    setupMenuBar();
@@ -236,13 +250,19 @@ void MainWindow::setupMenuBar()
 }
 void MainWindow::setupControlButtons()
 {
-    CONNECT(ui->haltButton,pressed(),manager,requestHalt());
+
+    CONNECT(ui->haltButton,pressed(),this,requestHalt());
 
 }
 void MainWindow::setupConnections()
 
 {
+
+
     qRegisterMetaType<mem_addr_t>("mem_addr_t");
+
+
+//    connect(Computer::getDefault()->Undos,&HistoryHandler::flare(),Computer::getDefault(),&Computer::update());
     //    qRegisterMetaType<ProcessHandle*>("ProcessHandle*const");
 }
 bool MainWindow::loadFile(QString path)
@@ -630,6 +650,7 @@ void MainWindow::gotoRunningMode()
     qDebug("Going to Running Mode");
     *threadRunning = true;
     ui->NextButton->setEnabled(false);
+
     IFNOMASK(emit update();)
             MASK
 }
@@ -733,6 +754,11 @@ void MainWindow::closeEvent(QCloseEvent *event)
     event->accept();
 }
 
+void MainWindow::requestHalt()
+{
+    Computer::getDefault()->setRunning(false);
+}
+
 void MainWindow::on_MemView1_destroyed()
 {
     qDebug("Hey");
@@ -772,4 +798,9 @@ void MainWindow::on_SaveButton_pressed()
 void MainWindow::on_haltButton_pressed()
 {
     Computer::getDefault()->setRunning(false);
+}
+
+void MainWindow::on_DeleteButton_pressed()
+{
+    update();
 }

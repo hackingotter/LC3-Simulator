@@ -68,7 +68,10 @@ HEADERS += \
     shortcutslisting.h \
     UndoStackView.h \
     HelpMenu.h \
-    StateMachine.h
+    StateMachine.h \
+    HistoryModel.h \
+    borrowed.h \
+    UndoStackMasker.h
 
 
 SOURCES += \
@@ -104,7 +107,9 @@ SOURCES += \
     globaltypes.cpp \
     UndoStackView.cpp \
     HelpMenu.cpp \
-    StateMachine.cpp
+    StateMachine.cpp \
+    HistoryModel.cpp \
+    UndoStackMasker.cpp
 
 
 DISTFILES += \
@@ -118,3 +123,4 @@ STATECHARTS += \
     State Chart.scxml \
     United.scxml
 
+#CONFIG += qtestlib

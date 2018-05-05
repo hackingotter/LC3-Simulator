@@ -10,13 +10,13 @@
 
 #define MASK \
 {\
-    Computer::getDefault()->updateMask++;\
-    qDebug("Masking" + QString().setNum(Computer::getDefault()->updateMask).toLocal8Bit());\
+    Computer::getDefault()->Undos->mask();\
+    qDebug("Masking" + QString().setNum(Computer::getDefault()->Undos->doing).toLocal8Bit());\
     }
 
-#define UNMASK {(Computer::getDefault()->updateMask==0)?1:Computer::getDefault()->updateMask--;qDebug("Unmasking"+ QString().setNum(Computer::getDefault()->updateMask).toLocal8Bit());}
+#define UNMASK {Computer::getDefault()->Undos->unmask();qDebug("Unmasking"+ QString().setNum(Computer::getDefault()->Undos->doing).toLocal8Bit());}
 
-#define IFNOMASK(EXECUTE) {if(Computer::getDefault()->updateMask==0){EXECUTE;/*qDebug("Higher")*/;}}
+#define IFNOMASK(EXECUTE) {if(Computer::getDefault()->Undos->doing==0){EXECUTE;/*qDebug("Higher")*/;}}
 
 #define KBSR 0xFE00
 #define KBDR 0xFE02
@@ -284,7 +284,7 @@ signals:
     void memValueChanged(mem_addr_t addr);
     void subRoutineCalled();
 public slots:
-
+    void promptUpdate();
     void continueExecution();
 private:
 
