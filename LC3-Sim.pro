@@ -68,7 +68,8 @@ HEADERS += \
     shortcutslisting.h \
     UndoStackView.h \
     HelpMenu.h \
-    StateMachine.h
+    StateMachine.h \
+    UndoStackMasker.h
 
 
 SOURCES += \
@@ -104,7 +105,8 @@ SOURCES += \
     globaltypes.cpp \
     UndoStackView.cpp \
     HelpMenu.cpp \
-    StateMachine.cpp
+    StateMachine.cpp \
+    UndoStackMasker.cpp
 
 
 DISTFILES += \

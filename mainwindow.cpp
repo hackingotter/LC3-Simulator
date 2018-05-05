@@ -1,4 +1,5 @@
 #include "QScreen"
+#include "UndoStackMasker.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QStandardItemModel>
@@ -141,7 +142,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     QObject::connect(ui->actionClear,SIGNAL(triggered()),disp,SLOT(clearScreen()));
 
-    ui->undoStackSpot->addWidget(new QUndoView(Computer::getDefault()->Undos));
+    ui->undoStackSpot->addWidget(new UndoStackMasker(Computer::getDefault()->Undos));
     //    QObject::connect(ui->NextButton,SIGNAL(on_NextButton_pressed()),ui->RegisterView,SLOT(update()));
     readSettings();
     //    setupMenuBar();
