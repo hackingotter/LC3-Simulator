@@ -4,12 +4,17 @@
 #include <QObject>
 #include <QWidget>
 #include <QUndoView>
-
+#include <QLayoutItem>
+#include <HistoryHandler.h>
 class UndoStackView : public QUndoView
 {
 public:
-    UndoStackView();
+    UndoStackView(HistoryHandler *solo, QWidget* parent =nullptr);
 
+
+private:
+    void paintEvent(QPaintEvent *e);
+    void paintLayout(QPainter *painter, QLayoutItem *item);
 };
 
 #endif // UNDOSTACKVIEW_H

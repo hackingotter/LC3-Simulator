@@ -3,14 +3,16 @@
 #define UNDOSTACKMASKER_H
 
 #include <QWidget>
+#include <QLayoutItem>
 #include <HistoryHandler.h>
+#include <UndoStackView.h>
 #include <QUndoView>
 class UndoStackMasker : public QWidget
 {
     Q_OBJECT
 
     HistoryHandler* Historian;
-    QUndoView* QSV;
+    UndoStackView* QSV;
     QWidget* Middleman;
     const QSize constructSize();
 public:
@@ -21,16 +23,16 @@ public:
      */
     void resizeEvent(QResizeEvent *event);
 signals:
-
     void signalFlare();
 public slots:
-
     void updateSize();
     void finishedDoing();
-protected slots:
+    void pres(const QModelIndex &mold);
+    protected slots:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
+    void startDoing();
 };
 
 #endif // UNDOSTACKMASKER_H

@@ -3,9 +3,11 @@
 #include "QPushButton"
 #include "QMouseEvent"
 #include "qevent.h"
+#include "QLayout"
 #include "QApplication"
 #include "QGraphicsScene"
 #include "QScrollBar"
+#include "QPainter"
 #include "computer.h"
 #include "QPalette"
 //#include <QTest>
@@ -13,7 +15,7 @@
 UndoStackMasker::UndoStackMasker(HistoryHandler* historian,QWidget *parent) : QWidget(parent)
 {
     Historian = historian;
-    QSV = new QUndoView(Historian,this);
+    QSV = new UndoStackView(Historian,this);
     QSV->setVerticalScrollBar(new QScrollBar(Qt::Vertical));
     QSV->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOn);
     Middleman = new QWidget(this);
@@ -21,7 +23,23 @@ UndoStackMasker::UndoStackMasker(HistoryHandler* historian,QWidget *parent) : QW
     connect(Historian,&HistoryHandler::indexChanged,this,&UndoStackMasker::updateSize);
     connect(Historian,&HistoryHandler::indexChanged,this,&UndoStackMasker::signalFlare);
     connect(Historian,&HistoryHandler::indexChanged,this,&UndoStackMasker::finishedDoing);
+    connect(QSV,&UndoStackView::pressed,this,&UndoStackMasker::pres);
+
+//    connect(QSV,&QUndoView::,this,&UndoStackMasker::startDoing);
+//    QSV->
 }
+void UndoStackMasker::pres(const QModelIndex &mold)
+{
+//    if(mold)
+//    {
+    qDebug(QString().setNum(mold.row()).toLocal8Bit());
+//    }
+//    else
+//    {
+//        qDebug("No index");
+//    }
+}
+
 void UndoStackMasker::updateSize()
 {
     Middleman->resize(constructSize());
@@ -50,10 +68,16 @@ const QSize UndoStackMasker::constructSize()
 
 void UndoStackMasker::mousePressEvent(QMouseEvent *event)
 {
-    qDebug("IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII");
     MASK
     QMouseEvent pressEvent(QEvent::MouseButtonPress,event->pos(),Qt::LeftButton,Qt::LeftButton,Qt::NoModifier);
     QApplication::sendEvent(QSV->viewport(), &pressEvent);
+    UNMASK
+}
+
+void UndoStackMasker::startDoing()
+{
+    MASK
+    qDebug("HHHHH");
 }
 void UndoStackMasker::finishedDoing()
 {
@@ -69,4 +93,20 @@ void UndoStackMasker::mouseReleaseEvent(QMouseEvent *event)
 void UndoStackMasker::mouseMoveEvent(QMouseEvent *event)
 {
     //    QApplication::sendEvent(QSV->viewport(),event);
+}
+void UndoStackMasker::paintLayout(QPainter *painter, QLayoutItem *item)
+{
+    QLayout *layout = item->layout();
+    if (layout) {
+        for (int i = 0; i < layout->count(); ++i)
+            paintLayout(painter, layout->itemAt(i));
+    }
+    painter->drawRect(item->geometry());
+}
+
+void UndoStackMasker::paintEvent(QPaintEvent *)
+{
+    QPainter painter(this);
+    if (layout())
+        paintLayout(&painter, layout());
 }
