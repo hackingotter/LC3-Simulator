@@ -10,7 +10,7 @@
 #include "BetterScrollbar.h"
 #include "computer.h"
 #include "FollowButton.h"
-
+#include <map>
 
 #define CLEARONGOTO (true)
 
@@ -18,7 +18,10 @@
 
 class MemWindow : public QWidget
 {
+
     Q_OBJECT
+    bool flipped;
+    std::map<QString, uint16_t> labelDict;
     MemTable* View;
     HighlightScrollBar* Scroll;
     QLabel* Label;
@@ -42,9 +45,11 @@ class MemWindow : public QWidget
     bool followmode=false;
 
     int getScrollOffset(val_t row, bool *ok);
+    void setupInput();
 public:
     explicit MemWindow(modeler* model, HighlightScrollBar *scroll, QWidget *parent = nullptr,QString* buttonName = new QString("PC"));
     MemTable* getMemView();
+    void setFlipped(bool upIsDown);
 signals:
 
 public slots:
@@ -52,6 +57,7 @@ public slots:
 
     void handleTracking();
     void setSpecialReg(reg_t reg);
+
 private slots:
     void handleSRPress();
     void handleGotoPress();

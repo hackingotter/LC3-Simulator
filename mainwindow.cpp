@@ -129,6 +129,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     setupControlButtons();
     setupInOut();
     setupWatches();
+    setupUndoInterface();
 
 
 
@@ -142,7 +143,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     QObject::connect(ui->actionClear,SIGNAL(triggered()),disp,SLOT(clearScreen()));
 
-    ui->undoStackSpot->addWidget(new UndoStackMasker(Computer::getDefault()->Undos));
+//    ui->undoStackSpot->addWidget();f
     //    QObject::connect(ui->NextButton,SIGNAL(on_NextButton_pressed()),ui->RegisterView,SLOT(update()));
     readSettings();
     //    setupMenuBar();
@@ -168,11 +169,11 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
-MemWindow* MainWindow::makeNConnectNewMemWindow(modeler* model)
-{
-    MemWindow* Newest = new MemWindow(model,Saturn->generateBar());
-    CONNECT(this,signalUpdate(),Newest,kick());
-}
+//MemWindow* MainWindow::makeNConnectNewMemWindow(modeler* model)
+//{
+//    MemWindow* Newest = new MemWindow(model,Saturn->generateBar());
+//    CONNECT(this,signalUpdate(),Newest,kick());
+//}
 void MainWindow::setupViews()
 {
     qDebug("Setting Up Views");
@@ -241,10 +242,16 @@ void MainWindow::setupControlButtons()
 
 }
 void MainWindow::setupConnections()
-
 {
     qRegisterMetaType<mem_addr_t>("mem_addr_t");
     //    qRegisterMetaType<ProcessHandle*>("ProcessHandle*const");
+}
+void MainWindow::setupUndoInterface()
+{
+    UndoStackMasker* widge = new UndoStackMasker(Computer::getDefault()->Undos);
+    ui->splitter_2->addWidget(widge);
+
+    widge->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Expanding);
 }
 bool MainWindow::loadFile(QString path)
 {
@@ -393,9 +400,7 @@ void MainWindow::handleFiles()
     Computer::getDefault()->loadProgramFile("LC3Maybe.obj");
     IFNOMASK(emit update();)
 }
-
 void MainWindow::setupDisplay()
-
 {
 
     disp = new Hope();
@@ -408,7 +413,6 @@ void MainWindow::setupDisplay()
     QObject::connect(Computer::getDefault(),SIGNAL(memValueChanged(mem_addr_t)),disp,SLOT(update(mem_addr_t)));
 
 }
-
 void MainWindow::setupMemView(QTableView* view, bool setmodel, bool setScroll)
 {
 
@@ -483,7 +487,7 @@ void MainWindow::setupStackView()
     CONNECT(this,signalUpdate(),StackWindow,kick());
     ui->StackBox->layout()->addWidget(StackWindow);
     MemTable* view = StackWindow->getMemView();
-
+    view->setFlipped(true);
     //    qDebug("Setting Model");
     //    view->hide();
     //    view->setModel(StackModel);
@@ -501,8 +505,8 @@ void MainWindow::setupStackView()
     view->verticalHeader()->setDefaultSectionSize(20);
     view->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     view->setSelectionBehavior(QAbstractItemView::SelectRows);
-    CONNECT(MainWindow::ui->actionFlip,triggered(),StackModel,flip());
-    CONNECT(StackModel,flip(),this,update());
+//    CONNECT(MainWindow::ui->actionFlip,triggered(),StackModel,flip());
+//    CONNECT(StackModel,flip(),this,update());
     QObject::connect(Computer::getDefault(),SIGNAL(memValueChanged(mem_addr_t)),StackModel,SLOT(stackFrameListener(mem_addr_t)));
 //    QObject::connect(Computer::getDefault(),SIGNAL(subRoutineCalled()),StackModel,SLOT(increaseStackFrameCounter()));
 //QObject::connect(Computer::getDefault(),SIGNAL(memValueChanged(mem_addr_t)),StackModel,SLOT(stackFrameListener(mem_addr_t)));

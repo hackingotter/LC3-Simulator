@@ -10,6 +10,7 @@ class MemTable : public QTableView
 {
     Q_OBJECT
     void setupConnections();
+    bool flipped;
     modeler * model;
     mem_loc_t * copied;
     QModelIndex savedCurrentFocusIndex = QModelIndex();
@@ -32,6 +33,7 @@ public:
      */
     void show();
 
+    void setFlipped(bool upIsDown);
     void requestKick();
 public slots:
     void showClickOptions(const QPoint &pos);

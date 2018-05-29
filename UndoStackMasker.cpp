@@ -20,6 +20,7 @@ UndoStackMasker::UndoStackMasker(HistoryHandler* historian,QWidget *parent) : QW
     QSV->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOn);
     Middleman = new QWidget(this);
     Middleman->setVisible(true);
+    QSV->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
     connect(Historian,&HistoryHandler::indexChanged,this,&UndoStackMasker::updateSize);
     connect(Historian,&HistoryHandler::indexChanged,this,&UndoStackMasker::signalFlare);
     connect(Historian,&HistoryHandler::indexChanged,this,&UndoStackMasker::finishedDoing);
@@ -56,8 +57,8 @@ const QSize UndoStackMasker::constructSize()
 {
     QSize* out = new QSize();
     qDebug("Phase 2" + QString().setNum(QSV->viewport()->width()).toLocal8Bit());
-    out->setWidth(QSV->viewport()->width());
-    out->setHeight(QSV->verticalScrollBar()->size().height());
+    out->setWidth(this->width());
+    out->setHeight(this->height());
 
     const QSize conout =  QSize(out->width(),out->height());
     qDebug(QString().setNum(conout.height()).toLocal8Bit());
@@ -93,20 +94,4 @@ void UndoStackMasker::mouseReleaseEvent(QMouseEvent *event)
 void UndoStackMasker::mouseMoveEvent(QMouseEvent *event)
 {
     //    QApplication::sendEvent(QSV->viewport(),event);
-}
-void UndoStackMasker::paintLayout(QPainter *painter, QLayoutItem *item)
-{
-    QLayout *layout = item->layout();
-    if (layout) {
-        for (int i = 0; i < layout->count(); ++i)
-            paintLayout(painter, layout->itemAt(i));
-    }
-    painter->drawRect(item->geometry());
-}
-
-void UndoStackMasker::paintEvent(QPaintEvent *)
-{
-    QPainter painter(this);
-    if (layout())
-        paintLayout(&painter, layout());
 }

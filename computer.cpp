@@ -327,6 +327,7 @@ Computer::Computer(QObject *parent) : QObject(parent)
 {
     Undos = new HistoryHandler();
     Undos->setUndoLimit(65535);
+
     //critical for being able to undo the moves
 
     for(int i = 0;i<=65535;i++)

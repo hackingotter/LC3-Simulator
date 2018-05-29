@@ -58,7 +58,7 @@ class MainWindow : public QMainWindow
     Ui::MainWindow *ui;
 
 
-    MemWindow *makeNConnectNewMemWindow(modeler *model);
+//    MemWindow *makeNConnectNewMemWindow(modeler *model);
     int getScreenWidth();
     int getScreenHeight();
 
@@ -165,6 +165,8 @@ public slots:
 
     void setupControlButtons();
 
+
+    void setupUndoInterface();
     void on_continueButton_clicked();
 
     void setupRegisterView();

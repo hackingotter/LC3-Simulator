@@ -13,8 +13,7 @@ public:
 
 
 private:
-    void paintEvent(QPaintEvent *e);
-    void paintLayout(QPainter *painter, QLayoutItem *item);
+
 };
 
 #endif // UNDOSTACKVIEW_H

@@ -2,7 +2,9 @@
 #include "QVBoxLayout"
 #include "QHBoxLayout"
 #include "QString"
+#include "QCompleter"
 #include "Utility.h"
+
 MemWindow::MemWindow(modeler *model, HighlightScrollBar* scroll, QWidget *parent,QString* buttonName) : QWidget(parent)
 {
     QHBoxLayout* hLayout = new QHBoxLayout();
@@ -15,6 +17,7 @@ MemWindow::MemWindow(modeler *model, HighlightScrollBar* scroll, QWidget *parent
     Input->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
     Input->setMaximumHeight(20);
 
+    setupInput();
     GotoButton = new QPushButton("GOTO",this);
     GotoButton->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
     GotoButton->setMinimumWidth(40);
@@ -78,14 +81,68 @@ MemWindow::MemWindow(modeler *model, HighlightScrollBar* scroll, QWidget *parent
 
 
 }
+void MemWindow::setupInput()
+{
+
+    labelDict = std::map<QString,uint16_t>();
+    QStringList suggestions;
+#define SUGGESTBOX(KEY,VALUE)\
+    suggestions<<KEY;\
+    labelDict[KEY] = VALUE;
+
+    for(val_t i = 0;i<65535;i++)
+    {
+        label_t* lab = Computer::getDefault()->getMemLabel(i);
+        if(lab)
+        {
+
+                suggestions<<lab->name;
+                labelDict[lab->name]= i;
+
+        }
+    }
+    for(int i =0;i<8;i++)
+    {
+        const QString reg ="r"+QString().setNum(i);
+        SUGGEST(suggestions,labelDict,reg,Computer::getDefault()->getRegister((reg_t)i))
+//        suggestions<<reg;
+//        labelDict[reg]= Computer::getDefault()->getRegister((reg_t)i);
+    }
+    suggestions<<"PC";
+    labelDict["PC"]=Computer::getDefault()->getRegister(PC);
+    suggestions<<"SP";
+    labelDict["SP"]=Computer::getDefault()->getRegister(SPR);
+    QCompleter searchCompleter(suggestions,this);
+
+    searchCompleter.setCaseSensitivity(Qt::CaseInsensitive);
+    searchCompleter.setCompletionMode(QCompleter::UnfilteredPopupCompletion);
+    Input->setCompleter(&searchCompleter);
+//    connect(searchCompleter,&QCompleter::activated)
+}
 
 MemTable *MemWindow::getMemView()
 {
     return View;
 }
+
+void MemWindow::setFlipped(bool upIsDown)
+{
+    View->setFlipped(upIsDown);
+    if(upIsDown)
+    {
+        SpecialReg = SPR;
+        SpecialButton->setText("SPR");
+    }
+    else
+    {
+        SpecialReg = PC;
+        SpecialButton->setText("PC");
+    }
+}
 void MemWindow::handleSRPress()
 {
-    View->scrollToRow(Computer::getDefault()->getRegister(SpecialReg));
+    val_t target_address = Computer::getDefault()->getRegister(SpecialReg);
+    View->scrollToRow(target_address);
 }
 void MemWindow::handleGotoPress()
 {
@@ -94,13 +151,15 @@ void MemWindow::handleGotoPress()
 
     if(ok)
     {
-
-        for(int i = 5;i>=0;i--)
-        {
-            Computer::getDefault()->setMemLoc(target+i,Computer::getDefault()->getMemLocation(i));
-        }
-
         View->scrollToRow(target);
+    }
+    else
+    {
+        const QString text = Input->text();
+        if(labelDict.find(text)!=labelDict.end())
+        {
+            View->scrollToRow(labelDict[text]);
+        }
     }
     CLEAR(Input);
 
@@ -129,6 +188,7 @@ void MemWindow::kick()
     {
         handleSRPress();
     }
+    setupInput();
 }
 
 

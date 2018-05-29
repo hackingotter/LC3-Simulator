@@ -182,6 +182,12 @@ void MemTable::scrollToRow(val_t row)
     setStyleSheet("background-color:rgb(255,240,240)");
 
     //    qDebug("Scrolling to Row");
+
+
+    if(flipped)
+    {
+        row = (0xBFFF-row);
+    }
     scrollTo(model->index(row,0),QAbstractItemView::PositionAtCenter);
     setStyleSheet(stylesheet);
 
@@ -339,4 +345,10 @@ void MemTable::show()
         setCurrentIndex(savedCurrentFocusIndex);
 
     }
+}
+
+void MemTable::setFlipped(bool upIsDown)
+{
+    flipped=upIsDown;
+
 }

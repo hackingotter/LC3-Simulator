@@ -14,8 +14,8 @@ painter.drawLine(offsetx+width  ,offsety+0      ,offsetx+width-dif  ,offsety+dif
 painter.drawLine(offsetx+width  ,offsety+height ,offsetx+width-dif  ,offsety+height-dif   );\
 painter.drawLine(offsetx+0      ,offsety+height ,offsetx+dif         ,offsety+height-dif   );
 
-#define ADDR2X(ADDR) ((ADDR - VIDEO_ADDR)%DISPLAY_WIDTH)
-#define ADDR2Y(ADDR) ((ADDR - VIDEO_ADDR - ADDR2X(ADDR))/DISPLAY_HEIGHT)
+#define ADDR2X(ADDR) DISPLAY_SCALE*((ADDR - VIDEO_ADDR)%DISPLAY_WIDTH)
+#define ADDR2Y(ADDR) DISPLAY_SCALE*((ADDR - VIDEO_ADDR - ADDR2X(ADDR)/DISPLAY_SCALE)/DISPLAY_HEIGHT)
 #define ADDR2POINT(ADDR) (ADDR2X(ADDR)),(ADDR2Y(ADDR))
 QPicture pi;
 
@@ -26,7 +26,7 @@ Hope::Hope(QWidget *parent):QLabel(parent,0)
     qDebug("Setting up screen");
 
 //    model = guardin->get
-    mag = new QImage(DISPLAY_WIDTH*DISPLAY_SCALE,DISPLAY_HEIGHT*DISPLAY_SCALE,QImage::Format_RGB32);
+    mag = new QImage(DISPLAY_WIDTH*DISPLAY_SCALE+50,DISPLAY_HEIGHT*DISPLAY_SCALE+50,QImage::Format_RGB32);
 
     setMouseTracking(true);
     QPainter p(&pi);
@@ -203,9 +203,9 @@ void Hope::update(mem_addr_t addr)
 void Hope::setPoint(int x, int y,QRgb rgb, QImage*image)
 {
 image->setPixel(x  ,y  ,rgb);
-//image->setPixel(2*x  ,2*y+1,rgb);
-//image->setPixel(2*x+1,2*y+1,rgb);
-//image->setPixel(2*x+1,2*y  ,rgb);
+image->setPixel(x  ,y+1,rgb);
+image->setPixel(x+1,y+1,rgb);
+image->setPixel(x+1,y  ,rgb);
 /*    if(x<0||y<0) return;
     {
         for(int i = 0;i<DISPLAY_SCALE;i++)

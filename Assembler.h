@@ -48,10 +48,10 @@ private:
      * /brief programLength
      */
     uint16_t programLength;
-    /** starting address fo the program being assembled
+    /** starting address of the program being assembled
      */
     val_t startingAddress;
-    /** ending address fo the program being assembled
+    /** ending address of the program being assembled
      */
     val_t endingAddress;
     /** used during assembly runs. set to true when .END is encountered

@@ -30,6 +30,7 @@
 #define R4COLOR (QColor(102,255,51))
 #define R5COLOR (QColor(153,102,51))
 #define R6COLOR (QColor(255,0,255))
+
 #ifndef MEMSIZE
 #define MEMSIZE 65535
 #endif

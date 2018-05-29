@@ -28,6 +28,8 @@
 #define MCR  0xFFFE
 #define MCC  0xFFFF
 
+#define ISINUSERSPACE(ADDR) (ADDR>=0x3000 && ADDR<=0xBFFF)
+
 #define MAXOFFSET 1024
 class Computer : public QObject
 {
