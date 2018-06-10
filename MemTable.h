@@ -6,6 +6,8 @@
 #include "QAction"
 #include "modeler.h"
 #include "QPoint"
+
+#define MINIMUMINSERTCOMBO (16)
 class MemTable : public QTableView
 {
     Q_OBJECT

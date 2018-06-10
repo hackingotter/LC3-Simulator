@@ -321,6 +321,27 @@ void MemTable::shiftDown(bool makeAgreement)
         selectRange(begin+1,end+1);
     }
 }
+void MemTable::insertRow(mem_addr_t target)
+{
+    //make it so the thing can see what zone it is in and prevent cross zone mergers
+    int combo = 0;
+    mem_addr_t source = target;
+    while( ++source<=STACKSPACE_END && combo<MINIMUMINSERTCOMBO)
+    {
+        if( Computer::getDefault()->getMemValue(source)==0)
+        {
+            combo++;
+        }
+        else
+        {
+            combo=0;
+        }
+    }
+    if(combo==MINIMUMINSERTCOMBO)
+    {
+
+    }
+}
 void MemTable::saveSettings()
 {
 

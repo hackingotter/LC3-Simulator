@@ -25,7 +25,7 @@ QVariant StackModeler::data(const QModelIndex &index,int role) const
 {
     mem_addr_t addr;
 
-    addr = 0xBFFF - index.row();
+    addr = STACKSPACE_END - index.row();
 
     const int column = index.column();
     if(!index.isValid())return QVariant();
@@ -40,6 +40,8 @@ QVariant StackModeler::data(const QModelIndex &index,int role) const
 
         case VALUECOLUMN:
             return QVariant(getHexString(Computer::getDefault()->getMemValue(addr)));
+        case NAMECOLUMN:
+            return QVariant(Computer::getDefault()->getMemNameSafe(addr));
         }
     }
     if(role == Qt::BackgroundRole)
@@ -50,7 +52,7 @@ QVariant StackModeler::data(const QModelIndex &index,int role) const
         }
         if(column == VALUECOLUMN)
         {
-            return stackFramePainter(0xBFFF-index.row());
+            return stackFramePainter(addr);
         }
     }
     return QVariant();
@@ -124,7 +126,7 @@ bool StackModeler::setData(const QModelIndex &index, const QVariant &value, int 
     static int a = 0;
     bool ok = true;
     mem_addr_t addr;
-    addr = 0xBFFF - index.row();
+    addr = STACKSPACE_END - index.row();
     qDebug(getHexString(addr).toLocal8Bit());
     qDebug(QString().setNum(a++).toLocal8Bit());
     const int column = index.column();

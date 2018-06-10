@@ -1,6 +1,7 @@
 #include "hope.h"
 #include "mainwindow.h"
 #include <QRgb>
+#include "computer.h"
 #include <QImage>
 
 #define testinter 3

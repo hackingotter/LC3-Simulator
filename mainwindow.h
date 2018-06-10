@@ -24,7 +24,6 @@
 #define ADDRSLOT 1
 #define NAMESLOT 2
 
-#define VIDEO_ADDR (0xC000)
 
 #define DISPLAY_WIDTH  128
 #define DISPLAY_HEIGHT 124

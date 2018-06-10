@@ -86,32 +86,28 @@ void MemWindow::setupInput()
 
     labelDict = std::map<QString,uint16_t>();
     QStringList suggestions;
-#define SUGGESTBOX(KEY,VALUE)\
-    suggestions<<KEY;\
-    labelDict[KEY] = VALUE;
+#define SUGGEST(KEY,VALUE)\
+    suggestions<<(KEY);\
+    labelDict[KEY] = (VALUE);
 
     for(val_t i = 0;i<65535;i++)
     {
         label_t* lab = Computer::getDefault()->getMemLabel(i);
         if(lab)
         {
-
-                suggestions<<lab->name;
-                labelDict[lab->name]= i;
+                SUGGEST(lab->name,i)
 
         }
     }
     for(int i =0;i<8;i++)
     {
         const QString reg ="r"+QString().setNum(i);
-        SUGGEST(suggestions,labelDict,reg,Computer::getDefault()->getRegister((reg_t)i))
+        SUGGEST(reg,Computer::getDefault()->getRegister((reg_t)i))
 //        suggestions<<reg;
 //        labelDict[reg]= Computer::getDefault()->getRegister((reg_t)i);
     }
-    suggestions<<"PC";
-    labelDict["PC"]=Computer::getDefault()->getRegister(PC);
-    suggestions<<"SP";
-    labelDict["SP"]=Computer::getDefault()->getRegister(SPR);
+    SUGGEST("PC",Computer::getDefault()->getRegister(PC))
+    SUGGEST("SP",Computer::getDefault()->getRegister(SPR))
     QCompleter searchCompleter(suggestions,this);
 
     searchCompleter.setCaseSensitivity(Qt::CaseInsensitive);
