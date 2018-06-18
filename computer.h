@@ -31,28 +31,45 @@
 #define TRAPSPACE_BEGIN   (0x0000)
 #define TRAPSPACE_END     (0x00FF)
 
+#define ISINTRAPSPACE(ADDR) (ADDR>=TRAPSPACE_BEGIN && ADDR<=TRAPSPACE_END)
+
+
+/**
+ *Interupt Space
+ **/
+
 #define INTERSPACE_BEGIN  (0x0100)
 #define INTERSPACE_END    (0x01FF)
+
+#define ISININTERSPACE(ADDR) (ADDR>=INTERSPACE_BEGIN && ADDR<=INTERSPACE_END)
 
 #define PRIVSPACE_BEGIN   (0x0200)
 #define PRIVSPACE_END     (0x2FFF)
 
+#define ISINPRIVSPACE(ADDR) (ADDR>=PRIVSPACE_BEGIN && ADDR<=PRIVSPACE_END)
+
+
 #define USERSPACE_BEGIN   (0x3000)
 #define USERSPACE_END     (0xFDFF)
 
+#define ISINUSERSPACE(ADDR) (ADDR>=USERSPACE_BEGIN && ADDR<=USERSPACE_END)
 
 #define VIDEOSPACE_START  (0xC000)
 #define VIDEO_ADDR        (VIDEOSPACE_START)
 #define VIDEOSPACE_END    (USERSPACE_END)
 
+#define ISINVIDEOSPACE(ADDR) (ADDR>=VIDEOSPACE_BEGIN && ADDR<=VIDEOSPACE_END)
+
 #define STACKSPACE_BEGIN  (USERSPACE_BEGIN)
 #define STACKSPACE_END    (VIDEOSPACE_START-1)
 //#define ISINSTACKSPACE(ADDR)
+#define ISINSTACKSPACE(ADDR) (ADDR>=STACKSPACE_BEGIN && ADDR<=STACKSPACE_END)
 
-#define DEVICESPACE_BEGIN (0x3000)
-#define DEVICESPACE_END   (0xFDFF)
 
-#define ISINUSERSPACE(ADDR) (ADDR>=USERSPACE_BEGIN && ADDR<=USERSPACE_END)
+#define DEVICESPACE_BEGIN (0xFE00)
+#define DEVICESPACE_END   (0xFFFF)
+
+#define ISINDEVICESPACE(ADDR) (ADDR>=DEVICESPACE_BEGIN && ADDR<=DEVICESPACE_END)
 
 #define MAXOFFSET 1024
 class Computer : public QObject
@@ -300,6 +317,10 @@ public:
     QString mnemGen(mem_addr_t addr) const;
     void lowerBoundTimes();
     void incrementPC();
+    bool isConnected(mem_addr_t addr);
+    bool isConnected(mem_loc_t addr);
+    bool isConnector(mem_loc_t mem);
+    bool isConnector(mem_addr_t addr);
 signals:
     void updateDisplay();
     void update();
@@ -352,6 +373,31 @@ private:
     void executeShiftCycle(mem_loc_t curLoc, mem_addr_t begin, mem_addr_t end, int32_t delta, int *changed, int offset, bool makeAgreement);
 
 
+    bool findGoodBlankRowAfter(mem_addr_t addr);
+    /** idLastOptionAfter
+     * \param addr The address which is to be moved
+     * \return The last possible address in the same section as the given address.
+     */
+    mem_addr_t idLastOptionAfter(mem_addr_t addr);
+    void connectAddrs(mem_addr_t source, mem_loc_t target);
+    void connectAddrs(mem_addr_t source, mem_addr_t target);
+    /** prepareMemory
+     *
+     * Set up the memory such that each line knows what address it occupies.
+     */
+    void prepareMemory();
+
+    /////////////////////////////////////////////////////////////////
+    //Unclean                                                      //
+    /////////////////////////////////////////////////////////////////
+    void cleanConnectors(mem_addr_t addr);
+
+    void prepareConnectors();
+    void formConnectionFromTo(mem_addr_t agent, mem_addr_t obj);
+
+    /////////////////////////////////////////////////////////////////
+    //                                                             //
+    /////////////////////////////////////////////////////////////////
 };
 
 #endif // COMPUTER_H

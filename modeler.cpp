@@ -137,6 +137,11 @@ QBrush modeler::column0Painter(mem_addr_t addr) const
     return QBrush();
 }
 
+QBrush modeler::column3Painter(mem_addr_t addr) const
+{
+    return QBrush();//TBI
+}
+
 void modeler::setSelectMode(modeler::SelectMode mode, mem_addr_t begin, mem_addr_t end)
 {
     this->currentMode = mode;
@@ -279,6 +284,21 @@ QVariant modeler::data(const QModelIndex &index, int role) const
 //                Computer::getDefault()->proposedNewLocation(addr,TESTBEGIN,TESTEND,TESTOFFSET,er);
 //                return *er;
 //            }
+
+            mem_loc_t ml = Computer::getDefault()->getMemLocation(addr);
+
+            connector_t* qui = ml.connectors;
+            QString ck = ":";
+            if(qui!= nullptr)
+            {
+                do{
+                    ck.append(getHexString(qui->connected));
+                    qui = qui->next;
+                }while(qui->next!= qui);
+                ck.append(getHexString(qui->connected));
+                return ck;
+            }
+
 
             return Computer::getDefault()->getMemNameSafe(addr);
 

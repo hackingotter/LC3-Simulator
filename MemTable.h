@@ -18,6 +18,7 @@ class MemTable : public QTableView
     QModelIndex savedCurrentFocusIndex = QModelIndex();
     void selectedClickOptions(const QPoint &pos, QMenu *clickMenu);
     void saveSettings();
+    void insertRow(mem_addr_t target);
 public:
     MemTable(modeler *model, QWidget *parent = 0);
     void setupActions();
@@ -70,6 +71,7 @@ private slots:
     void shiftUpBrute();
     void paste(bool makeAgreement = true);
     void pasteBrute();
+    void insertBelow();
 };
 
 #endif // MEMTABLE_H

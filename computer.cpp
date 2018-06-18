@@ -196,7 +196,9 @@ public:
         Computer::getDefault()->remember++;
         Computer::getDefault()->setMemValue(mem_addr,oldValue);
         if(mem_addr == DDR)
+        {
             Computer::getDefault()->popDisplay();
+        }
         Computer::getDefault()->remember--;
     }
     void redo()
@@ -206,7 +208,9 @@ public:
             Computer::getDefault()->remember++;
             Computer::getDefault()->setMemValue(mem_addr,newValue);
             if(mem_addr == DDR)
+            {
                 Computer::getDefault()->pushDisplay(newValue);
+            }
             Computer::getDefault()->remember--;
         }
         fresh = false;
@@ -329,14 +333,27 @@ Computer::Computer(QObject *parent) : QObject(parent)
     Undos->setUndoLimit(65535);
 
     //critical for being able to undo the moves
-
-    for(int i = 0;i<=65535;i++)
-    {
-        _memory[i].addr=i;
-    }
+    prepareMemory();
+    prepareConnectors();
     savedSSP = 0;
     savedUSP = 0;
     activeStack = supervisorStack;
+}
+void Computer::prepareMemory()
+{
+    for(int i = 0;i<=MEMSIZE;i++)
+    {
+        _memory[i].addr=i;//set the address numbers.
+    }
+}
+void Computer::prepareConnectors()
+{
+    for(int i = 0;i<=MEMSIZE;i++)
+    {
+        _memory[i].connectors=nullptr;//set the address numbers.
+    }
+//    formConnectionFromTo(1,2);
+//    formConnectionFromTo(3,2);
 }
 void Computer::lowerBoundTimes()
 {
@@ -345,6 +362,7 @@ void Computer::lowerBoundTimes()
     for(int i = 0;i<=65535;i++)
     {
         _memory[i].addr=i;
+        _memory[i].connectors = nullptr;
     }
     t = clock()- t;
 
@@ -524,8 +542,22 @@ mem_loc_t *Computer::getMemLocationsBlock(mem_addr_t addr, val_t blockSize)
     }
     return block;
 }
+void Computer::connectAddrs(mem_addr_t source, mem_addr_t target)
+{
+    Computer::getDefault()->connectAddrs(source,_memory[target]);
+}
+void Computer::connectAddrs(mem_addr_t source, mem_loc_t target)
+{
+    if(target.connectors == nullptr)
+    {
+        target.connectors = (connector_t*)calloc(1,sizeof(connector_t));
+//        target.connectors->before = target.connectors;
+//        target.connectors->after = target.connectors;
 
+    }
+    target.connectors->connected = source;
 
+}
 void Computer::setMemValue(mem_addr_t addr, val_t val)
 {
     qDebug("Settin' Mem");
@@ -534,7 +566,11 @@ void Computer::setMemValue(mem_addr_t addr, val_t val)
     _memory[addr].value = val;
     if(oval== val)return;
     if(addr>=0xfe00)    qDebug(getHexString(addr).toLocal8Bit());
+    if(isConnector(addr))
+    {
+        connectAddrs(addr,Computer::getDefault()->connectedAddress(addr));
 
+    }
 
     TRY2PUSH(oval,val,changeMemValue(addr,oval,val));
     emit memValueChanged(addr);
@@ -1328,8 +1364,6 @@ void Computer::checkSpecialAddressWrite(mem_addr_t addr)
     }
 }
 
-
-
 void Computer::executeSingleInstruction() {
 
     Undos->beginMacro("Executing "+getHexString(getRegister(PC)));
@@ -1426,8 +1460,42 @@ void Computer::makeDisplayReady()
 {
     setMemValue(DSR,0x8000);
 }
+mem_addr_t Computer::idLastOptionAfter(mem_addr_t addr)
+{
+    if(addr>=TRAPSPACE_BEGIN && addr  <= TRAPSPACE_END)
+    {
+        return TRAPSPACE_END;
+    }
+    if(addr>=INTERSPACE_BEGIN && addr <= INTERSPACE_END)
+    {
+        return INTERSPACE_END;
+    }
+    if(addr>= PRIVSPACE_BEGIN && addr <= PRIVSPACE_BEGIN)
+    {
+        return PRIVSPACE_END;
+    }
+    if(addr>= USERSPACE_BEGIN && addr <= STACKSPACE_END)
+    {
+        return STACKSPACE_END;
+    }
+    if(addr>=VIDEOSPACE_START && addr <= VIDEOSPACE_END)
+    {
+        return VIDEOSPACE_END;
+    }
+    if(addr>=DEVICESPACE_BEGIN)
+    {
+        return DEVICESPACE_END;
+    }
+    return 0;
+}
+bool Computer::findGoodBlankRowAfter(mem_addr_t addr)
+{
+    mem_addr_t lastPossible = idLastOptionAfter(addr);
+
+    qDebug(getHexString(lastPossible).toLocal8Bit());
 
 
+}
 bool Computer::insertBlankRow(mem_addr_t addr)
 {
     mem_addr_t queue = findSpace(addr,10);
@@ -1470,9 +1538,6 @@ bool Computer::canShiftClean(mem_addr_t originStart, mem_addr_t originEnd,mem_ad
     return true;
 
 }
-
-
-
 
 bool Computer::stillInRange(mem_addr_t current, int32_t delta, mem_addr_t beginRange,mem_addr_t endRange)
 {
@@ -1670,7 +1735,75 @@ mem_addr_t Computer::connectedAddress(mem_loc_t mem)
     return mem.addr + addrOffset;
 
 }
+bool Computer::isConnected(mem_addr_t addr)
+{
+    return Computer::getDefault()->isConnected(Computer::getMemLocation(addr));
 
+}
+bool Computer::isConnected(mem_loc_t mem)
+{
+    return (mem.connectors);//this will be false if it is null;
+}
+bool Computer::isConnector(mem_addr_t addr)
+{
+    return Computer::getDefault()->isConnector(Computer::getDefault()->getMemLocation(addr));
+}
+bool Computer::isConnector(mem_loc_t mem)
+{
+    return Computer::getDefault()->connectedAddress(mem)!=mem.addr;
+}
+void Computer::cleanConnectors(mem_addr_t addr)
+{
+    /*connector_t ** cur= &_memory[addr].connectors;
+    if(*cur->next== nullptr)
+    {
+        cur->next= cur;
+    }*/
+
+}
+
+void Computer::formConnectionFromTo(mem_addr_t agent, mem_addr_t obj)
+{
+    //Make sure that the connector we are trying to work with is valid
+
+    connector_t ** cur= &_memory[obj].connectors;
+
+    //Create new connector_t
+    connector_t * newConnect = (connector_t*)malloc(sizeof(connector_t));
+
+    newConnect->connected = agent;
+    newConnect->next = newConnect;
+
+    //If there are no connections for obj, make this new one obj's connector
+    if(*cur==nullptr)
+    {
+        _memory[obj].connectors = newConnect;
+        std::cout<<"H"<<std::endl;
+    }
+    else
+    {
+    //If there are connections, run through each one until the end is found
+    //This will be signified by a connector_t pointing to itself
+        while((*cur)->next->connected!= (*cur)->connected)
+        {
+            qDebug("We aren't at the end");
+            cur = &((*cur)->next);//here, we are moving the double pointer.
+            //this way, we can still change the values
+        }
+        if((*cur)->connected == newConnect->connected)
+        {
+            return;//don't need to add it, it is already there.
+        }
+        qDebug("We are at the end");
+        (**cur).next = newConnect;
+    }
+    //Make sure that none of the connections we see are the same as the one we
+    //are trying to insert.
+
+    //Put it at the end
+
+
+}
 int Computer::getPCOffsetNumber(mem_loc_t mem)
 {
     if(mnemGen(mem)==BADOP)
@@ -1970,3 +2103,4 @@ void Computer::incrementPC()
 {
     setRegister(PC, getRegister(PC) + 1);
 }
+

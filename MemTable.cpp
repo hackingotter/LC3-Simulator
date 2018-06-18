@@ -135,6 +135,11 @@ void MemTable::pasteBrute()
 {
     paste(false);
 }
+
+void MemTable::insertBelow()
+{
+
+}
 void MemTable::paste(bool makeAgreement)
 {
     mem_addr_t begin, end;

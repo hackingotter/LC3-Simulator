@@ -68,6 +68,7 @@ public:
     void setCopied(QModelIndexList* target);
 
     QBrush column0Painter(mem_addr_t addr) const;
+    QBrush column3Painter(mem_addr_t addr) const;
     void setSelectMode(SelectMode mode, mem_addr_t begin, mem_addr_t end);
 signals:
 

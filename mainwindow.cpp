@@ -97,7 +97,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     help->show();
     help->activateWindow();
 
-    Computer::getDefault()->lowerBoundTimes();
+//    Computer::getDefault()->lowerBoundTimes();
     std::cout<<Computer::getDefault()->proposedNewLocation(8,5,10,-2)<<std::endl;
 
 
@@ -157,9 +157,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     //    ui->MemView1->layout()->addWidget(new MemWindow(model));
 
-    Computer::getDefault()->setMemValue(0,0x1FFF);
-    Computer::getDefault()->setMemValue(1,0x7fc0);
-    Computer::getDefault()->setMemValue(2,0x0FFD);
+//    Computer::getDefault()->setMemValue(0,0x1FFF);
+//    Computer::getDefault()->setMemValue(1,0x7fc0);
+//    Computer::getDefault()->setMemValue(2,0x0FFD);
 
     Computer::getDefault()->setRegister(R7,0xBFFF);
 
