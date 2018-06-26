@@ -394,6 +394,7 @@ private:
 
     void prepareConnectors();
     void formConnectionFromTo(mem_addr_t agent, mem_addr_t obj);
+    void breakConnectionFromTo(mem_addr_t agent, mem_addr_t obj);
 
     /////////////////////////////////////////////////////////////////
     //                                                             //

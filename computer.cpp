@@ -352,8 +352,11 @@ void Computer::prepareConnectors()
     {
         _memory[i].connectors=nullptr;//set the address numbers.
     }
-//    formConnectionFromTo(1,2);
-//    formConnectionFromTo(3,2);
+    formConnectionFromTo(1,2);
+    formConnectionFromTo(3,2);
+    formConnectionFromTo(4,2);
+    breakConnectionFromTo(1,2);
+
 }
 void Computer::lowerBoundTimes()
 {
@@ -551,8 +554,8 @@ void Computer::connectAddrs(mem_addr_t source, mem_loc_t target)
     if(target.connectors == nullptr)
     {
         target.connectors = (connector_t*)calloc(1,sizeof(connector_t));
-//        target.connectors->before = target.connectors;
-//        target.connectors->after = target.connectors;
+        //        target.connectors->before = target.connectors;
+        //        target.connectors->after = target.connectors;
 
     }
     target.connectors->connected = source;
@@ -562,9 +565,12 @@ void Computer::setMemValue(mem_addr_t addr, val_t val)
 {
     qDebug("Settin' Mem");
 
+
+
     val_t oval = _memory[addr].value;
-    _memory[addr].value = val;
     if(oval== val)return;
+    breakConnectionFromTo(addr,connectedAddress(addr));
+    _memory[addr].value = val;
     if(addr>=0xfe00)    qDebug(getHexString(addr).toLocal8Bit());
     if(isConnector(addr))
     {
@@ -1596,7 +1602,13 @@ mem_addr_t Computer::proposedNewLocation(mem_addr_t addr,mem_addr_t begin, mem_a
     return addr;
 }
 
+void *Computer::fastMemorySlide(mem_addr_t begin, mem_addr_t end, int32_t delta, bool makeAgreement, bool* success)
+{
+    MASK
+            clock_t t = clock();//for timekeeping purposes
 
+
+}
 void *Computer::slideMemory(mem_addr_t begin, mem_addr_t end, int32_t delta,bool makeAgreement, bool*)
 {
     MASK
@@ -1726,7 +1738,7 @@ mem_addr_t Computer::connectedAddress(mem_loc_t mem)
         addrOffset = getSignedOffset11(inst);
         break;
     case 9:
-        addrOffset = getSignedOffset9(inst)+1;
+        addrOffset = getSignedOffset9(inst)+1;//because of the pc increment
         break;
     default:
 
@@ -1782,8 +1794,8 @@ void Computer::formConnectionFromTo(mem_addr_t agent, mem_addr_t obj)
     }
     else
     {
-    //If there are connections, run through each one until the end is found
-    //This will be signified by a connector_t pointing to itself
+        //If there are connections, run through each one until the end is found
+        //This will be signified by a connector_t pointing to itself
         while((*cur)->next->connected!= (*cur)->connected)
         {
             qDebug("We aren't at the end");
@@ -1801,6 +1813,63 @@ void Computer::formConnectionFromTo(mem_addr_t agent, mem_addr_t obj)
     //are trying to insert.
 
     //Put it at the end
+
+
+}
+
+void Computer::breakConnectionFromTo(mem_addr_t agent, mem_addr_t obj)
+{
+    connector_t ** cur= &_memory[obj].connectors;
+    //check if there is no connection to be broken
+    qDebug("attempting to break the connection");
+    if((*cur)==nullptr)
+    {
+        qDebug("nothing was there");
+        return;
+    }
+    //Since there is a connection, we need to check if it is actually a
+    //from the agent to the obj.
+    connector_t ** past = cur;
+    std::printf("Current: %s at %p\n",getHexString((*cur)->connected).toLocal8Bit(),(*cur));
+
+    while(((*cur)->next != (*cur)) && ((*cur)->connected != agent))
+    {
+        qDebug("We aren't at the end");
+        std::printf("Current: %s at %p\n",getHexString((*cur)->connected).toLocal8Bit(),(*cur));
+        std::printf("   Next: %s at %p\n",getHexString((*past)->connected).toLocal8Bit(),(*past));
+        *past = *cur;
+        cur = &((*cur)->next);//here, we are moving the double pointer.
+        //this way, we can still change the values
+    }
+    if((*cur)->connected != agent)
+    {
+        return;//don't need to remove it, it isn't there.
+    }
+    else
+    {
+        if((*past) == (*cur))//it was the first one.
+        {
+            if((*cur)->next!=(*cur))
+            {
+                (*cur) = (*cur)->next;
+            }
+        }
+        if((*cur)->next->connected == (*cur)->connected)//we found it at the end.
+        {
+            qDebug("We found it at the end");
+            (*past)->next = (*past);
+        }
+        else
+        {
+            if((*cur)->next != (*cur))
+            {
+                qDebug("We found it in the middle.");
+                (*past)->next = (*cur)->next;
+            }
+        }
+        //            free(*cur);
+//        *cur = nullptr;
+    }
 
 
 }
