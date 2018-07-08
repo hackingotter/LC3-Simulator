@@ -356,6 +356,7 @@ void Computer::prepareConnectors()
     formConnectionFromTo(3,2);
     formConnectionFromTo(4,2);
     breakConnectionFromTo(1,2);
+    //    repointConnecters(2,5);
 
 }
 void Computer::lowerBoundTimes()
@@ -572,11 +573,15 @@ void Computer::setMemValue(mem_addr_t addr, val_t val)
     breakConnectionFromTo(addr,connectedAddress(addr));
     _memory[addr].value = val;
     if(addr>=0xfe00)    qDebug(getHexString(addr).toLocal8Bit());
-    if(isConnector(addr))
+    if(getPCOffsetNumber(addr))
     {
-        connectAddrs(addr,Computer::getDefault()->connectedAddress(addr));
-
+        formConnectionFromTo(addr,connectedAddress(addr));
     }
+    //    if(isConnector(addr))
+    //    {
+    //        connectAddrs(addr,Computer::getDefault()->connectedAddress(addr));
+
+    //    }
 
     TRY2PUSH(oval,val,changeMemValue(addr,oval,val));
     emit memValueChanged(addr);
@@ -1602,11 +1607,155 @@ mem_addr_t Computer::proposedNewLocation(mem_addr_t addr,mem_addr_t begin, mem_a
     return addr;
 }
 
-void *Computer::fastMemorySlide(mem_addr_t begin, mem_addr_t end, int32_t delta, bool makeAgreement, bool* success)
+void Computer::fastJuggleShift(mem_addr_t current,
+                               mem_addr_t begin,
+                               mem_addr_t end,
+                               int32_t delta,
+                               int* changed,
+                               int offset,
+                               bool makeAgreement)
+{
+    //Gotta love memoization
+    if(changed[current-offset])
+    {
+        qDebug("time saved"+getHexString(current).toLocal8Bit());
+        return;
+    }
+    mem_loc_t curLoc = _memory[current];
+    mem_addr_t proposedNext = proposedNewLocation(current,begin,end,delta);
+    bool connectionChanged;
+    if(!makeAgreement)//if you don't care about making agreement
+    {
+        connectionChanged=false;
+    }
+    else //if you do care about making agreement
+    {
+        mem_addr_t curConnect = connectedAddress(curLoc);
+        mem_addr_t proposedConnect = proposedNewLocation(curConnect,begin,end,delta);
+        connectionChanged=(proposedConnect!=curConnect);
+    }
+    if((proposedNext==current) && (!connectionChanged))
+    {
+        changed[current-offset]=1;
+        return;
+    }
+    fastExecuteShiftCycle(curLoc,begin,end,delta,changed,offset,makeAgreement);
+}
+void Computer::repointConnecters(mem_addr_t addr)
+{
+    MASK
+            Undos->beginMacro("Repointing relevant");
+    connector_t** curr = &(_memory[addr].connectors);
+    bool b = 1;
+    if(*curr == nullptr)
+    {
+        return;//there was nothing to repoint
+    }
+    else
+    {
+        while((*curr)->next != (*curr))
+        {
+            mem_addr_t connected = (*curr)->connected;
+            setMemValue(connected,generateOffset(connected,addr,&b));
+            curr = &((*curr)->next);
+        }
+        mem_addr_t connected = (*curr)->connected;
+        setMemValue(connected,generateOffset(connected,addr,&b));
+    }
+    Undos->endMacro();
+    UNMASK
+
+}
+//void Computer::repointConnecters(mem_addr_t addr)
+//{
+//    MASK
+//    Undos->beginMacro("Repointing relevant");
+//    connector_t** curr = &_memory[addr].connectors;
+//    bool b = 1;
+//    if(*curr == nullptr)
+//    {
+//        return;//there was nothing to repoint
+//    }
+//    while(1)
+//    {
+
+//        mem_addr_t source = (*curr)->connected;
+//        qDebug(getHexString(source).toLocal8Bit());
+//        setMemValue(source,generateOffset(source,newAddr,&b));
+//        if((*curr)->next != (*curr))
+//        {
+//            curr = &((*curr)->next);
+//        }
+//        else
+//        {
+//            break;
+//        }
+//    }
+//    Undos->endMacro();
+
+
+
+//            UNMASK
+//            IFNOMASK(update(););
+//}
+
+void Computer::fastExecuteShiftCycle(mem_loc_t curLoc, mem_addr_t begin, mem_addr_t end, int32_t delta, int* changed, int offset,bool makeAgreement)
+{
+    MASK
+
+            while(changed[curLoc.addr-offset]!=1)
+    {
+        //mark this address as viewed
+        changed[curLoc.addr-offset] = 1;
+        mem_addr_t nextAddr = proposedNewLocation(curLoc.addr,begin,end,delta);
+        mem_addr_t target = proposedNewLocation(connectedAddress(curLoc),begin,end,delta);
+        mem_loc_t nextLoc;
+        memcpy(&nextLoc,&_memory[nextAddr],sizeof(mem_loc_t));
+        setMemLoc(nextAddr, curLoc);
+        bool b;
+        if(makeAgreement)
+        {
+            val_t value= generateOffset(_memory[nextAddr],target,&b);
+            setMemValue(nextAddr,value);
+        }
+        curLoc = nextLoc;
+    }
+    UNMASK
+            IFNOMASK(update(););
+}
+
+void Computer::fastMemorySlide(mem_addr_t begin, mem_addr_t end, int32_t delta, bool makeAgreement, bool* success)
 {
     MASK
             clock_t t = clock();//for timekeeping purposes
+    qDebug("Testing 1 2 3");
+    Undos->beginMacro("Shifting addresses");
 
+    //maybe make some check message
+    if(true)
+    {
+        //since we already know what is connecting to what, this is rather
+        //simple.
+
+        //all we need to do is examine each cell we plan to move.
+        //starting by finding what cells are to be moved
+        mem_addr_t startSearch = begin +((delta>0)?0:delta);
+        mem_addr_t endSearch   = end   +((delta>0)?delta:0);
+
+        /**
+         * changed keeps track of the addresses already visited.
+         */
+
+        int* changed = (int*)calloc(endSearch-startSearch+1,sizeof(int));
+        for(mem_addr_t index = startSearch;index<=endSearch;index++)
+        {
+            fastJuggleShift(index,begin,end,delta,changed,startSearch, makeAgreement);
+        }
+    }
+    Undos->endMacro();
+
+    UNMASK
+            IFNOMASK(update(););
 
 }
 void *Computer::slideMemory(mem_addr_t begin, mem_addr_t end, int32_t delta,bool makeAgreement, bool*)
@@ -1623,10 +1772,6 @@ void *Computer::slideMemory(mem_addr_t begin, mem_addr_t end, int32_t delta,bool
     {
         qDebug("suc");
         Undos->beginMacro("Shifting addresses " + getHexString(begin) +"-"+ getHexString(end) +" to "+getHexString(begin+delta));
-
-
-
-
         mem_addr_t startSearch;
         mem_addr_t endSearch;
         mem_addr_t smallestInShiftRange = begin+((delta>0)?0:delta);
@@ -1694,6 +1839,7 @@ void Computer::juggleShift(mem_addr_t current, mem_addr_t begin, mem_addr_t end,
         return;
     }
     executeShiftCycle(curLoc, begin, end, delta,changed,offset,makeAgreement);
+
 }
 void Computer::executeShiftCycle(mem_loc_t curLoc, mem_addr_t begin, mem_addr_t end, int32_t delta, int* changed, int offset,bool makeAgreement)
 {
@@ -1868,10 +2014,14 @@ void Computer::breakConnectionFromTo(mem_addr_t agent, mem_addr_t obj)
             }
         }
         //            free(*cur);
-//        *cur = nullptr;
+        //        *cur = nullptr;
     }
 
 
+}
+int Computer::getPCOffsetNumber(mem_addr_t addr)
+{
+    return getPCOffsetNumber(_memory[addr]);
 }
 int Computer::getPCOffsetNumber(mem_loc_t mem)
 {
@@ -1897,6 +2047,13 @@ int Computer::getPCOffsetNumber(mem_loc_t mem)
             return 11;
         }
         return 0;
+    case trapOpCode:
+    {
+        //this code is technically not needed, but it is important to note that
+        //this acts like jsrr, where, although it is connected to a different
+        //line, the connection is not an offset, it is a destination.
+        return 0;
+    }
     default:
         return 0;//not connected
     }
@@ -1907,7 +2064,10 @@ bool Computer::canConnect(mem_loc_t from, mem_addr_t to)
     return (isBetween(-1*2^(power-1),2^(power-1)-1,from.addr-to));
 }
 
-
+val_t Computer::generateOffset(mem_addr_t mem, mem_addr_t target, bool*ok)
+{
+    return generateOffset(_memory[mem],target,ok);
+}
 val_t Computer::generateOffset(mem_loc_t mem, mem_addr_t target, bool* ok)
 {
     *ok = true;
@@ -2048,24 +2208,25 @@ QString Computer::mnemGen(mem_loc_t loc)const
         if((val&0x0E00)==0x0E00)//if all three are set, just display BR
         {}
         else
+        {
             if(val&0x0E00)
             {
                 if(val&0x0800) out.append("n");
                 if(val&0x0400) out.append("z");
                 if(val&0x0200) out.append("p");
             }
-        if((val&0x0E00)==0x0000)
-        {
-            //            out = BADOP;
+            else
+            {
+               out =  BADOP;
+               break;
+            }
         }
-        else
-        {
             val_t offset = val&0x01FF;
             if(val&0x0100) offset|=0xFE00;
             mem_addr_t target = addr + offset;
             out.append(" ");
             out.append(name_or_addr(target));
-        }
+
         break;
 
     }

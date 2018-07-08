@@ -2,6 +2,12 @@
 #include "QWindow"
 #include "QLabel"
 #include "QHBoxLayout"
+#include "QTabWidget"
+
+
+#define TABUTILITY(SOURCE,GENERATOR,NAME,TARGET)\
+SOURCE = GENERATOR;\
+    TARGET->addTab(SOURCE,NAME);
 HelpMenu::HelpMenu(QWidget *parent) : QDialog(parent)
 {
     generateTabs();
@@ -20,18 +26,18 @@ HelpMenu::HelpMenu(QWidget *parent) : QDialog(parent)
 void HelpMenu::generateTabs()
 {
     Tabs = new QTabWidget(this);
-    GeneralTab = generateGeneralTab();
-    MemViewTab = generateMemViewTab();
-    StackViewTab=generateStackViewTab();
-    RegViewTab = generateRegViewTab();
-    Tabs->addTab(GeneralTab,"General");
-    Tabs->addTab(MemViewTab,"Memory");
-    Tabs->addTab(StackViewTab,"Stack");
-    Tabs->addTab(RegViewTab,"Registers");
+    TABUTILITY(GeneralTab  ,generateGeneralTab(),"General",Tabs);
+    TABUTILITY(MemViewTab  ,generateMemViewTab(),"Memory",Tabs);
+    TABUTILITY(StackViewTab,generateStackViewTab(),"Stack",Tabs);
+    TABUTILITY(RegViewTab  ,generateRegViewTab(),"Registers",Tabs);
+    TABUTILITY(SettingTab  ,generateSettingTab(),"Settings", Tabs);
 }
 QWidget* HelpMenu::generateGeneralTab()
 {
     QWidget* genTab = new QWidget();
+
+
+
     return genTab;
 }
 QWidget* HelpMenu::generateMemViewTab()
@@ -64,4 +70,17 @@ QWidget* HelpMenu::generateRegViewTab()
     QWidget* RegViewTab = new QWidget();
 
     return RegViewTab;
+}
+
+QWidget *HelpMenu::generateSettingTab()
+{
+    QWidget* setTab = new QWidget();
+    QTabWidget* holder = new QTabWidget(setTab);
+    QWidget* shortcuts;
+    TABUTILITY(shortcuts,new QWidget(holder),"Shortcuts",holder);
+
+
+
+
+    return setTab;
 }

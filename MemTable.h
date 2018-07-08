@@ -61,6 +61,7 @@ private slots:
      * intact.
      */
     void shiftDown(bool makeAgreement = true);
+    void fastShiftDown(bool makeAgreement = true );
     /** For when possible connections in data are to be disregarded when moved,
      * this function calls for the data to be shifted down 'as is.'
      */
@@ -72,6 +73,7 @@ private slots:
     void paste(bool makeAgreement = true);
     void pasteBrute();
     void insertBelow();
+    void fastShiftUp(bool makeAgreement = true);
 };
 
 #endif // MEMTABLE_H

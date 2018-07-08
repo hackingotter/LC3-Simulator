@@ -300,12 +300,14 @@ public:
 
 
     void *slideMemory(mem_addr_t begin, mem_addr_t end, int32_t delta, bool makeAgreement, bool *);
-
+    void fastMemorySlide(mem_addr_t begin, mem_addr_t end, int32_t delta, bool makeAgreement, bool *success);
 
     bool canConnect(mem_loc_t from, mem_addr_t to);
+    int getPCOffsetNumber(mem_addr_t mem);
     int getPCOffsetNumber(mem_loc_t mem);
     bool canShiftClean(mem_addr_t originStart, mem_addr_t originEnd, mem_addr_t destination);
     mem_loc_t createShiftedLoc(mem_loc_t original, mem_addr_t newAddress, mem_addr_t newTarget, bool *ok);
+    val_t generateOffset(mem_addr_t mem, mem_addr_t target, bool*ok);
     val_t generateOffset(mem_loc_t mem, mem_addr_t target, bool *ok);
     mem_addr_t connectedAddress(mem_addr_t addr){return connectedAddress(_memory[addr]);}
     void juggleShift(mem_addr_t current, mem_addr_t begin, mem_addr_t end, int32_t delta, int *changed, int offset, bool makeAgreement);
@@ -399,6 +401,11 @@ private:
     /////////////////////////////////////////////////////////////////
     //                                                             //
     /////////////////////////////////////////////////////////////////
+
+//    void repointConnecters(mem_addr_t addr);
+    void fastExecuteShiftCycle(mem_loc_t curLoc, mem_addr_t begin, mem_addr_t end, int32_t delta, int *changed, int offset, bool makeAgreement);
+    void fastJuggleShift(mem_addr_t current, mem_addr_t begin, mem_addr_t end, int32_t delta, int *changed, int offset, bool makeAgreement);
+    void repointConnecters(mem_addr_t addr);
 };
 
 #endif // COMPUTER_H

@@ -17,7 +17,25 @@ typedef enum console_err_t {
 } console_err_t;
 
 typedef enum console_cmd_t {
-    run // TODO console commands
+    help,
+    assemble,
+    _break,
+    _continue,
+    check,
+    clear,
+    dump,
+    input,
+    list,
+    next,
+    print,
+    quit,
+    _reset,
+    step,
+    set,
+    stop,
+    trace,
+    run, // TODO console commands
+
 } console_cmd_t;
 
 typedef void* console_arg_t; // TODO improve this

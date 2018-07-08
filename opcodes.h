@@ -6,7 +6,7 @@
 #define   brOpCode 0x0000
 #define  jmpOpCode 0xC000
 #define  jsrOpCode 0x4000
-#define jsrrOpCode 0x4000 special version of jsr
+#define jsrrOpCode 0x4000 //special version of jsr
 #define   ldOpCode 0x2000
 #define  ldiOpCode 0xA000
 #define  ldrOpCode 0x6000

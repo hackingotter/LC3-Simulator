@@ -11,7 +11,12 @@ public:
     QVariant data(const QModelIndex &index, int role) const override;
     bool setData(const QModelIndex &index, const QVariant &value, int role) ;
 private:
+    QModelIndex getOffsetIndex(const QModelIndex &index) const;
     QVector<val_t>* Offset;
+    Qt::ItemFlags flags(const QModelIndex &index) const;
+
+    bool handleAddresColumn(const QModelIndex &index, const QVariant &value, int role);
 };
+
 
 #endif // WATCHMODEL_H

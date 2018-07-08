@@ -11,11 +11,13 @@ class HelpMenu : public QDialog
     QWidget* MemViewTab;
     QWidget* StackViewTab;
     QWidget* RegViewTab;
+    QWidget* SettingTab;
     QTabWidget* Tabs;
     QWidget *generateMemViewTab();
     QWidget *generateStackViewTab();
     QWidget *generateGeneralTab();
     QWidget *generateRegViewTab();
+    QWidget *generateSettingTab();
     void generateTabs();
 public:
     explicit HelpMenu(QWidget *parent = nullptr);

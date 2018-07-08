@@ -41,6 +41,7 @@
 #include <QFile>
 #include "KBRDModel.h"
 #include <QProcess>
+#include "Console.h"
 #include <QCoreApplication>
 #define REGISTERVIEWNUMCOLUMN 2
 #define SCROLLTO(VIEW,INPUT)\

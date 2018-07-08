@@ -19,6 +19,7 @@ WatchWatcher::WatchWatcher(QWidget *parent,bool* access): QWidget(parent),_acces
     Levi =new WatchModel(parent,_access);
     Coat->setModel(Levi);
     setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+
 }
 QTableView * WatchWatcher::getTableViewPtr()
 {

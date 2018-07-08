@@ -2,7 +2,7 @@
 #include "Utility.h"
 #include <QObject>
 #include <QThread>
-
+#include "Console.h"
 #include "ThreadManager.h"
 //#include "Simulator.h"
 #include "computer.h"
@@ -67,7 +67,7 @@ void Bridge::process()
     case Break:
     {
         qDebug("Until Break");
-        Computer::getDefault()->continueExecution();
+        executeCommand(_continue,nullptr);
     }
     default:qDebug("Welp");
 

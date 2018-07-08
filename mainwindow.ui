@@ -618,12 +618,6 @@
     </property>
     <addaction name="actionInfo"/>
    </widget>
-   <widget class="QMenu" name="menuStack">
-    <property name="title">
-     <string>Stack</string>
-    </property>
-    <addaction name="actionFlip"/>
-   </widget>
    <widget class="QMenu" name="menutest">
     <property name="title">
      <string>test</string>
@@ -635,7 +629,6 @@
    <addaction name="menuMore_Options"/>
    <addaction name="menuScreen"/>
    <addaction name="menuHelp"/>
-   <addaction name="menuStack"/>
    <addaction name="menutest"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">

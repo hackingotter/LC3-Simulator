@@ -29,7 +29,7 @@ using namespace Memory_Modulos;
 modeler::modeler(QObject *parent,bool* access): QStandardItemModel(parent),threadRunning(access)
 {
     QStringList HeaderLabel;
-    //Since there is no real easy way of setting the headers, i fill it up with "EMPTY"
+    //Since there is no real easy way of setting the headers, I fill it up with "EMPTY"
     //header items, then proceed to replace each
     for(int i = 0;i<NUMBER_OF_COLUMNS;i++)
     {
@@ -252,18 +252,7 @@ QVariant modeler::data(const QModelIndex &index, int role) const
         }
             return  QVariant();
     }
-    //    if(role == Qt::TextAlignmentRole){
-    //        switch (column) {
-
-    //        case NAMECOLUMN:return Qt::AlignRight;
-    //        case VALUCOLUMN:return Qt::AlignCenter;
-    //        }
-    //    }
-    /*
-     * Testing if it is asking for the background color
-     */
-
-    if (role == Qt::DisplayRole)
+    if(role == Qt::DisplayRole)
     {
 
 

@@ -83,9 +83,11 @@ void MemTable::setupActions()
     budgeDown->setContext(Qt::WidgetShortcut);
     ADDSHORTCUT("Paste"     ,Qt::CTRL + Qt::Key_V                          ,paste());
     ADDSHORTCUT("Paste Above",Qt::CTRL+ Qt::ALT + Qt::Key_V              ,pasteBrute());
-    ADDSHORTCUT("Force Down",Qt::CTRL + Qt::SHIFT + Qt::ALT + Qt::Key_Down ,shiftDownBrute());
+    ADDSHORTCUT("Force Down",Qt::CTRL + Qt::SHIFT + Qt::ALT + Qt::Key_Down ,fastShiftDown(););
     ADDSHORTCUT("Force Up"  ,Qt::CTRL + Qt::SHIFT + Qt::ALT + Qt::Key_Up   ,shiftUpBrute());
     ADDSHORTCUT("Insert Bellow",Qt::CTRL + Qt::Key_Enter,                       insertBelow());
+    ADDSHORTCUT("Test Up"   ,Qt::Key_F,fastShiftUp(););
+    ADDSHORTCUT("Test Down"   ,Qt::Key_F,fastShiftDown(););
 
 
 }
@@ -123,6 +125,7 @@ void MemTable::showClickOptions(const QPoint &pos)
         ClickMenu.addAction("Go to Connected",this,SLOT(scrollToSelected()));
     }
 
+
     //    connect(shift,SIGNAL(triggered()),this, handleShift());
     ClickMenu.exec(mapToGlobal(pos  ));
 
@@ -140,6 +143,7 @@ void MemTable::insertBelow()
 {
 
 }
+
 void MemTable::paste(bool makeAgreement)
 {
     mem_addr_t begin, end;
@@ -303,6 +307,30 @@ void MemTable::shiftUp(bool makeAgreement)
 
 
 }
+void MemTable::fastShiftUp(bool makeAgreement)
+{
+    qDebug("shiftUp");
+    bool b = false;
+    if(selectedIndexes().size()>0)
+    {
+        QModelIndex original = currentIndex();
+
+        mem_addr_t begin =  selectedIndexes().constFirst().row();
+        mem_addr_t end =    selectedIndexes().constLast().row();
+
+        Computer::getDefault()->fastMemorySlide(begin,end,-1,makeAgreement,&b);
+
+
+        setCurrentIndex(model->index(begin-1,original.column()));
+
+
+        clearSelection();
+
+        selectRange(begin-1,end-1);
+    }
+
+
+}
 void MemTable::selectRange(mem_addr_t begin, int32_t end)
 {
 
@@ -321,6 +349,23 @@ void MemTable::shiftDown(bool makeAgreement)
         mem_addr_t begin =  selectedIndexes().constFirst().row();
         mem_addr_t end   =   selectedIndexes().constLast().row();
         Computer::getDefault()->slideMemory(begin,end,1,makeAgreement,&b);
+        setCurrentIndex(model->index(begin+1,original.column()));
+        clearSelection();
+        selectRange(begin+1,end+1);
+    }
+}
+
+void MemTable::fastShiftDown(bool makeAgreement)
+{
+    qDebug("shifting down Fast");
+            bool b = false;
+    if(selectedIndexes().size()>0)
+    {
+        QModelIndex original = currentIndex();
+        qDebug("wor");
+        mem_addr_t begin =  selectedIndexes().constFirst().row();
+        mem_addr_t end   =   selectedIndexes().constLast().row();
+        Computer::getDefault()->fastMemorySlide(begin,end,1,makeAgreement,&b);
         setCurrentIndex(model->index(begin+1,original.column()));
         clearSelection();
         selectRange(begin+1,end+1);
