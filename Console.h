@@ -8,7 +8,7 @@
 
 #ifndef Console_h
 #define Console_h
-
+#include "computer.h"
 
 typedef enum console_err_t {
     consoleNoErr,
@@ -26,6 +26,7 @@ typedef enum console_cmd_t {
     dump,
     input,
     list,
+    load,
     next,
     print,
     quit,
@@ -35,11 +36,15 @@ typedef enum console_cmd_t {
     stop,
     trace,
     run, // TODO console commands
+    assembleNLoad
 
 } console_cmd_t;
 
 typedef void* console_arg_t; // TODO improve this
 
+static bool traceState;
+
+static FILE tracefile;
 
 void startConsole();
 
@@ -48,7 +53,7 @@ void startConsole();
  * \param args arguments for that command 
  * \return an error if applicable.
  */
-console_err_t runCommand(console_cmd_t cmd, console_arg_t args);
+console_err_t executeCommand(console_cmd_t cmd, console_arg_t args);
 
 /** pareses and runs a command for the console including arguments
  * \param str the string to parse and run

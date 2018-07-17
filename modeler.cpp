@@ -106,10 +106,10 @@ QBrush modeler::column0Painter(mem_addr_t addr) const
     if(addr == Computer::getDefault()->getRegister(R2))
     {
         return QBrush(R2COLOR);
-//            darkRed,
-//            darkGreen,
-//            darkBlue,
-//            darkCyan,
+        //            darkRed,
+        //            darkGreen,
+        //            darkBlue,
+        //            darkCyan,
     }
     if(addr == Computer::getDefault()->getRegister(R3))
     {
@@ -160,55 +160,55 @@ QBrush modeler::rowPainter(mem_addr_t addr,const QModelIndex &index) const
     case 1:
     {
         if(Utility::Utilit::specialSelectStart<=Utility::Utilit::specialSelectEnd)
-        if(Computer::getDefault()->isBetween(Utility::Utilit::specialSelectStart,Utility::Utilit::specialSelectEnd,addr))
-        {
-            switch(currentMode)
+            if(Computer::getDefault()->isBetween(Utility::Utilit::specialSelectStart,Utility::Utilit::specialSelectEnd,addr))
             {
-            case SelectMode::Copy:
-                return QBrush(QColor(100,235,213));
-            case SelectMode::Cut:
-                return QBrush(QColor(12,230,20));
-            default:
+                switch(currentMode)
+                {
+                case SelectMode::Copy:
+                    return QBrush(QColor(100,235,213));
+                case SelectMode::Cut:
+                    return QBrush(QColor(12,230,20));
+                default:
 
-            return QBrush(QColor(157,157,20));
+                    return QBrush(QColor(157,157,20));
+                }
             }
-        }
 
 
     }break;
     case 2:
     {
-//        for(int i = 0; i < 30; i++)
-//        {
+        //        for(int i = 0; i < 30; i++)
+        //        {
 
 
-//            int value = Computer::getDefault()->proposedNewLocation(i,TESTBEGIN,TESTEND,TESTOFFSET);
-//            if(addr == value)
-//            {
+        //            int value = Computer::getDefault()->proposedNewLocation(i,TESTBEGIN,TESTEND,TESTOFFSET);
+        //            if(addr == value)
+        //            {
 
-//                if(addr == i)
-//                {
-//                    return QBrush(QColor(250,100,100));
-//                }
-//                else
-//                if(addr > i)
-//                {
-//                    return QBrush(QColor(100,220,100));
-//                }
-//                else
-//                if(addr < i)
-//                {
-//                    return QBrush(QColor(100,100,220));
-//                }
+        //                if(addr == i)
+        //                {
+        //                    return QBrush(QColor(250,100,100));
+        //                }
+        //                else
+        //                if(addr > i)
+        //                {
+        //                    return QBrush(QColor(100,220,100));
+        //                }
+        //                else
+        //                if(addr < i)
+        //                {
+        //                    return QBrush(QColor(100,100,220));
+        //                }
 
-//            }
-//            if(Computer::getDefault()->connectedAddress(addr)==value)
-//            {
-//                return QBrush(QColor(150,150,200));
-//            }
+        //            }
+        //            if(Computer::getDefault()->connectedAddress(addr)==value)
+        //            {
+        //                return QBrush(QColor(150,150,200));
+        //            }
 
 
-//        }
+        //        }
     }
 
     }
@@ -217,10 +217,10 @@ QBrush modeler::rowPainter(mem_addr_t addr,const QModelIndex &index) const
 
 
 
-//    if(addr == copied->addr)
-//    {
-//        return QBrush(QColor(250,30,205));
-//    }
+    //    if(addr == copied->addr)
+    //    {
+    //        return QBrush(QColor(250,30,205));
+    //    }
     return QBrush();
 }
 
@@ -250,7 +250,7 @@ QVariant modeler::data(const QModelIndex &index, int role) const
             breakpoint_t va = Computer::getDefault()->getMemBreakPoint(addr);
             return QVariant(va != nullptr);
         }
-            return  QVariant();
+        return  QVariant();
     }
     if(role == Qt::DisplayRole)
     {
@@ -263,16 +263,16 @@ QVariant modeler::data(const QModelIndex &index, int role) const
             return getHexString(addr);
             //        case BRCOLUMN:return /*(bool)getMemBreakPoint(addr);*/ 0;
         case VALUCOLUMN:
-//            return getHexString(Computer::getDefault()->proposedNewLocation(addr,TESTBEGIN,TESTEND,TESTOFFSET));
+            //            return getHexString(Computer::getDefault()->proposedNewLocation(addr,TESTBEGIN,TESTEND,TESTOFFSET));
             return getHexString(Computer::getDefault()->getMemValue(addr));
         case NAMECOLUMN:
         {
-//            if(addr<30)
-//            {
-//                QString* er = new QString();
-//                Computer::getDefault()->proposedNewLocation(addr,TESTBEGIN,TESTEND,TESTOFFSET,er);
-//                return *er;
-//            }
+            //            if(addr<30)
+            //            {
+            //                QString* er = new QString();
+            //                Computer::getDefault()->proposedNewLocation(addr,TESTBEGIN,TESTEND,TESTOFFSET,er);
+            //                return *er;
+            //            }
 
             mem_loc_t ml = Computer::getDefault()->getMemLocation(addr);
 
@@ -280,11 +280,11 @@ QVariant modeler::data(const QModelIndex &index, int role) const
             QString ck = ":";
             if(qui!= nullptr)
             {
-                do{
+                ck = getHexString(ml.addr);
+                while(qui != nullptr){
                     ck.append(getHexString(qui->connected));
                     qui = qui->next;
-                }while(qui->next!= qui);
-                ck.append(getHexString(qui->connected));
+                }
                 return ck;
             }
 
@@ -329,11 +329,11 @@ QVariant modeler::dataCheck(const QModelIndex &index)const
         breakpoint_t va = Computer::getDefault()->getMemBreakPoint(addr);
         return QVariant(va != nullptr);
     }
-        return  QVariant();
+    return  QVariant();
 }
 QVariant modeler::dataBack(const QModelIndex &index)const
 {
-//    int column = index.column();
+    //    int column = index.column();
     mem_addr_t addr = index.row();
 
     return rowPainter(addr,index);
@@ -353,11 +353,11 @@ bool modeler::setData(const QModelIndex &index, const QVariant &value, int role)
             qDebug("TBI");
             if(Computer::getDefault()->getMemBreakPoint(addr) == nullptr)
             {
-            Computer::getDefault()->setMemBreakPoint(addr,(void **)((void *)1));
+                Computer::getDefault()->setMemBreakPoint(addr,(void **)((void *)1));
             }
             else
             {
-               Computer::getDefault()->setMemBreakPoint(addr,(void **)(nullptr));
+                Computer::getDefault()->setMemBreakPoint(addr,(void **)(nullptr));
             }
             emit breakChanged(addr,nullptr);
             return true;
@@ -375,11 +375,11 @@ bool modeler::setData(const QModelIndex &index, const QVariant &value, int role)
             qDebug("You just set a Value");
         {
 
-                val_t newValue = Utility::unifiedInput2Val(value.toString(),&ok);
-                if(ok)
-                {
-                    Computer::getDefault()->setMemValue(addr,newValue);
-                }
+            val_t newValue = Utility::unifiedInput2Val(value.toString(),&ok);
+            if(ok)
+            {
+                Computer::getDefault()->setMemValue(addr,newValue);
+            }
 
 
         }

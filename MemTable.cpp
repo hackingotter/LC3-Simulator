@@ -74,12 +74,12 @@ void MemTable::setupActions()
 
     QShortcut* budgeUp = new QShortcut(this);
     budgeUp->setKey(Qt::CTRL+Qt::SHIFT+Qt::Key_Up);
-    connect(budgeUp,SIGNAL(activated()),this, SLOT(shiftUp()));
+    connect(budgeUp,SIGNAL(activated()),this, SLOT(fastShiftUp()));
     budgeUp->setContext(Qt::WidgetShortcut);
 
     QShortcut* budgeDown= new QShortcut(this);
     budgeDown->setKey(Qt::CTRL+Qt::SHIFT+Qt::Key_Down);
-    connect(budgeDown,SIGNAL(activated()),this, SLOT(shiftDown()));
+    connect(budgeDown,SIGNAL(activated()),this, SLOT(fastShiftDown()));
     budgeDown->setContext(Qt::WidgetShortcut);
     ADDSHORTCUT("Paste"     ,Qt::CTRL + Qt::Key_V                          ,paste());
     ADDSHORTCUT("Paste Above",Qt::CTRL+ Qt::ALT + Qt::Key_V              ,pasteBrute());

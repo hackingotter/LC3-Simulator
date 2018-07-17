@@ -16,7 +16,11 @@
 #define CASE(QUICK,FULL,SOURCE,INDEX) if (!strcmp(QUICK,SOURCE[INDEX])||!strcmp(FULL,SOURCE[INDEX]))
 
 void printUsage();
-
+console_err_t stepCommand(console_arg_t args);
+console_err_t continueCommand(console_arg_t args);
+console_err_t traceCommand(console_arg_t args);
+console_err_t assembleCommand(console_arg_t args);
+console_err_t runCommand(console_arg_t args);
 
 char * getConsoleLine() {
     char * line = (char*)malloc(100);
@@ -181,20 +185,49 @@ void printUsage() {
 
 console_err_t executeCommand(console_cmd_t cmd, console_arg_t args)
 {
+    console_err_t out;
     switch(cmd)
     {
-        case run: break;
-    case _continue: break;
+        case run: return runCommand(args); break;
+        case step: return stepCommand(args);break;
+        case _continue: return continueCommand(args);break;
+    case trace: return traceCommand(args);break;
+    case assemble: return assembleCommand(args);break;
+
     }
+
 }
-console_err_t continueCommand(console_arg_t* args)
+console_err_t stepCommand(console_arg_t args)
+{
+    if(args == nullptr)
+    {
+        Computer::getDefault()->executeSingleInstruction();
+        return consoleNoErr;
+    }
+    return parseErr;
+}
+console_err_t continueCommand(console_arg_t args)
 {
     if(args == nullptr)
     {
         Computer::getDefault()->continueExecution();
+        return consoleNoErr;
     }
+    return parseErr;
 }
-console_err_t runCommand(console_arg_t* args)
+console_err_t assembleCommand(console_arg_t args)
 {
 
+}
+console_err_t traceCommand(console_arg_t args)
+{
+
+}
+console_err_t runCommand(console_arg_t args)
+{
+//    if(!strcmp("-s",args[0]))
+//    {
+//        return stepCommand(nullptr);
+//    }
+//    return parseErr;
 }

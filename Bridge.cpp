@@ -60,7 +60,7 @@ void Bridge::process()
     {
         qDebug("Steppin");
 
-        Computer::getDefault()->executeSingleInstruction();
+        executeCommand(step,nullptr);
         qDebug(QString().setNum(*ok).toLocal8Bit());
         break;
     }

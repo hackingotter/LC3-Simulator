@@ -296,7 +296,7 @@ public:
       * \param end The end of the area to be shifted
       * \return The shifted address.
       */
-    mem_addr_t proposedNewLocation(mem_addr_t addr, mem_addr_t begin, mem_addr_t end, int32_t delta, QString *code = new QString());
+    mem_addr_t proposedNewAddress(mem_addr_t addr, mem_addr_t begin, mem_addr_t end, int32_t delta, QString *code = new QString());
 
 
     void *slideMemory(mem_addr_t begin, mem_addr_t end, int32_t delta, bool makeAgreement, bool *);
@@ -405,7 +405,40 @@ private:
 //    void repointConnecters(mem_addr_t addr);
     void fastExecuteShiftCycle(mem_loc_t curLoc, mem_addr_t begin, mem_addr_t end, int32_t delta, int *changed, int offset, bool makeAgreement);
     void fastJuggleShift(mem_addr_t current, mem_addr_t begin, mem_addr_t end, int32_t delta, int *changed, int offset, bool makeAgreement);
-    void repointConnecters(mem_addr_t addr);
+
+    void redirectConnecters(mem_addr_t target, bool undoSafe = true);
+    void fastJuggleShiftPhase2(mem_addr_t startSearch, mem_addr_t endSearch, int32_t delta, bool makeAgreement);
+    /** Move each relavent line without regard for context.
+     * @param rangeBegin
+     * @param rangeEnd
+     * @param delta
+     */
+    bool fastShiftPhase0(mem_addr_t selectionBegin, mem_addr_t selectionEnd, int32_t delta, mem_loc_t *temp);
+    void fastShiftPhase1(mem_addr_t rangeBegin, mem_addr_t rangeEnd, int32_t delta, mem_loc_t *temp);
+
+
+    /** Finds the proper bounds to go through in a shift
+     * @param start
+     * @param end
+     * @param selectionStart
+     * @param selectionEnd
+     * @param delta
+     */
+    void identifyRangeBounds(mem_addr_t *start, mem_addr_t *end, mem_addr_t selectionStart, mem_addr_t selectionEnd, int32_t delta);
+    void moveMemory(mem_addr_t selectionBegin, mem_addr_t selectionEnd, int32_t delta);
+
+
+    /////////////////////////////////////////////////////////////////
+    //                      Testing Methods                        //
+    /////////////////////////////////////////////////////////////////
+
+    void testMemoryShifting();
+
+
+    bool repairConnectionsPostShift(mem_addr_t selectionBegin, mem_addr_t selectionEnd, int32_t delta, mem_loc_t *temp);
+    bool insertShiftedMemory(mem_addr_t selectionBegin, mem_addr_t selectionEnd, int32_t delta, mem_loc_t *temp);
+    bool updateConnectorsAfterPhase0(mem_addr_t selectionBegin, mem_addr_t selectionEnd, int32_t delta, mem_loc_t *temp);
+    bool cleanupAccidents(mem_addr_t selectionBegin, mem_addr_t selectionEnd, int32_t delta);
 };
 
 #endif // COMPUTER_H

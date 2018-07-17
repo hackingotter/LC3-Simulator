@@ -99,10 +99,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     help->activateWindow();
 
 //    Computer::getDefault()->lowerBoundTimes();
-    std::cout<<Computer::getDefault()->proposedNewLocation(8,5,10,-2)<<std::endl;
+    std::cout<<Computer::getDefault()->proposedNewAddress(8,5,10,-2)<<std::endl;
 
 
-    std::cout<<Computer::getDefault()->proposedNewLocation(9,5,10,-2)<<std::endl;
+    std::cout<<Computer::getDefault()->proposedNewAddress(9,5,10,-2)<<std::endl;
     Computer::getDefault()->setProgramStatus(cond_z);
 
     Utility::systemInfoDebug();//Just some fun info
@@ -757,11 +757,12 @@ void MainWindow::on_redoButton_pressed()
 void MainWindow::on_consoleEnterButton_pressed()
 {
     qDebug("I want to take the input");
+
 }
 
 void MainWindow::on_continueButton_pressed()
 {
-    manager->activate(Bridge::Break);
+    executeCommand(_continue,nullptr);
 }
 
 void MainWindow::on_RestoreButton_pressed()

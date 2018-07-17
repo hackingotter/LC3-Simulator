@@ -92,6 +92,7 @@ typedef struct connector_t{
 
 } connector_t;
 
+
 /** type used to get memory.
  */
 typedef struct mem_loc_t {
@@ -113,6 +114,12 @@ typedef struct mem_loc_t {
 //void operator +=(mem_loc_t *a, connector_t* b);
 bool operator ==(mem_loc_t a, mem_loc_t b);
 bool operator !=(mem_loc_t a, mem_loc_t b);
+
+
+void operator +=(mem_loc_t* loc, connector_t b);
+void operator -=(mem_loc_t* loc, connector_t b);
+void operator +=(mem_loc_t loc, connector_t b);
+
 // helpers
 
 #define bitMask(x) (1 << x)
