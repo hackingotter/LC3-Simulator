@@ -321,6 +321,42 @@ private:
     mem_addr_t mem_addr;
     connector_t** link;
 };
+class moveMemDoer: public QUndoCommand
+{
+
+public:
+    moveMemDoer(mem_addr_t selectionBegin, mem_addr_t selectionEnd, int32_t delta, bool makeAgreement):
+        _selectionBegin(selectionBegin),
+        _selectionEnd(selectionEnd),
+        _delta(delta)
+    {
+        setText("Shifted Memory");
+    }
+    void undo()
+    {
+        Computer::getDefault()->remember++;
+        Computer::getDefault()->moveMemory(_selectionBegin+_delta,_selectionEnd+_delta,-_delta);
+        Computer::getDefault()->remember--;
+    }
+    void redo()
+    {
+        if( age == 0)
+        {
+            Computer::getDefault()->remember++;
+            Computer::getDefault()->moveMemory(_selectionBegin,_selectionEnd,_delta);
+            Computer::getDefault()->remember--;
+            return;
+        }
+        age = 0;
+
+    }
+private:
+    mem_addr_t _selectionBegin;
+    mem_addr_t _selectionEnd;
+    int32_t _delta;
+    bool _makeAgreement;
+    int age = 1;
+};
 
 
 
@@ -371,7 +407,7 @@ void Computer::prepareConnectors()
 
     //    breakConnectionFromTo(1,2);
     //    repointConnecters(2,5);
-    testMemoryShifting();
+
 
 }
 void Computer::lowerBoundTimes()
@@ -395,9 +431,11 @@ static Computer* defaultComputer = 0;
 
 Computer* Computer::getDefault() {
     if (defaultComputer) {
+
         return defaultComputer;
     }
     defaultComputer = new Computer();
+defaultComputer->testRunner();
     return defaultComputer;
 }
 
@@ -423,10 +461,7 @@ void Computer::setRegister(reg_t reg, val_t val) {
     //will implement an identification method
     val_t oval = registers[reg];
     registers[reg] = val;
-    if(oval != val)
-    {
-        TRY2PUSH(oval, val,changeRegValue(reg,oval,val));
-    }
+    TRY2PUSH(0,0,changeRegValue(reg,oval,val));
     IFNOMASK(emit update();)
 }
 
@@ -577,7 +612,7 @@ void Computer::connectAddrs(mem_addr_t source, mem_loc_t target)
     target.connectors->connected = source;
 
 }
-void Computer::setMemValue(mem_addr_t addr, val_t val)
+void Computer::setMemValue(mem_addr_t addr, val_t val,bool remember)
 {
     qDebug("Settin' Mem");
 
@@ -656,7 +691,7 @@ void Computer::setMemLabel(mem_addr_t addr,label_t* newLabel)
 {
     label_t* oldLabel = _memory[addr].label;
     _memory[addr].label = newLabel;
-    TRY2PUSH(oldLabel,newLabel,changeMemLabel(addr,oldLabel,newLabel));
+    TRY2PUSH(0,0,changeMemLabel(addr,oldLabel,newLabel));
 
     IFNOMASK(emit update();)
 }
@@ -713,6 +748,8 @@ void Computer::setMemComment(mem_addr_t addr, QString comment)
 QString Computer::getMemComment(mem_addr_t addr)
 {
     //return "To be figured out. Issues with value vs. reference";
+
+    //^This comment has to be one of the oldest in this code.
     return _memory[addr].comment;
 }
 
@@ -1664,8 +1701,10 @@ void Computer::identifyRangeBounds(mem_addr_t* start,mem_addr_t* end, mem_addr_t
     *start  = selectionStart + (delta<0) * delta;
     *end    = selectionEnd   + (delta>0) * delta;
 }
-void Computer::moveMemory(mem_addr_t selectionBegin, mem_addr_t selectionEnd, int32_t delta)
+void Computer::moveMemory(mem_addr_t selectionBegin, mem_addr_t selectionEnd, int32_t delta, bool makeAgreement)
 {
+
+    MASK
     bool a = 0;
     mem_addr_t rangeBegin = 0;
     mem_addr_t rangeEnd   = 0;
@@ -1674,15 +1713,26 @@ void Computer::moveMemory(mem_addr_t selectionBegin, mem_addr_t selectionEnd, in
     mem_loc_t temp[length];
 
     //copy everything into a temp buffer and adjust them so they point the right way.
+//the compiler thinks it fun to compile things out of order.
+    //however, this implementation cares not.
+    int thisIsDumb = 0;
 
-
-    if(!fastShiftPhase0(selectionBegin,selectionEnd,delta,temp)){}else
-    if(!updateConnectorsAfterPhase0(selectionBegin,selectionEnd,delta,temp)){}else
-    if(!insertShiftedMemory(selectionBegin,selectionEnd,delta,temp)){}else
-    if(!repairConnectionsPostShift(selectionBegin,selectionEnd,delta,temp)){} else
-    if(!cleanupAccidents(selectionBegin,selectionEnd,delta)){}
-
-
+    while(thisIsDumb != -1)
+    {
+        switch(thisIsDumb++)
+        {
+        case 0 : fastShiftPhase0(selectionBegin,selectionEnd,delta,temp); break;
+        case 1 : updateConnectorsAfterPhase0(selectionBegin,selectionEnd,delta,temp); break;
+        case 2 : insertShiftedMemory(selectionBegin,selectionEnd,delta,temp);break;
+        case 3 : repairConnectionsPostShift(selectionBegin,selectionEnd,delta,temp); break;
+        case 4 : cleanupAccidents(selectionBegin,selectionEnd,delta); break;
+        default:
+            thisIsDumb = -1;
+        }
+    }
+    TRY2PUSH(0,0,moveMemDoer(selectionBegin,selectionEnd,delta, makeAgreement));
+    UNMASK
+            IFNOMASK(emit update();)
 }
 
 void Computer::testMemoryShifting()
@@ -1699,10 +1749,74 @@ void Computer::testMemoryShifting()
 
 
     _memory[0x21].value = 0x000;
-//    moveMemory(0x1F,0x1F,1);
+
+    //    moveMemory(0x1F,0x1F,1);
 
 
 }
+
+bool Computer::testconnectionIdentification()
+{
+      mem_loc_t test = mem_loc_t();
+      test.addr = 0x3000;
+      bool ok = false;
+      ok = (0x3000 == getFurthestConnection(test));
+      if(!ok)
+      {
+          qDebug("Fix getFurthestConnection");
+          return false;
+      }
+
+}
+bool Computer::bruteMemShift(mem_addr_t selectionBegin, mem_addr_t selectionEnd, int32_t delta)
+{
+    bool a = 0;
+    mem_addr_t rangeBegin = 0;
+    mem_addr_t rangeEnd   = 0;
+    identifyRangeBounds(&rangeBegin,&rangeEnd,selectionBegin,selectionEnd,delta);
+    for(mem_addr_t addr = rangeBegin; addr <= rangeEnd; addr++)
+    {
+        mem_addr_t proposNewAddress = proposedNewAddress(addr,selectionBegin,selectionEnd,delta,nullptr);
+        mem_addr_t newConnecteeAddress = proposedNewAddress(connectedAddress(_memory[addr]),selectionBegin,selectionEnd,delta,nullptr);
+        mem_addr_t offsetAddress = proposNewAddress - rangeBegin;
+        //        temp[offsetAddress] = _memory[addr];
+        //        (&_memory[connectedAddress(addr)])-=connector_t(addr);
+        //        temp[offsetAddress].addr = proposNewAddress;
+        //        temp[offsetAddress].value = generateOffset(temp[offsetAddress],newConnecteeAddress,&a);
+    }
+    return true;
+}
+
+mem_addr_t Computer::getFurthestConnection(mem_loc_t loc)
+{
+
+    mem_addr_t furthest = connectedAddress(loc);
+    furthest = (loc.addr > furthest)?(loc.addr):(furthest);
+    connector_t** curr =  &(loc.connectors);
+    while((*curr)!= nullptr)
+    {
+        mem_addr_t tribute = (*curr)->connected;
+        furthest = (tribute>furthest)?(tribute):(furthest);
+        curr = &((*curr)->next);
+    }
+    return furthest;
+
+}
+mem_addr_t Computer::terribadInsertLineAlgorithm(mem_addr_t destination)
+{
+
+}
+
+void Computer::testRunner()
+{
+    qDebug("Beginning Testing");
+
+    if(!testconnectionIdentification())
+    {
+        qDebug("Failed");
+    }
+}
+
 bool Computer::fastShiftPhase0(mem_addr_t selectionBegin, mem_addr_t selectionEnd, int32_t delta, mem_loc_t *temp)
 {
     bool a = 0;
@@ -1717,7 +1831,11 @@ bool Computer::fastShiftPhase0(mem_addr_t selectionBegin, mem_addr_t selectionEn
         temp[offsetAddress] = _memory[addr];
         (&_memory[connectedAddress(addr)])-=connector_t(addr);
         temp[offsetAddress].addr = proposNewAddress;
-        temp[offsetAddress].value = generateOffset(temp[offsetAddress],newConnecteeAddress,&a);
+        temp[offsetAddress].value = generateOffsetedValue(temp[offsetAddress],newConnecteeAddress,&a);
+        if(connectedAddress(temp[offsetAddress]) != newConnecteeAddress)
+        {
+            return false;//there was a bad connection
+        }
     }
     return true;
 }
@@ -1736,50 +1854,50 @@ void Computer::fastShiftPhase1(mem_addr_t rangeBegin, mem_addr_t rangeEnd, int32
     }
 }
 
-                void Computer::fastExecuteShiftCycle(mem_loc_t curLoc, mem_addr_t begin, mem_addr_t end, int32_t delta, int* changed, int offset,bool makeAgreement)
+void Computer::fastExecuteShiftCycle(mem_loc_t curLoc, mem_addr_t begin, mem_addr_t end, int32_t delta, int* changed, int offset,bool makeAgreement)
+{
+    MASK
+
+            while(changed[curLoc.addr-offset]!=1)
+    {
+        //mark this address as viewed
+        changed[curLoc.addr-offset] = 1;
+        mem_addr_t nextAddr = proposedNewAddress(curLoc.addr,begin,end,delta);
+        mem_addr_t target = proposedNewAddress(connectedAddress(curLoc),begin,end,delta);
+        mem_loc_t nextLoc = _memory[nextAddr];
+
+        if(makeAgreement)
         {
-            MASK
-
-                    while(changed[curLoc.addr-offset]!=1)
-            {
-                //mark this address as viewed
-                changed[curLoc.addr-offset] = 1;
-                mem_addr_t nextAddr = proposedNewAddress(curLoc.addr,begin,end,delta);
-                mem_addr_t target = proposedNewAddress(connectedAddress(curLoc),begin,end,delta);
-                mem_loc_t nextLoc = _memory[nextAddr];
-
-                if(makeAgreement)
-                {
-                    breakConnectionFromTo(_memory[curLoc.addr].addr,
-                            connectedAddress(curLoc));
-                }
-                setMemLoc(nextAddr, curLoc);
-
-                bool b;
-                if(makeAgreement)
-                {
-
-                    val_t value = generateOffset(_memory[nextAddr],target,&b);
-
-                    setMemValue(nextAddr,value);
-
-                }
-                curLoc = nextLoc;
-            }
-            UNMASK
-                    IFNOMASK(update(););
+            breakConnectionFromTo(_memory[curLoc.addr].addr,
+                    connectedAddress(curLoc));
         }
+        setMemLoc(nextAddr, curLoc);
 
-        void Computer::fastMemorySlide(mem_addr_t begin, mem_addr_t end, int32_t delta, bool makeAgreement, bool* success)
+        bool b;
+        if(makeAgreement)
         {
-        MASK
-        clock_t t = clock();//for timekeeping purposes
-        qDebug("Testing 1 2 3");
-        Undos->beginMacro("Shifting addresses");
 
-        //maybe make some check message
-        if(true)
-        {
+            val_t value = generateOffsetedValue(_memory[nextAddr],target,&b);
+
+            setMemValue(nextAddr,value);
+
+        }
+        curLoc = nextLoc;
+    }
+    UNMASK
+            IFNOMASK(update(););
+}
+
+void Computer::fastMemorySlide(mem_addr_t begin, mem_addr_t end, int32_t delta, bool makeAgreement, bool* success)
+{
+    MASK
+            clock_t t = clock();//for timekeeping purposes
+    qDebug("Testing 1 2 3");
+    Undos->beginMacro("Shifting addresses");
+
+    //maybe make some check message
+    if(true)
+    {
         //since we already know what is connecting to what, this is rather
         //simple.
 
@@ -1858,17 +1976,14 @@ bool Computer::repairConnectionsPostShift(mem_addr_t selectionBegin, mem_addr_t 
         connector_t** cur = &(temp[addr-rangeBegin].connectors);
         while((*cur)!= nullptr)
         {
-
-             _memory[(*cur)->connected].value = generateOffset(_memory[(*cur)->connected],addr,&a);
+            _memory[(*cur)->connected].value = generateOffsetedValue(_memory[(*cur)->connected],addr,&a);
             cur = &((*cur)->next);
         }
         int connectee = connectedAddress(addr);
         if(connectee != addr)
         {
-
             (&_memory[connectee])+= connector_t(addr);
         }
-
     }
     return true;
 }
@@ -1885,7 +2000,7 @@ void Computer::redirectConnecters(mem_addr_t target,bool undoSafe)
     while((*cur) != nullptr)
     {
         mem_addr_t addr = (*cur)->connected;
-        val_t newValue = generateOffset(addr,target,&ok);
+        val_t newValue = generateOffsetedValue(addr,target,&ok);
         if(!undoSafe)
         {
             _memory[addr].value= newValue;
@@ -1998,7 +2113,7 @@ void Computer::executeShiftCycle(mem_loc_t curLoc, mem_addr_t begin, mem_addr_t 
         bool b;
         if(makeAgreement)
         {
-            val_t value= generateOffset(_memory[nextAddr],target,&b);
+            val_t value= generateOffsetedValue(_memory[nextAddr],target,&b);
             setMemValue(nextAddr,value);
         }
         curLoc = nextLoc;
@@ -2220,14 +2335,14 @@ int Computer::getPCOffsetNumber(mem_loc_t mem)
 bool Computer::canConnect(mem_loc_t from, mem_addr_t to)
 {
     int power = getPCOffsetNumber(from);
-    return (isBetween(-1*2^(power-1),2^(power-1)-1,from.addr-to));
+    return (isBetween(-1*(2^(power-1)),(2^(power-1))-1,from.addr-to));
 }
 
-val_t Computer::generateOffset(mem_addr_t mem, mem_addr_t target, bool*ok)
+val_t Computer::generateOffsetedValue(mem_addr_t mem, mem_addr_t target, bool*ok)
 {
-    return generateOffset(_memory[mem],target,ok);
+    return generateOffsetedValue(_memory[mem],target,ok);
 }
-val_t Computer::generateOffset(mem_loc_t mem, mem_addr_t target, bool* ok)
+val_t Computer::generateOffsetedValue(mem_loc_t mem, mem_addr_t target, bool* ok)
 {
     *ok = true;
     int32_t difference = target-mem.addr;
@@ -2395,7 +2510,7 @@ QString Computer::mnemGen(mem_loc_t loc)const
         if((val&0x0E3F))//if there are ones outside of the OpCode and BaseR
             //Bad Op
         {
-                        out = BADOP;
+            out = BADOP;
         }
         else if(val&0x01C0)//if so, RET is the proper memn
         {

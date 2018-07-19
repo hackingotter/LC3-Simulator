@@ -58,7 +58,16 @@ MemTable::MemTable(modeler* model,QWidget* parent):QTableView(parent)
     setupActions();
 }
 
-
+void MemTable::setupWarnings()
+{
+    QString memoryMovementMessage = "This warning has a timer on it, so please take this time to read the following.\n"
+                                    ""
+                                    "\n"
+                                    "The slide function is the most dangerous action that one can do with this program. I have taken precations\n"
+                                    "in effort to protect the code, but I feel that this ability is far too powerful to deny you its use, so beware.\n"
+               "\n"
+               "\n";
+}
 void MemTable::setupActions()
 {
     qDebug("JJ");
@@ -81,13 +90,14 @@ void MemTable::setupActions()
     budgeDown->setKey(Qt::CTRL+Qt::SHIFT+Qt::Key_Down);
     connect(budgeDown,SIGNAL(activated()),this, SLOT(fastShiftDown()));
     budgeDown->setContext(Qt::WidgetShortcut);
-    ADDSHORTCUT("Paste"     ,Qt::CTRL + Qt::Key_V                          ,paste());
-    ADDSHORTCUT("Paste Above",Qt::CTRL+ Qt::ALT + Qt::Key_V              ,pasteBrute());
-    ADDSHORTCUT("Force Down",Qt::CTRL + Qt::SHIFT + Qt::ALT + Qt::Key_Down ,fastShiftDown(););
-    ADDSHORTCUT("Force Up"  ,Qt::CTRL + Qt::SHIFT + Qt::ALT + Qt::Key_Up   ,shiftUpBrute());
-    ADDSHORTCUT("Insert Bellow",Qt::CTRL + Qt::Key_Enter,                       insertBelow());
-    ADDSHORTCUT("Test Up"   ,Qt::Key_F,fastShiftUp(););
-    ADDSHORTCUT("Test Down"   ,Qt::Key_F,fastShiftDown(););
+    ADDSHORTCUT("Paste"     ,Qt::CTRL + Qt::Key_V                               , paste());
+    ADDSHORTCUT("Paste Above",Qt::CTRL+ Qt::ALT + Qt::Key_V                     , pasteBrute());
+    ADDSHORTCUT("Force Down",Qt::CTRL + Qt::SHIFT + Qt::ALT + Qt::Key_Down      , fastShiftDown(););
+    ADDSHORTCUT("Force Up"  ,Qt::CTRL + Qt::SHIFT + Qt::ALT + Qt::Key_Up        , shiftUpBrute());
+    ADDSHORTCUT("Insert Below",Qt::CTRL + Qt::Key_Enter                         , insertBelow());
+    ADDSHORTCUT("Insert Above",Qt::CTRL + Qt::SHIFT + Qt::Key_Enter             , insertAbove());
+    ADDSHORTCUT("Go Backward"   , Qt::Key_Alt + Qt::Key_Left                    , goBackward(););
+    ADDSHORTCUT("Go Forward"   , Qt::Key_Alt + Qt::Key_Right                    , goForward(););
 
 
 }
@@ -138,7 +148,11 @@ void MemTable::pasteBrute()
 {
     paste(false);
 }
-
+void MemTable::insertAbove()
+{
+    qDebug("This is dangerous, please implement this better");
+    //this is a note to myself, Joseph Melberg
+}
 void MemTable::insertBelow()
 {
 
@@ -295,7 +309,7 @@ void MemTable::shiftUp(bool makeAgreement)
         mem_addr_t end =    selectedIndexes().constLast().row();
 
         Computer::getDefault()->slideMemory(begin,end,-1,makeAgreement,&b);
-
+//        Computer::getDefault()->moveMemory(begin,end, -1);
 
         setCurrentIndex(model->index(begin-1,original.column()));
 
@@ -318,14 +332,10 @@ void MemTable::fastShiftUp(bool makeAgreement)
         mem_addr_t begin =  selectedIndexes().constFirst().row();
         mem_addr_t end =    selectedIndexes().constLast().row();
 
-        Computer::getDefault()->fastMemorySlide(begin,end,-1,makeAgreement,&b);
-
-
+//        Computer::getDefault()->fastMemorySlide(begin,end,-1,makeAgreement,&b);
+        Computer::getDefault()->moveMemory(begin,end, -1);
         setCurrentIndex(model->index(begin-1,original.column()));
-
-
         clearSelection();
-
         selectRange(begin-1,end-1);
     }
 
@@ -365,7 +375,8 @@ void MemTable::fastShiftDown(bool makeAgreement)
         qDebug("wor");
         mem_addr_t begin =  selectedIndexes().constFirst().row();
         mem_addr_t end   =   selectedIndexes().constLast().row();
-        Computer::getDefault()->fastMemorySlide(begin,end,1,makeAgreement,&b);
+//        Computer::getDefault()->fastMemorySlide(begin,end,1,makeAgreement,&b);
+        Computer::getDefault()->moveMemory(begin, end, 1);
         setCurrentIndex(model->index(begin+1,original.column()));
         clearSelection();
         selectRange(begin+1,end+1);
@@ -375,6 +386,13 @@ void MemTable::insertRow(mem_addr_t target)
 {
     //make it so the thing can see what zone it is in and prevent cross zone mergers
     int combo = 0;
+
+    //Step 1, do this fast and bad
+
+    Computer::getDefault()->moveMemory(target, target + 0x100,1);
+
+
+
     mem_addr_t source = target;
     while( ++source<=STACKSPACE_END && combo<MINIMUMINSERTCOMBO)
     {
@@ -387,7 +405,7 @@ void MemTable::insertRow(mem_addr_t target)
             combo=0;
         }
     }
-    if(combo==MINIMUMINSERTCOMBO)
+    if(combo == MINIMUMINSERTCOMBO)
     {
 
     }
@@ -418,6 +436,15 @@ void MemTable::show()
     }
 }
 
+
+void MemTable::goBackward()
+{
+    qDebug("Implement goBackward!");
+}
+void MemTable::goForward()
+{
+    qDebug("Implement goForward!");
+}
 void MemTable::setFlipped(bool upIsDown)
 {
     flipped=upIsDown;

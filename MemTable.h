@@ -18,7 +18,15 @@ class MemTable : public QTableView
     QModelIndex savedCurrentFocusIndex = QModelIndex();
     void selectedClickOptions(const QPoint &pos, QMenu *clickMenu);
     void saveSettings();
+    /** put a row into the spot where target is, shifting the below
+     * @brief insertRow
+     * @param target
+     */
     void insertRow(mem_addr_t target);
+    /** setupWarnings
+     * \todo DO
+     */
+    void setupWarnings();
 public:
     MemTable(modeler *model, QWidget *parent = 0);
     void setupActions();
@@ -47,6 +55,15 @@ public slots:
     void scrollToSelected();
     void handleCut();
     void kick();
+    /**
+     * @brief goForward
+     *
+     * This is similar to the re/undo function, but instead of reverting the code to a future
+     * state, it instead brings the view of the code to a future state.
+     */
+    void goForward();
+    void goBackward();
+
 private slots:
     void setCut();
     void setCopied();
@@ -72,6 +89,7 @@ private slots:
     void shiftUpBrute();
     void paste(bool makeAgreement = true);
     void pasteBrute();
+    void insertAbove();
     void insertBelow();
     void fastShiftUp(bool makeAgreement = true);
 };

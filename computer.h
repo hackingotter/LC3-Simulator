@@ -204,7 +204,7 @@ public:
      * \param addr The address to set.
      * \param val the value to set the memory at addr to
      */
-    void setMemValue(mem_addr_t addr, val_t val);
+    void setMemValue(mem_addr_t addr, val_t val, bool remember = true);
 
     /** sets a block of memory.
      * \param addr The starting address of the block
@@ -307,8 +307,17 @@ public:
     int getPCOffsetNumber(mem_loc_t mem);
     bool canShiftClean(mem_addr_t originStart, mem_addr_t originEnd, mem_addr_t destination);
     mem_loc_t createShiftedLoc(mem_loc_t original, mem_addr_t newAddress, mem_addr_t newTarget, bool *ok);
-    val_t generateOffset(mem_addr_t mem, mem_addr_t target, bool*ok);
-    val_t generateOffset(mem_loc_t mem, mem_addr_t target, bool *ok);
+    /** generateOffset
+     * \param mem
+     * \param target
+     * \param ok
+     *
+     *
+     * \todo add ability to identify out of bounds connection attempt
+     * \return The value which will point the instruction at target.
+     */
+    val_t generateOffsetedValue(mem_addr_t mem, mem_addr_t target, bool*ok);
+    val_t generateOffsetedValue(mem_loc_t mem, mem_addr_t target, bool *ok);
     mem_addr_t connectedAddress(mem_addr_t addr){return connectedAddress(_memory[addr]);}
     void juggleShift(mem_addr_t current, mem_addr_t begin, mem_addr_t end, int32_t delta, int *changed, int offset, bool makeAgreement);
     QString getMemNameSafe(mem_loc_t loc) const;
@@ -323,6 +332,19 @@ public:
     bool isConnected(mem_loc_t addr);
     bool isConnector(mem_loc_t mem);
     bool isConnector(mem_addr_t addr);
+    /** moveMemory
+     * \param selectionBegin
+     * \param selectionEnd
+     * \param delta
+     * \param makeAgreement
+     * \param remember
+     *
+     * \todo implement failure handling
+     */
+    void moveMemory(mem_addr_t selectionBegin, mem_addr_t selectionEnd, int32_t delta, bool  makeAgreement = true);
+
+    mem_addr_t getFurthestConnection(mem_loc_t loc);
+
 signals:
     void updateDisplay();
     void update();
@@ -425,20 +447,24 @@ private:
      * @param delta
      */
     void identifyRangeBounds(mem_addr_t *start, mem_addr_t *end, mem_addr_t selectionStart, mem_addr_t selectionEnd, int32_t delta);
-    void moveMemory(mem_addr_t selectionBegin, mem_addr_t selectionEnd, int32_t delta);
-
-
-    /////////////////////////////////////////////////////////////////
-    //                      Testing Methods                        //
-    /////////////////////////////////////////////////////////////////
-
-    void testMemoryShifting();
 
 
     bool repairConnectionsPostShift(mem_addr_t selectionBegin, mem_addr_t selectionEnd, int32_t delta, mem_loc_t *temp);
     bool insertShiftedMemory(mem_addr_t selectionBegin, mem_addr_t selectionEnd, int32_t delta, mem_loc_t *temp);
     bool updateConnectorsAfterPhase0(mem_addr_t selectionBegin, mem_addr_t selectionEnd, int32_t delta, mem_loc_t *temp);
     bool cleanupAccidents(mem_addr_t selectionBegin, mem_addr_t selectionEnd, int32_t delta);
+    bool bruteMemShift(mem_addr_t selectionBegin, mem_addr_t selectionEnd, int32_t delta);
+
+
+    mem_addr_t terribadInsertLineAlgorithm(mem_addr_t destination);
+    /////////////////////////////////////////////////////////////////
+    //                      Testing Methods                        //
+    /////////////////////////////////////////////////////////////////
+
+    void testRunner();
+    void testMemoryShifting();
+    bool testconnectionIdentification();
+
 };
 
 #endif // COMPUTER_H
