@@ -120,7 +120,8 @@ DISTFILES += \
     Test_copy.txt \
     lc3os.asm \
     Commitment \
-    pennCompilertest.asm
+    pennCompilertest.asm \
+    Priority.txt
 
 STATECHARTS += \
     State Chart.scxml \

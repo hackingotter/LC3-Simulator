@@ -86,14 +86,19 @@ public:
 
     void redo()
     {
+        if(age == 0)
+        {
+
         Computer::getDefault()->remember++;
         Computer::getDefault()->setProgramStatus(newCondt);
         Computer::getDefault()->remember--;
+        }
+        age = 0;
     }
 private:
     cond_t newCondt;
     cond_t oldCondt;
-
+    int age = 1;
 };
 class changeMemBlock: public QUndoCommand
 {
@@ -139,19 +144,20 @@ public:
 
     void redo()
     {
-        if(!fresh)
+        if(age == 0)
         {
             Computer::getDefault()->remember++;
             Computer::getDefault()->setMemLoc(addr,newLoc);
             Computer::getDefault()->remember--;
 
         }
-        fresh = false;
+        age = 0;
     }
 private:
     mem_loc_t newLoc;
     mem_loc_t oldLoc;
     mem_addr_t addr;
+    int age = 1;
 };
 class changeRegValue: public QUndoCommand
 {
@@ -170,15 +176,20 @@ public:
     }
     void redo()
     {
+        if(age == 0)
+        {
         Computer::getDefault()->remember++;
         Computer::getDefault()->setRegister(regName,newValue);
         Computer::getDefault()->remember--;
+        }
+        age = 0;
     }
 
 private:
     reg_t regName;
     val_t newValue;
     val_t oldValue;
+    int age = 1;
 };
 class changeMemValue: public QUndoCommand
 {
@@ -203,7 +214,7 @@ public:
     }
     void redo()
     {
-        if(!fresh)
+        if(age == 0)
         {
             Computer::getDefault()->remember++;
             Computer::getDefault()->setMemValue(mem_addr,newValue);
@@ -213,15 +224,16 @@ public:
             }
             Computer::getDefault()->remember--;
         }
-        fresh = false;
+        age = 0;
     }
+
 
     ~changeMemValue() {;}
 private:
     mem_addr_t mem_addr;
     val_t oldValue;
     val_t newValue;
-    bool fresh = true;
+    int age = 1;
 };
 class changeMemLabel: public QUndoCommand
 {
@@ -241,15 +253,21 @@ public:
     }
     void redo()
     {
+        if(age == 0)
+        {
         Computer::getDefault()->remember++;
         Computer::getDefault()->setMemLabel(mem_addr,newLabelPtr);
         Computer::getDefault()->remember--;
+        return;
+        }
+        age = 0;
     }
 
 private:
     mem_addr_t mem_addr;
     label_t* oldLabelPtr;
     label_t* newLabelPtr;
+    int age = 1;
 };
 class changeMemBreak: public QUndoCommand
 {
@@ -267,14 +285,19 @@ public:
     }
     void redo()
     {
+        if(age == 0)
+        {
         Computer::getDefault()->remember++;
         Computer::getDefault()->setMemBreakPoint(mem_addr,newBreak);
         Computer::getDefault()->remember--;
+        }
+        age = 0;
     }
 private:
     mem_addr_t mem_addr;
     breakpoint_t* oldBreak;
     breakpoint_t* newBreak;
+    int age = 1;
 };
 class changeMemComment:public QUndoCommand
 {
@@ -292,14 +315,19 @@ public:
     }
     void redo()
     {
+        if(age == 0)
+        {
         Computer::getDefault()->remember++;
         Computer::getDefault()->setMemComment(mem_addr,newComment);
         Computer::getDefault()->remember--;
+        }
+        age = 0;
     }
 private:
     mem_addr_t mem_addr;
     QString oldComment;
     QString newComment;
+    int age = 1;
 };
 class changeMemConnect: public QUndoCommand
 {
@@ -330,7 +358,7 @@ public:
         _selectionEnd(selectionEnd),
         _delta(delta)
     {
-        setText("Shifted Memory");
+        setText("Shifted Memory"+getHexString(selectionBegin));
     }
     void undo()
     {
