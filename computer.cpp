@@ -329,26 +329,7 @@ private:
     QString newComment;
     int age = 1;
 };
-class changeMemConnect: public QUndoCommand
-{
-public:
-    changeMemConnect(mem_addr_t pointee, mem_addr_t pointer):mem_addr(pointee)
-    {
 
-
-    }
-    void undo()
-    {
-
-    }
-    void redo()
-    {
-
-    }
-private:
-    mem_addr_t mem_addr;
-    connector_t** link;
-};
 class moveMemDoer: public QUndoCommand
 {
 
@@ -1795,6 +1776,25 @@ bool Computer::testconnectionIdentification()
           return false;
       }
 
+}
+void Computer::saveRegisters()
+{
+    for(reg_t i = 0; i < NUM_OF_REGS; i++)
+    {
+        std::cout<<getRegister(i)<<std::endl;
+    }
+}
+void Computer::saveMemory()
+{
+    for(mem_addr_t i = 0; i < MEMSIZE+1; i++)
+    {
+
+    }
+}
+void Computer::saveWorkSpace()
+{
+    saveRegisters();
+    saveMemory();
 }
 bool Computer::bruteMemShift(mem_addr_t selectionBegin, mem_addr_t selectionEnd, int32_t delta)
 {

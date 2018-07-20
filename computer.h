@@ -465,6 +465,13 @@ private:
     void testMemoryShifting();
     bool testconnectionIdentification();
 
+    /////////////////////////////////////////////////////////////////
+    //                       Saving Methods                        //
+    /////////////////////////////////////////////////////////////////
+
+    void saveWorkSpace();
+    void saveRegisters();
+    void saveMemory();
 };
 
 #endif // COMPUTER_H

@@ -74,7 +74,8 @@ HEADERS += \
     HelpMenu.h \
     StateMachine.h \
     UndoStackMasker.h \
-    Preferences.h
+    Preferences.h \
+    Saver.h
 
 
 SOURCES += \
@@ -112,7 +113,8 @@ SOURCES += \
     HelpMenu.cpp \
     StateMachine.cpp \
     UndoStackMasker.cpp \
-    Preferences.cpp
+    Preferences.cpp \
+    Saver.cpp
 
 
 DISTFILES += \
