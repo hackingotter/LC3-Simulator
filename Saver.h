@@ -6,6 +6,7 @@ class Saver
 {
 public:
     Saver();
+    void static vanguard();
 private:
 
 };

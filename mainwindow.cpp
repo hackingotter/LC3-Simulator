@@ -42,6 +42,7 @@
 #include "KBRDModel.h"
 #include <QProcess>
 #include "Console.h"
+#include "Saver.h"
 #include <QCoreApplication>
 #define REGISTERVIEWNUMCOLUMN 2
 #define SCROLLTO(VIEW,INPUT)\
@@ -728,17 +729,23 @@ void MainWindow::saveSettings()
     settings.setValue("Window Y",geometry().y());
     settings.endGroup();
 
-    qDebug("done saving");
+    qDebug("done saving ui Settings");
 
 
 
 }
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+//    saveWorkSpace();
     saveSettings();
+    Saver::vanguard();
     event->accept();
 }
 
+void MainWindow::saveWorkSpace()
+{
+//    Computer::getDefault()->saveWorkSpace();
+}
 void MainWindow::on_MemView1_destroyed()
 {
     qDebug("Hey");

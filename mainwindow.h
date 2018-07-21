@@ -61,6 +61,7 @@ class MainWindow : public QMainWindow
     int getScreenWidth();
     int getScreenHeight();
 
+    void saveWorkSpace();
 public:
     /**
      * @brief model The main model for the memory tables

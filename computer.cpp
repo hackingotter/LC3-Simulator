@@ -4,6 +4,7 @@
 #include <QString>
 #include <QUndoCommand>
 #include <QLabel>
+#include <string>
 #include <time.h>
 #include "iostream"
 
@@ -1779,26 +1780,35 @@ bool Computer::testconnectionIdentification()
 }
 void Computer::saveRegisters()
 {
-    for(reg_t i = 0; i < NUM_OF_REGS; i++)
+    for(int i = 0; i < NUM_OF_REGS; i+= 1)
     {
-        std::cout<<getRegister(i)<<std::endl;
+        std::cout<<getRegister((reg_t)i)<<std::endl;
     }
 }
-void Computer::saveMemory()
+void Computer::saveMemLoc(std::ofstream *destination,mem_loc_t loc)
 {
-    for(mem_addr_t i = 0; i < MEMSIZE+1; i++)
+    (*destination)<<loc.addr<<","<<loc.value<<"\n";
+}
+void Computer::saveMemory(std::ofstream *destination)
+{
+
+
+    mem_addr_t addr = 0;
+    do
     {
 
+        saveMemLoc(destination,_memory[addr]);
+    addr++;
     }
+    while(addr!= 0);
 }
-void Computer::saveWorkSpace()
+void Computer::saveWorkSpace(std::ofstream *destination)
 {
     saveRegisters();
-    saveMemory();
+    saveMemory(destination);
 }
 bool Computer::bruteMemShift(mem_addr_t selectionBegin, mem_addr_t selectionEnd, int32_t delta)
 {
-    bool a = 0;
     mem_addr_t rangeBegin = 0;
     mem_addr_t rangeEnd   = 0;
     identifyRangeBounds(&rangeBegin,&rangeEnd,selectionBegin,selectionEnd,delta);
@@ -1821,11 +1831,14 @@ mem_addr_t Computer::getFurthestConnection(mem_loc_t loc)
     mem_addr_t furthest = connectedAddress(loc);
     furthest = (loc.addr > furthest)?(loc.addr):(furthest);
     connector_t** curr =  &(loc.connectors);
+    if(loc.connectors != nullptr)
+    {
     while((*curr)!= nullptr)
     {
         mem_addr_t tribute = (*curr)->connected;
         furthest = (tribute>furthest)?(tribute):(furthest);
         curr = &((*curr)->next);
+    }
     }
     return furthest;
 
@@ -1839,10 +1852,10 @@ void Computer::testRunner()
 {
     qDebug("Beginning Testing");
 
-    if(!testconnectionIdentification())
-    {
-        qDebug("Failed");
-    }
+//    if(!testconnectionIdentification())
+//    {
+//        qDebug("Failed");
+//    }
 }
 
 bool Computer::fastShiftPhase0(mem_addr_t selectionBegin, mem_addr_t selectionEnd, int32_t delta, mem_loc_t *temp)

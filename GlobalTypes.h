@@ -118,7 +118,8 @@ bool operator !=(mem_loc_t a, mem_loc_t b);
 
 void operator +=(mem_loc_t* loc, connector_t b);
 void operator -=(mem_loc_t* loc, connector_t b);
-void operator +=(mem_loc_t loc, connector_t b);
+
+
 
 // helpers
 

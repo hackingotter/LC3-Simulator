@@ -6,7 +6,7 @@
 #include "GlobalTypes.h"
 #include "HistoryHandler.h"
 #include <QUndoStack>
-
+#include "fstream"
 
 #define MASK \
 {\
@@ -468,10 +468,12 @@ private:
     /////////////////////////////////////////////////////////////////
     //                       Saving Methods                        //
     /////////////////////////////////////////////////////////////////
-
-    void saveWorkSpace();
+public:
+    void saveWorkSpace(std::ofstream *destination);
+private:
     void saveRegisters();
-    void saveMemory();
+    void saveMemory(std::ofstream *destination);
+    void saveMemLoc(std::ofstream *destination, mem_loc_t loc);
 };
 
 #endif // COMPUTER_H
