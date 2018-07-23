@@ -1,5 +1,6 @@
 #include "computer.h"
 #include "opcodes.h"
+#include "ctime"
 #include "Util.h"
 #include <QString>
 #include <QUndoCommand>
@@ -28,11 +29,32 @@
 
 #define SAVEFUNC(STUFF)  QString save()\
 {\
-    return STUFF\
+    STUFF\
     }
 
 namespace Action
 {
+typedef enum CommandID
+{
+    REGISTER_ID = -1,
+    VALUE_ID    = -1,
+    MEMORY_LOC_ID = -1,
+    SHIFT_ID    =  1,
+
+
+} CommandID;
+typedef enum CommandSaveIdentifiers
+{
+    TEXTDISPLAY,
+    REGCONDITION,
+    MEMBLOCK,
+    MEMLOC,
+    REGVALUE,
+    MEMVALUE,
+    MEMLABEL,
+    MEMCOMMENT,
+    MEMDOER
+} CommandSaveIdentifiers;
 enum doPriority{
     systLevel = 0,//for when the system does something
     userLevel = 1,
@@ -48,11 +70,13 @@ public:
 class changeTextDisplay : public QUndoCommand
 {
 public:
+
     changeTextDisplay(QLabel* target,char newchar):_target(target),_newchar(newchar)
     {
         setText("Pushed " +QString(&_newchar) + " to the display");
 
     }
+
     void undo()
     {
         Computer::getDefault()->remember++;
@@ -90,9 +114,9 @@ public:
         if(age == 0)
         {
 
-        Computer::getDefault()->remember++;
-        Computer::getDefault()->setProgramStatus(newCondt);
-        Computer::getDefault()->remember--;
+            Computer::getDefault()->remember++;
+            Computer::getDefault()->setProgramStatus(newCondt);
+            Computer::getDefault()->remember--;
         }
         age = 0;
     }
@@ -179,9 +203,9 @@ public:
     {
         if(age == 0)
         {
-        Computer::getDefault()->remember++;
-        Computer::getDefault()->setRegister(regName,newValue);
-        Computer::getDefault()->remember--;
+            Computer::getDefault()->remember++;
+            Computer::getDefault()->setRegister(regName,newValue);
+            Computer::getDefault()->remember--;
         }
         age = 0;
     }
@@ -196,6 +220,12 @@ class changeMemValue: public QUndoCommand
 {
 
 public:
+    changeMemValue(std::ifstream * source)
+    {
+        (*source).read((char *) &mem_addr,sizeof(mem_addr_t));
+        (*source).read((char * )&oldValue,sizeof(val_t));
+        (*source).read((char * )&newValue,sizeof(val_t));
+    }
     changeMemValue(mem_addr_t addr,val_t oval,val_t nval):mem_addr(addr),oldValue(oval),newValue(nval)
     {
         qDebug("I am");
@@ -227,8 +257,6 @@ public:
         }
         age = 0;
     }
-
-
     ~changeMemValue() {;}
 private:
     mem_addr_t mem_addr;
@@ -256,10 +284,10 @@ public:
     {
         if(age == 0)
         {
-        Computer::getDefault()->remember++;
-        Computer::getDefault()->setMemLabel(mem_addr,newLabelPtr);
-        Computer::getDefault()->remember--;
-        return;
+            Computer::getDefault()->remember++;
+            Computer::getDefault()->setMemLabel(mem_addr,newLabelPtr);
+            Computer::getDefault()->remember--;
+            return;
         }
         age = 0;
     }
@@ -288,9 +316,9 @@ public:
     {
         if(age == 0)
         {
-        Computer::getDefault()->remember++;
-        Computer::getDefault()->setMemBreakPoint(mem_addr,newBreak);
-        Computer::getDefault()->remember--;
+            Computer::getDefault()->remember++;
+            Computer::getDefault()->setMemBreakPoint(mem_addr,newBreak);
+            Computer::getDefault()->remember--;
         }
         age = 0;
     }
@@ -318,9 +346,9 @@ public:
     {
         if(age == 0)
         {
-        Computer::getDefault()->remember++;
-        Computer::getDefault()->setMemComment(mem_addr,newComment);
-        Computer::getDefault()->remember--;
+            Computer::getDefault()->remember++;
+            Computer::getDefault()->setMemComment(mem_addr,newComment);
+            Computer::getDefault()->remember--;
         }
         age = 0;
     }
@@ -330,7 +358,6 @@ private:
     QString newComment;
     int age = 1;
 };
-
 class moveMemDoer: public QUndoCommand
 {
 
@@ -370,8 +397,22 @@ private:
 
 
 
-
 }
+
+
+//Q_DECLARE_METATYPE(Action::changeTextDisplay)
+//Q_DECLARE_METATYPE(Action::changeRegCondt)
+//Q_DECLARE_METATYPE(Action::changeMemBlock)
+//Q_DECLARE_METATYPE(Action::changeMemLoc)
+//Q_DECLARE_METATYPE(Action::changeRegValue)
+//Q_DECLARE_METATYPE(Action::changeMemValue)
+//Q_DECLARE_METATYPE(Action::changeMemLabel)
+//Q_DECLARE_METATYPE(Action::changeMemBreak)
+//Q_DECLARE_METATYPE(Action::changeMemComment)
+//Q_DECLARE_METATYPE(Action::moveMemDoer)
+
+
+
 
 Computer::Computer(QObject *parent) : QObject(parent)
 {
@@ -445,7 +486,7 @@ Computer* Computer::getDefault() {
         return defaultComputer;
     }
     defaultComputer = new Computer();
-defaultComputer->testRunner();
+    defaultComputer->testRunner();
     return defaultComputer;
 }
 
@@ -467,11 +508,14 @@ val_t* Computer::getAllRegisters() {
     return ret;
 }
 
-void Computer::setRegister(reg_t reg, val_t val) {
+void Computer::setRegister(reg_t reg, val_t val,bool remember) {
     //will implement an identification method
     val_t oval = registers[reg];
     registers[reg] = val;
+    if(remember)
+    {
     TRY2PUSH(0,0,changeRegValue(reg,oval,val));
+    }
     IFNOMASK(emit update();)
 }
 
@@ -625,12 +669,12 @@ void Computer::connectAddrs(mem_addr_t source, mem_loc_t target)
 void Computer::setMemValue(mem_addr_t addr, val_t val,bool remember)
 {
     qDebug("Settin' Mem");
+    MASK
 
-    mem_addr_t connected = connectedAddress(addr);
-
-    val_t oval = _memory[addr].value;
+            val_t oval = _memory[addr].value;
 
     if(oval== val)return;
+    mem_addr_t connected = connectedAddress(addr);
     breakConnectionFromTo(addr,connected);
     _memory[addr].value = val;
     if(addr>=0xfe00)    qDebug(getHexString(addr).toLocal8Bit());
@@ -647,7 +691,8 @@ void Computer::setMemValue(mem_addr_t addr, val_t val,bool remember)
 
     TRY2PUSH(oval,val,changeMemValue(addr,oval,val));
     emit memValueChanged(addr);
-    IFNOMASK(emit update();)
+    UNMASK
+            IFNOMASK(emit update();)
 }
 
 void Computer::setMemValuesBlock(mem_addr_t addr, size_t blockSize, val_t *vals)
@@ -1715,7 +1760,7 @@ void Computer::moveMemory(mem_addr_t selectionBegin, mem_addr_t selectionEnd, in
 {
 
     MASK
-    bool a = 0;
+            bool a = 0;
     mem_addr_t rangeBegin = 0;
     mem_addr_t rangeEnd   = 0;
     identifyRangeBounds(&rangeBegin,&rangeEnd,selectionBegin,selectionEnd,delta);
@@ -1723,7 +1768,7 @@ void Computer::moveMemory(mem_addr_t selectionBegin, mem_addr_t selectionEnd, in
     mem_loc_t temp[length];
 
     //copy everything into a temp buffer and adjust them so they point the right way.
-//the compiler thinks it fun to compile things out of order.
+    //the compiler thinks it fun to compile things out of order.
     //however, this implementation cares not.
     int thisIsDumb = 0;
 
@@ -1735,11 +1780,12 @@ void Computer::moveMemory(mem_addr_t selectionBegin, mem_addr_t selectionEnd, in
         case 1 : updateConnectorsAfterPhase0(selectionBegin,selectionEnd,delta,temp); break;
         case 2 : insertShiftedMemory(selectionBegin,selectionEnd,delta,temp);break;
         case 3 : repairConnectionsPostShift(selectionBegin,selectionEnd,delta,temp); break;
-        case 4 : cleanupAccidents(selectionBegin,selectionEnd,delta); break;
+
         default:
             thisIsDumb = -1;
         }
     }
+    delete[] temp;
     TRY2PUSH(0,0,moveMemDoer(selectionBegin,selectionEnd,delta, makeAgreement));
     UNMASK
             IFNOMASK(emit update();)
@@ -1767,27 +1813,57 @@ void Computer::testMemoryShifting()
 
 bool Computer::testconnectionIdentification()
 {
-      mem_loc_t test = mem_loc_t();
-      test.addr = 0x3000;
-      bool ok = false;
-      ok = (0x3000 == getFurthestConnection(test));
-      if(!ok)
-      {
-          qDebug("Fix getFurthestConnection");
-          return false;
-      }
+    mem_loc_t test = mem_loc_t();
+    test.addr = 0x3000;
+    bool ok = false;
+    ok = (0x3000 == getFurthestConnection(test));
+    if(!ok)
+    {
+        qDebug("Fix getFurthestConnection");
+        return false;
+    }
 
 }
-void Computer::saveRegisters()
+void Computer::saveRegisters(std::ofstream * destination)
 {
+    char * mem_block;
     for(int i = 0; i < NUM_OF_REGS; i+= 1)
     {
-        std::cout<<getRegister((reg_t)i)<<std::endl;
+
+        val_t val = getRegister((reg_t)i);
+        (*destination).write((char*)&val,sizeof(val_t));
+
+        //        (*destination)<<getRegister((reg_t)i)<<std::endl;
     }
+}
+void Computer::loadRegisters(std::ifstream * source)
+{
+    MASK
+    for(int i = 0; i < NUM_OF_REGS; i+= 1)
+    {
+        val_t val  = 0;
+        (*source).read((char *)&val,sizeof(val_t));
+        setRegister((reg_t)i,val,false);
+        std::cout<<val<<std::endl;
+    }
+    UNMASK
 }
 void Computer::saveMemLoc(std::ofstream *destination,mem_loc_t loc)
 {
-    (*destination)<<loc.addr<<","<<loc.value<<"\n";
+    val_t val = loc.value;
+
+
+
+//    (*destination).write((char*)&(loc.breakpt),sizeof(breakpoint_t*));
+    (*destination).write((char*)&val,sizeof(val_t));
+}
+void Computer::loadMemLoc(std::ifstream *source,mem_loc_t* locptr)
+{
+    val_t val = 0;
+
+//    (*source).read((char * )&(locptr->breakpt),sizeof(breakpoint_t*));
+    (*source).read((char * )&val,sizeof(val_t));
+    locptr->value = val;
 }
 void Computer::saveMemory(std::ofstream *destination)
 {
@@ -1796,16 +1872,58 @@ void Computer::saveMemory(std::ofstream *destination)
     mem_addr_t addr = 0;
     do
     {
-
         saveMemLoc(destination,_memory[addr]);
-    addr++;
+        addr++;
     }
-    while(addr!= 0);
+    while(addr!= 10);
 }
-void Computer::saveWorkSpace(std::ofstream *destination)
+void Computer::loadMemory(std::ifstream * source)
 {
-    saveRegisters();
-    saveMemory(destination);
+    mem_addr_t addr = 0;
+    do
+    {
+        loadMemLoc(source,&_memory[addr]);
+    }
+    while(++addr!= 10);
+
+}
+void Computer::saveUndos(std::ofstream * destination)
+{
+//    QVariant
+}
+void Computer::saveComputer(std::ofstream *destination)
+{
+    int i = 0;
+    while(i != -1)
+    {
+        switch(i++)
+        {
+        case 0: saveRegisters(destination);break;
+        case 1: saveMemory(destination);break;
+        default:
+        {
+            i =-1;
+        }
+        }
+    }
+    return;
+}
+void Computer::loadComputer(std::ifstream *source)
+{
+    int i = 0;
+    while(i != -1)
+    {
+        switch(i++)
+        {
+        case 0: loadRegisters(source);break;
+        case 1: loadMemory(   source);break;
+        default:
+        {
+            i =-1;
+        }
+        }
+    }
+    return;
 }
 bool Computer::bruteMemShift(mem_addr_t selectionBegin, mem_addr_t selectionEnd, int32_t delta)
 {
@@ -1833,12 +1951,12 @@ mem_addr_t Computer::getFurthestConnection(mem_loc_t loc)
     connector_t** curr =  &(loc.connectors);
     if(loc.connectors != nullptr)
     {
-    while((*curr)!= nullptr)
-    {
-        mem_addr_t tribute = (*curr)->connected;
-        furthest = (tribute>furthest)?(tribute):(furthest);
-        curr = &((*curr)->next);
-    }
+        while((*curr)!= nullptr)
+        {
+            mem_addr_t tribute = (*curr)->connected;
+            furthest = (tribute>furthest)?(tribute):(furthest);
+            curr = &((*curr)->next);
+        }
     }
     return furthest;
 
@@ -1852,10 +1970,34 @@ void Computer::testRunner()
 {
     qDebug("Beginning Testing");
 
-//    if(!testconnectionIdentification())
-//    {
-//        qDebug("Failed");
-//    }
+    //    if(!testconnectionIdentification())
+    //    {
+    //        qDebug("Failed");
+    //    }
+}
+
+void Computer::testUndoSpeed()
+{
+    qInfo("Testing Undo Speed");
+    time_t t = time(NULL);
+    clock_t clocker =clock();
+
+    MASK
+            mem_addr_t addr = 0;
+    {
+        do
+        {
+            //            std::cout<<addr<<std::endl;
+            Computer::setMemValue(addr%4,addr);
+            addr+=1;
+
+        }
+        while(clock() - clocker<1000);
+    }
+
+    std::cout<<"This is how far it got:"<<addr<<std::endl;
+    UNMASK
+            IFNOMASK(update(););
 }
 
 bool Computer::fastShiftPhase0(mem_addr_t selectionBegin, mem_addr_t selectionEnd, int32_t delta, mem_loc_t *temp)
@@ -2028,10 +2170,7 @@ bool Computer::repairConnectionsPostShift(mem_addr_t selectionBegin, mem_addr_t 
     }
     return true;
 }
-bool Computer::cleanupAccidents(mem_addr_t selectionBegin, mem_addr_t selectionEnd, int32_t delta)
-{
 
-}
 void Computer::redirectConnecters(mem_addr_t target,bool undoSafe)
 {
 

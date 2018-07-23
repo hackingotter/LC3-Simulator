@@ -7,6 +7,8 @@ class Saver
 public:
     Saver();
     void static vanguard();
+    void static loadState();
+    void static saveState();
 private:
 
 };

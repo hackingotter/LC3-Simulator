@@ -219,6 +219,8 @@ public slots:
     void gotoRunningMode();
     void gotoUserMode();
 
+    void reloadState();
+    void storeState();
 private slots:
     void on_pushButton_4_pressed();
     void on_Update_Temp_pressed();

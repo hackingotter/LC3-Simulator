@@ -102,7 +102,7 @@ public:
      * \param reg the register to set
      * \param val the value that reg will be set to
      */
-    void setRegister(reg_t reg, val_t val);
+    void setRegister(reg_t reg, val_t val, bool remember = true);
 
     /** Sets the value of a register
      * \param vals An array of length 10 containg the values of all registers. Does not have to be null terminated. Order is R0-R6,SPR,PC,PSR
@@ -452,7 +452,7 @@ private:
     bool repairConnectionsPostShift(mem_addr_t selectionBegin, mem_addr_t selectionEnd, int32_t delta, mem_loc_t *temp);
     bool insertShiftedMemory(mem_addr_t selectionBegin, mem_addr_t selectionEnd, int32_t delta, mem_loc_t *temp);
     bool updateConnectorsAfterPhase0(mem_addr_t selectionBegin, mem_addr_t selectionEnd, int32_t delta, mem_loc_t *temp);
-    bool cleanupAccidents(mem_addr_t selectionBegin, mem_addr_t selectionEnd, int32_t delta);
+
     bool bruteMemShift(mem_addr_t selectionBegin, mem_addr_t selectionEnd, int32_t delta);
 
 
@@ -460,6 +460,8 @@ private:
     /////////////////////////////////////////////////////////////////
     //                      Testing Methods                        //
     /////////////////////////////////////////////////////////////////
+public:
+    void testUndoSpeed();
 
     void testRunner();
     void testMemoryShifting();
@@ -469,11 +471,16 @@ private:
     //                       Saving Methods                        //
     /////////////////////////////////////////////////////////////////
 public:
-    void saveWorkSpace(std::ofstream *destination);
+    void saveComputer(std::ofstream *destination);
+    void loadComputer(std::ifstream *source);
 private:
-    void saveRegisters();
+    void saveRegisters(std::ofstream *destination);
     void saveMemory(std::ofstream *destination);
     void saveMemLoc(std::ofstream *destination, mem_loc_t loc);
+    void loadRegisters(std::ifstream *source);
+    void loadMemLoc(std::ifstream *source, mem_loc_t *locptr);
+    void loadMemory(std::ifstream *source);
+    void saveUndos(std::ofstream *destination);
 };
 
 #endif // COMPUTER_H

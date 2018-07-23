@@ -226,17 +226,29 @@ void MainWindow::setupMenuBar()
     QAction* actionAssemble_File = new QAction("Assemble File",this);
     QAction* actionAssemble_Load_File = new QAction("Assemble and Load File",this);
     QAction* actionSave_File = new QAction("Save File",this);
-    QAction* actionSave_File_As= new QAction("Save File As ...");
-
+    QAction* actionSave_File_As= new QAction("Save File As ...",this);
+    QAction* actionSave_State = new QAction("Save IDE State",this);
+    QAction* actionLoad_State = new QAction("Load IDE State",this);
 
     actionAssemble_Load_File->setShortcut(QKeySequence(tr("Ctrl+D")));
 
 
     QList<QAction*> fileActions;
-    fileActions <<actionLoad_File<<actionAssemble_File<<actionAssemble_Load_File<<actionSave_File<<actionSave_File_As;
+    fileActions <<actionLoad_File<<actionAssemble_File<<actionAssemble_Load_File<<actionSave_File<<actionSave_File_As<<actionSave_State<<actionLoad_State;
     ui->menuFile->addActions(fileActions);
+
+    CONNECT(actionSave_State,triggered(),this, storeState());
+    CONNECT(actionLoad_State,triggered(),this, reloadState());
     CONNECT(actionLoad_File,triggered(),this,loadFile());
     CONNECT(actionAssemble_Load_File,triggered(),this, assembleNLoadFile());
+}
+void MainWindow::reloadState()
+{
+    Saver::loadState();
+}
+void MainWindow::storeState()
+{
+    Saver::saveState();
 }
 void MainWindow::setupControlButtons()
 {
@@ -737,6 +749,7 @@ void MainWindow::saveSettings()
 void MainWindow::closeEvent(QCloseEvent *event)
 {
 //    saveWorkSpace();
+//    Computer::getDefault()->testUndoSpeed();
     saveSettings();
     Saver::vanguard();
     event->accept();
