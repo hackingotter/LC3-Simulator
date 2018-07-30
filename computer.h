@@ -227,6 +227,12 @@ public:
      */
     void setMemComment(mem_addr_t addr,QString comment);
 
+    void setMemDataType(mem_addr_t addr, data_t type);
+
+    data_t getMemDataType(mem_addr_t addr);
+
+
+
     /** loads a file program file into memory. the files first line will be used as starting address. File must be hex
      * \param path the path to the file to load
      * \return the number of instructions loaded from the file
@@ -322,6 +328,9 @@ public:
     void juggleShift(mem_addr_t current, mem_addr_t begin, mem_addr_t end, int32_t delta, int *changed, int offset, bool makeAgreement);
     QString getMemNameSafe(mem_loc_t loc) const;
     QString getMemNameSafe(mem_addr_t addr) const;
+    QString displayData(mem_addr_t addr);
+    QString displayData(mem_loc_t loc);
+
     QString mnemGen(mem_loc_t loc) const;
     QString name_or_addr(mem_addr_t target) const;
     QString name_or_addr(mem_loc_t target) const;

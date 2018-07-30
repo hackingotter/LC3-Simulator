@@ -31,7 +31,13 @@ typedef uint16_t mem_addr_t;
 typedef void * breakpoint_t;
 
 // enums
-
+typedef enum data_t{
+    INSTRUCTION,
+    CHAR,
+    HEX,
+    INTEGER,
+    UNHANDLED
+} data_t;
 /** Defines an enum for the condition codes of LC3.
 */
 typedef enum cond_t {
@@ -102,14 +108,16 @@ typedef struct mem_loc_t {
     breakpoint_t *breakpt; /** a pointer to the breakpoint set at that position. might be null. */
     connector_t* connectors;/** a pointer to a list of addresses which connect to it.*/
     QString comment; /** a pointer to a possible comment string. might be null. */
+    data_t dataType; /** describes how a value should be seen*/
+
     mem_loc_t() :
         addr(0),
         value(0),
         label(nullptr),
         breakpt(nullptr),
-
-
+        dataType(INSTRUCTION),
         comment(QString()) {}
+
 } mem_loc_t;
 //void operator +=(mem_loc_t *a, connector_t* b);
 bool operator ==(mem_loc_t a, mem_loc_t b);

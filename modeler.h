@@ -56,6 +56,13 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
     // Editable:
+    /** setData
+     * \param index
+     * \param value
+     * \param role
+     * \todo prevent repeated names
+     * \return
+     */
     bool setData(const QModelIndex &index, const QVariant &value,
                  int role = Qt::EditRole) override;
 

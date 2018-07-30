@@ -274,19 +274,19 @@ QVariant modeler::data(const QModelIndex &index, int role) const
             //                return *er;
             //            }
 
-            mem_loc_t ml = Computer::getDefault()->getMemLocation(addr);
+//            mem_loc_t ml = Computer::getDefault()->getMemLocation(addr);
 
-            connector_t* qui = ml.connectors;
-            QString ck = ":";
-            if(qui!= nullptr)
-            {
-                ck = getHexString(ml.addr);
-                while(qui != nullptr){
-                    ck.append(getHexString(qui->connected));
-                    qui = qui->next;
-                }
-                return ck;
-            }
+//            connector_t* qui = ml.connectors;
+//            QString ck = ":";
+//            if(qui!= nullptr)
+//            {
+//                ck = getHexString(ml.addr);
+//                while(qui != nullptr){
+//                    ck.append(getHexString(qui->connected));
+//                    qui = qui->next;
+//                }
+//                return ck;
+//            }
 
 
             return Computer::getDefault()->getMemNameSafe(addr);
@@ -294,7 +294,7 @@ QVariant modeler::data(const QModelIndex &index, int role) const
         }
 
         case MNEMCOLUMN:
-            return Computer::getDefault()->mnemGen(addr);
+            return Computer::getDefault()->displayData(addr);
         case COMMCOLUMN:
             return Computer::getDefault()->getMemComment(addr);
         }
@@ -305,7 +305,7 @@ QVariant modeler::data(const QModelIndex &index, int role) const
         switch (column) {
         case VALUCOLUMN:
         {
-            return getHexString(Computer::getDefault()->getMemValue(addr));
+            return Computer::getDefault()->displayData(addr);
         }
         case NAMECOLUMN:
         {
@@ -319,6 +319,7 @@ QVariant modeler::data(const QModelIndex &index, int role) const
 
     return QVariant();
 }
+
 QVariant modeler::dataCheck(const QModelIndex &index)const
 {
     int column = index.column();
@@ -368,8 +369,6 @@ bool modeler::setData(const QModelIndex &index, const QVariant &value, int role)
             Computer::getDefault()->setMemLabelText(addr,value.toString());
 
         }
-
-
             return true;
         case VALUCOLUMN:
             qDebug("You just set a Value");
@@ -405,7 +404,43 @@ bool modeler::setData(const QModelIndex &index, const QVariant &value, int role)
     return true;
 
 }
+bool handleValueColumn(mem_addr_t addr, QVariant input)
+{
+    QString inputStr = input.toString();
+    QChar beginning = inputStr.at(0);
+    data_t newType = UNHANDLED;
+    int out = 0;
+    bool ok = true;
+    switch(beginning)
+    {
+    case "#":
+    {
+        out = (inputStr.remove(0,1)).toInt(&ok);
+        newType = INTEGER;
+    }
+        break;
+    case "x":
+    {
+        out = (inputStr.remove(0,1)).toInt(&ok);
+        newType = HEX;
+    }
+        break;
+    case "'":
+    {
+//        out = inputStr.at(1).to;
+        newType = CHAR;
+    }
+        break;
+    default:
+    {
 
+    }
+        if(newType != UNHANDLED && ok)
+        {
+            Computer::getDefault()->setMemValue(addr,out);
+        }
+    }
+}
 Qt::ItemFlags modeler::flags(const QModelIndex &index) const
 {
     if((*threadRunning) && threadRunning!=Q_NULLPTR)return 0;

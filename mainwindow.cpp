@@ -102,7 +102,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 //    Computer::getDefault()->lowerBoundTimes();
     std::cout<<Computer::getDefault()->proposedNewAddress(8,5,10,-2)<<std::endl;
 
-
+    Saver::savePortable();
     std::cout<<Computer::getDefault()->proposedNewAddress(9,5,10,-2)<<std::endl;
     Computer::getDefault()->setProgramStatus(cond_z);
 
@@ -229,18 +229,25 @@ void MainWindow::setupMenuBar()
     QAction* actionSave_File_As= new QAction("Save File As ...",this);
     QAction* actionSave_State = new QAction("Save IDE State",this);
     QAction* actionLoad_State = new QAction("Load IDE State",this);
+    QAction* actionTestingSave = new QAction("Test saving",this);
 
     actionAssemble_Load_File->setShortcut(QKeySequence(tr("Ctrl+D")));
 
 
     QList<QAction*> fileActions;
     fileActions <<actionLoad_File<<actionAssemble_File<<actionAssemble_Load_File<<actionSave_File<<actionSave_File_As<<actionSave_State<<actionLoad_State;
+    fileActions << actionTestingSave;
     ui->menuFile->addActions(fileActions);
 
     CONNECT(actionSave_State,triggered(),this, storeState());
     CONNECT(actionLoad_State,triggered(),this, reloadState());
     CONNECT(actionLoad_File,triggered(),this,loadFile());
     CONNECT(actionAssemble_Load_File,triggered(),this, assembleNLoadFile());
+    CONNECT(actionTestingSave,triggered(),this, testingSave());
+}
+void MainWindow::testingSave()
+{
+    Saver::savePortable();
 }
 void MainWindow::reloadState()
 {

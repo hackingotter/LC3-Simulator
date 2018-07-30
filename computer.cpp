@@ -270,9 +270,10 @@ public:
     changeMemLabel(mem_addr_t addr,label_t* oldLabel,label_t* newLabel):mem_addr(addr),oldLabelPtr(oldLabel),newLabelPtr(newLabel)
     {
         setText("set Label");
-        QUndoCommand::setObsolete(oldLabelPtr && // null check
-                                  (newLabelPtr->name == oldLabelPtr->name) &&
-                                  (newLabelPtr->addr==oldLabelPtr->addr));
+        qDebug("You made a memlable under");
+//        QUndoCommand::setObsolete(oldLabelPtr && // null check
+//                                  (newLabelPtr->name == oldLabelPtr->name) &&
+//                                  (newLabelPtr->addr==oldLabelPtr->addr));
     }
     void undo()
     {
@@ -282,13 +283,16 @@ public:
     }
     void redo()
     {
+        qDebug("am I going to redo?");
         if(age == 0)
         {
             Computer::getDefault()->remember++;
             Computer::getDefault()->setMemLabel(mem_addr,newLabelPtr);
             Computer::getDefault()->remember--;
+            qDebug("yes");
             return;
         }
+        qDebug("no");
         age = 0;
     }
 
@@ -765,6 +769,10 @@ void Computer::setMemLabelText(mem_addr_t addr,QString labelString)
 
 
     // store new label
+    //when did I take out this line V
+    _memory[addr].label = label;
+
+
     TRY2PUSH(addr,oldLabel,changeMemLabel(addr,oldLabel,label));
     UNMASK
             qDebug("all good here");
@@ -799,6 +807,7 @@ void Computer::setMemComment(mem_addr_t addr, QString comment)
 
     IFNOMASK(emit update();)
 }
+
 
 QString Computer::getMemComment(mem_addr_t addr)
 {
@@ -2582,6 +2591,34 @@ QString Computer::getMemNameSafe(mem_addr_t addr) const
     return getMemNameSafe(_memory[addr]);
 }
 
+QString Computer::displayData(mem_addr_t addr)
+{
+    return displayData(_memory[addr]);
+}
+
+QString Computer::displayData(mem_loc_t loc)
+{
+    switch(loc.dataType)
+    {
+    case CHAR:
+    {
+        return "To Be Implemented";
+    }
+    case INSTRUCTION:
+    {
+        return mnemGen(loc.addr);
+    }
+    case INTEGER:
+    {
+        return QString().setNum(loc.value);
+    }
+    case HEX:
+    {
+        return getHexString(loc.value);
+    }
+    }
+}
+
 QString Computer::mnemGen(mem_addr_t addr) const
 {
     return mnemGen(_memory[addr]);
@@ -2608,16 +2645,16 @@ QString Computer::mnemGen(mem_loc_t loc)const
     {
     case andOpCode  :out.append("AND ");break;
     case addOpCode  :out.append("ADD ");break;
-    case brOpCode   :out.append("BR");break;
+    case brOpCode   :out.append(" BR");break;
     case jmpOpCode  :out.append("JMP ");break;
     case jsrOpCode  :out.append("JSR");break;
-    case ldOpCode   :out.append("LD ");break;
+    case ldOpCode   :out.append(" LD ");break;
     case ldiOpCode  :out.append("LDI ");break;
     case ldrOpCode  :out.append("LDR ");break;
     case leaOpCode  :out.append("LEA ");break;
     case notOpCode  :out.append("NOT ");break;
     case rtiOpCode  :out.append("RTI ");break;
-    case stOpCode   :out.append("ST ");break;
+    case stOpCode   :out.append(" ST ");break;
     case stiOpCode  :out.append("STI ");break;
     case strOpCode  :out.append("STR ");break;
     case trapOpCode :out.append("TRAP ");break;

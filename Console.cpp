@@ -167,6 +167,10 @@ void startConsole() {
         {
 
         }
+        CASE("testing","testing",argv,1)
+        {
+
+        }
     }
 
 }
