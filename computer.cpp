@@ -808,6 +808,24 @@ void Computer::setMemComment(mem_addr_t addr, QString comment)
     IFNOMASK(emit update();)
 }
 
+void Computer::setMemDataType(mem_addr_t addr, data_t type)
+{
+
+    Computer::getDefault()->setMemDataType(&(_memory[addr]),type);
+}
+void Computer::setMemDataType(mem_loc_t* loc, data_t type)
+{
+    loc->dataType = type;
+}
+
+data_t Computer::getMemDataType(mem_addr_t addr)
+{
+    return _memory[addr].dataType;
+}
+data_t Computer::getMemDataType(mem_loc_t* loc)
+{
+    return loc->dataType;
+}
 
 QString Computer::getMemComment(mem_addr_t addr)
 {

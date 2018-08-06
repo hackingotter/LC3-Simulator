@@ -88,7 +88,7 @@ signals:
     void change();
 private:
 
-
+    QVariant handleMNemColumn(mem_addr_t addr) const;
     QVariant dataCheck(const QModelIndex &index) const;
     QVariant dataBack(const QModelIndex &index) const;
 };

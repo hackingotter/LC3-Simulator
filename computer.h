@@ -229,9 +229,11 @@ public:
 
     void setMemDataType(mem_addr_t addr, data_t type);
 
+    void setMemDataType(mem_loc_t *loc, data_t type);
+
     data_t getMemDataType(mem_addr_t addr);
 
-
+    data_t getMemDataType(mem_loc_t* loc);
 
     /** loads a file program file into memory. the files first line will be used as starting address. File must be hex
      * \param path the path to the file to load

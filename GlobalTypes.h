@@ -36,6 +36,7 @@ typedef enum data_t{
     CHAR,
     HEX,
     INTEGER,
+    COLOR,
     UNHANDLED
 } data_t;
 /** Defines an enum for the condition codes of LC3.

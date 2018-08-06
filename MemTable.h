@@ -63,7 +63,7 @@ public slots:
      */
     void goForward();
     void goBackward();
-
+    void changeDataDisplay(mem_addr_t row);
 private slots:
     void setCut();
     void setCopied();
@@ -92,6 +92,7 @@ private slots:
     void insertAbove();
     void insertBelow();
     void fastShiftUp(bool makeAgreement = true);
+
 };
 
 #endif // MEMTABLE_H

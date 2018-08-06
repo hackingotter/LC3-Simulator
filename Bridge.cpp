@@ -51,7 +51,7 @@ void Bridge::process()
         // TODO update
 
         qDebug("Am I done? Starting at"+ QString().setNum(target_PC).toLocal8Bit());
-       Computer::getDefault()->executeUntilAddress(target_PC);
+        Computer::getDefault()->executeUntilAddress(target_PC);
         Bridge::isHalting = false;
 
         break;

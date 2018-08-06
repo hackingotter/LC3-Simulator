@@ -109,7 +109,7 @@ void MemTable::setupConnections()
 void MemTable::showClickOptions(const QPoint &pos)
 {
     mem_addr_t row = rowAt(pos.y());
-
+    int column = columnAt(pos.x());
 
 
     qDebug("clicking!");
@@ -134,16 +134,48 @@ void MemTable::showClickOptions(const QPoint &pos)
     {
         ClickMenu.addAction("Go to Connected",this,SLOT(scrollToSelected()));
     }
+    switch(column)
+    {
+        case Memory_Modulos::MNEMCOLUMN:
+        {
+            QMenu  * DataTypeMenu = new QMenu("Display value as...");
 
+
+            QAction* displayAsInstruction = new QAction("Instruction");
+            QAction* displayAsBase10 = new QAction("Base 10");
+            QAction* displayAsBase16 = new QAction("Base 16");
+            QAction* displayAsColor = new QAction("Color");
+            QAction* displayAsChar  =   new QAction("Char");
+             Computer* comp = Computer::getDefault();
+            connect(displayAsInstruction,  &QAction::triggered,comp, [=](){ comp->setMemDataType(row,INSTRUCTION); });
+            connect(displayAsBase10,  &QAction::triggered,comp, [=](){ comp->setMemDataType(row,INTEGER); });
+            connect(displayAsBase16,  &QAction::triggered,comp, [=](){ comp->setMemDataType(row,HEX); });
+            connect(displayAsColor,  &QAction::triggered,comp, [=](){ comp->setMemDataType(row,COLOR); });
+            connect(displayAsChar,  &QAction::triggered,comp, [=](){ comp->setMemDataType(row,CHAR); });
+            DataTypeMenu->addAction(displayAsInstruction);
+            DataTypeMenu->addAction(displayAsBase10);
+            DataTypeMenu->addAction(displayAsBase16);
+            DataTypeMenu->addAction(displayAsColor);
+            DataTypeMenu->addAction(displayAsChar);
+            ClickMenu.addMenu(DataTypeMenu);
+//            ClickMenu.addAction("Go to Connected", this, [this]{changeDisplayType(row);});
+        }
+    }
 
     //    connect(shift,SIGNAL(triggered()),this, handleShift());
     ClickMenu.exec(mapToGlobal(pos  ));
 
 }
+void MemTable::changeDataDisplay(mem_addr_t row)
+{
+    data_t dat = (Computer::getDefault()->getMemDataType(row) == INSTRUCTION)?HEX:INSTRUCTION;
+    Computer::getDefault()->setMemDataType(row,dat);
+}
 //void MemTable::insertBelow(bool makeAgreement)
 //{
 
 //}
+
 void MemTable::pasteBrute()
 {
     paste(false);

@@ -210,6 +210,13 @@ QBrush modeler::rowPainter(mem_addr_t addr,const QModelIndex &index) const
 
         //        }
     }
+    case VALUCOLUMN:
+    {
+        if(Computer::getDefault()->getMemDataType(addr) == COLOR)
+        {
+            return QBrush(Utility::int2QColor(Computer::getDefault()->getMemValue(addr)));
+        }
+    }
 
     }
 
@@ -264,6 +271,7 @@ QVariant modeler::data(const QModelIndex &index, int role) const
             //        case BRCOLUMN:return /*(bool)getMemBreakPoint(addr);*/ 0;
         case VALUCOLUMN:
             //            return getHexString(Computer::getDefault()->proposedNewLocation(addr,TESTBEGIN,TESTEND,TESTOFFSET));
+
             return getHexString(Computer::getDefault()->getMemValue(addr));
         case NAMECOLUMN:
         {
@@ -294,6 +302,7 @@ QVariant modeler::data(const QModelIndex &index, int role) const
         }
 
         case MNEMCOLUMN:
+            return this->handleMNemColumn(addr);
             return Computer::getDefault()->displayData(addr);
         case COMMCOLUMN:
             return Computer::getDefault()->getMemComment(addr);
@@ -404,42 +413,50 @@ bool modeler::setData(const QModelIndex &index, const QVariant &value, int role)
     return true;
 
 }
-bool handleValueColumn(mem_addr_t addr, QVariant input)
+QVariant modeler::handleMNemColumn(mem_addr_t addr) const
 {
-    QString inputStr = input.toString();
-    QChar beginning = inputStr.at(0);
-    data_t newType = UNHANDLED;
+//    QString inputStr = input.toString();
+//    QChar beginning = inputStr.at(0);
+//    data_t newType = UNHANDLED;
     int out = 0;
     bool ok = true;
-    switch(beginning)
+    switch(Computer::getDefault()->getMemDataType(addr))
     {
-    case "#":
-    {
-        out = (inputStr.remove(0,1)).toInt(&ok);
-        newType = INTEGER;
+    case UNHANDLED:return QVariant("Unhandled");
+    case HEX: return QVariant("Hex");
+    case INTEGER: return QVariant("Integer");
+    case INSTRUCTION: return QVariant("Instruction");
+    case COLOR: return QVariant("Color");
     }
-        break;
-    case "x":
-    {
-        out = (inputStr.remove(0,1)).toInt(&ok);
-        newType = HEX;
-    }
-        break;
-    case "'":
-    {
-//        out = inputStr.at(1).to;
-        newType = CHAR;
-    }
-        break;
-    default:
-    {
+//    switch(beginning)
+//    {
+//    case "#":
+//    {
+//        out = (inputStr.remove(0,1)).toInt(&ok);
+//        newType = INTEGER;
+//    }
+//        break;
+//    case "x":
+//    {
+//        out = (inputStr.remove(0,1)).toInt(&ok);
+//        newType = HEX;
+//    }
+//        break;
+//    case "'":
+//    {
+////        out = inputStr.at(1).to;
+//        newType = CHAR;
+//    }
+//        break;
+//    default:
+//    {
 
-    }
-        if(newType != UNHANDLED && ok)
-        {
-            Computer::getDefault()->setMemValue(addr,out);
-        }
-    }
+//    }
+//        if(newType != UNHANDLED && ok)
+//        {
+//            Computer::getDefault()->setMemValue(addr,out);
+//        }
+
 }
 Qt::ItemFlags modeler::flags(const QModelIndex &index) const
 {
