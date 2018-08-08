@@ -62,7 +62,7 @@ public:
     static void setup();
 };
 
-
+QString charToQString(char ch);
 int QSTRING2INTBASE(QString source,int suggestedBase);
 
 void systemInfoDebug();

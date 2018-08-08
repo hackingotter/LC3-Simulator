@@ -91,6 +91,7 @@ private:
     QVariant handleMNemColumn(mem_addr_t addr) const;
     QVariant dataCheck(const QModelIndex &index) const;
     QVariant dataBack(const QModelIndex &index) const;
+    QVariant handleDataValueColumn(mem_addr_t addr, int role) const;
 };
 
 #endif // MODELER_H

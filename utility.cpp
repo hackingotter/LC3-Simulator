@@ -7,7 +7,40 @@ namespace Utility {
 
 
 
+QString charToQString(char ch)
+{
+    if(ch > 0x7E)
+    {
+        return QString(ch);
+    }
+    switch(ch)
+    {
+    case '\0':
+        return "\\0";
+    case '\a':
+        return "\\a";
+    case '\b':
+        return "\\b";
+    case '\t':
+        return "\\t";
+    case '\n':
+        return "\\n";
+    case '\v':
+        return "\\v";
+    case '\f':
+        return "\\f";
+    case '\r':
+        return "\\r";
+    case '\e':
+        return "\\e";
+    }
+    if(0x20 <= ch && ch <= 0x7E)
+    {
+        return QString().append(QChar(ch));
+    }
+    return "Undeclared Char";
 
+}
 int QSTRING2INTBASE(QString source,int suggestedBase)
 {
     qDebug("Looks like we are changing a QString to a Int ");

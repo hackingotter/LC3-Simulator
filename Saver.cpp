@@ -26,15 +26,30 @@ void Saver::savePortable( mem_addr_t beginning, mem_addr_t end, bool takeComment
 
 
             std::string labelString = Computer::getDefault()->getMemNameSafe(index).toStdString();
+            data_t data = Computer::getDefault()->getMemDataType(index);
 
             if(labelString != "")
             {
-                destination<<labelString<<std::endl;
+                destination<<labelString;
+                if(data == INSTRUCTION)
+                {
+                    destination<<std::endl;
+                }
             }
             destination<<"    ";
-            std::string mnemString = (Computer::getDefault()->mnemGen(index)).toStdString();
 
-            destination<<mnemString;
+            switch(Computer::getDefault()->getMemDataType(index))
+            {
+            case INSTRUCTION:
+                destination<<Computer::getDefault()->mnemGen(index).toStdString();
+                break;
+            default:
+                destination<<"Nothing Yet";
+            }
+
+//            std::string mnemString = (Computer::getDefault()->mnemGen(index)).toStdString();
+
+//            destination<<mnemString;
 
             destination<<std::endl;
 

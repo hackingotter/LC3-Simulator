@@ -38,6 +38,7 @@ private:
 
     std::map<QString, uint16_t> labelDict;
     std::map<mem_addr_t, QString> commentDict;
+    std::map<mem_addr_t, data_t> dataDict;
 
     /** used to annotate comments from lines that do not have instructions
      * \brief annotatedComment
@@ -90,6 +91,7 @@ private:
 // returns new pc
     uint16_t processLine(std::string &line, RunType runType, uint16_t pc, std::ofstream &oStream);
 
+    data_t getNumberType(std::string num);
 public:
     Assembler();
 
@@ -122,6 +124,10 @@ public:
      * /param comp
      */
     void passCommentsToComputer(Computer* comp);
+
+    data_t dataTypeForAddress(mem_addr_t addr);
+
+    void passDataTypesToComputer(Computer* comp);
 };
 
 

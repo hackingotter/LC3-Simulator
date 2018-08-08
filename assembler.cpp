@@ -37,7 +37,7 @@ using namespace std;
 #define  haltTrap 0xF025
 
 Assembler::Assembler() : parserRegex(regex(
-                                         R"abc([ \t]*((?!(?:ADD|SUB|AND|(?:BR[nzp]{0,3})|JMP|JMPT|JSRR|JSR|LDI|LDR|LD|LEA|NOT|RET|RTT|RTI|STI|STR|ST|TRAP|MUL|GETC|OUT|IN|PUTSP|PUTS|HALT)(?:\W|$))\w*)?[ \t]*(?:(?:(ADD|SUB|AND|(?:BR[nzp]{0,3})|JMP|JMPT|JSRR|JSR|LDI|LDR|LD|LEA|NOT|RET|RTT|RTI|STI|STR|ST|TRAP|MUL|\.FILL|\.STRINGZ|\.ORIG|\.END|\.BLKW|PUTS|GETC|OUT|IN|PUTSP|HALT)(?:\W|$))[ \t]*(?:r(\d),?)?[ \t]*(?:r(\d),?)?[ \t]*(?:(?:r(\d))|((?:#|x|b|o|-(?!-))?-?[0-9A-F]+\.?[0-9]*)|(\w*)|((?:".*")|(?:'.*')))?)?[ \t]*(?:;+([\S \t]*))?[ \t]*$)abc",
+                                         R"abc([ \t]*((?!(?:ADD|SUB|AND|(?:BR[nzp]{0,3})|JMP|JMPT|JSRR|JSR|LDI|LDR|LD|LEA|NOT|RET|RTT|RTI|STI|STR|ST|TRAP|MUL|GETC|OUT|IN|PUTSP|PUTS|HALT)(?:\W|$))\w*)?[ \t]*(?:(?:(ADD|SUB|AND|(?:BR[nzp]{0,3})|JMP|JMPT|JSRR|JSR|LDI|LDR|LD|LEA|NOT|RET|RTT|RTI|STI|STR|ST|TRAP|MUL|\.FILL|\.STRINGZ?|\.ORIG|\.END|\.BLKW|PUTS|GETC|OUT|IN|PUTSP|HALT)(?:\W|$))[ \t]*(?:r(\d),?)?[ \t]*(?:r(\d),?)?[ \t]*(?:(?:r(\d))|((?:#|x|b|o|-(?!-))?-?[0-9A-F]+\.?[0-9]*)|(\w*)|((?:".*")|(?:'.*')))?)?[ \t]*(?:;+([\S \t]*))?[ \t]*$)abc",
                                          std::regex_constants::icase)),
                          programLength(0),
                          startingAddress(0xFFFF),
@@ -48,6 +48,7 @@ Assembler::Assembler() : parserRegex(regex(
 
     labelDict = map<QString, uint16_t> ();
     commentDict = map<mem_addr_t, QString> ();
+    dataDict    = map<mem_addr_t,data_t> ();
 }
 
 void Assembler::assembleFile(const char *inFile, const char *outFile) {
@@ -158,6 +159,26 @@ void Assembler::passCommentsToComputer(Computer *comp)
     UNMASK
 }
 
+data_t Assembler::dataTypeForAddress(mem_addr_t addr)
+{
+    auto match = dataDict.find(addr);
+    if (match != dataDict.end()) {
+        return dataDict[addr];
+    } else {
+        return INSTRUCTION;//default
+    }
+}
+
+void Assembler::passDataTypesToComputer(Computer *comp)
+{
+    MASK
+    foreach (const auto n, dataDict)
+    {
+        comp->setMemDataType(n.first,n.second);
+    }
+    UNMASK
+}
+
 uint16_t Assembler::processLine(string &line, RunType runType, uint16_t pc, ofstream &oStream) {
     std::smatch match;
 
@@ -248,6 +269,8 @@ uint16_t Assembler::writeInstruction(RunType runType, string &instruction, strin
     // .FILL
     if (instruction == ".FILL") {
         if (runType == MainRun) {
+            data_t fillData = getNumberType(opNumber);
+            dataDict[pc] = fillData;
             writeFill(oStream, opNumber, opLabel);
         }
         pc += 1;
@@ -258,6 +281,7 @@ uint16_t Assembler::writeInstruction(RunType runType, string &instruction, strin
         uint16_t size = (uint16_t) parseNumber(opNumber);
         if (runType == MainRun) {
             for (int i = 0; i < size; i++) {
+                dataDict[pc + i] = HEX;
                 writeWord(oStream, 0);
             }
         }
@@ -265,17 +289,24 @@ uint16_t Assembler::writeInstruction(RunType runType, string &instruction, strin
     }
 
         // .STRINGZ
-    else if (instruction == ".STRINGZ") {
+    else if (instruction == ".STRINGZ" || instruction == ".STRING") {
         string unescaped = unescapeString(opString);
         auto strLen = (uint16_t) unescaped.length();
         if (runType == MainRun) {
             for (int i = 0; i < strLen; i++) {
                 char c = unescaped[i];
+
                 writeWord(oStream, (uint16_t) c);
+                dataDict[pc + i] = CHAR;
             }
+            if(instruction == ".STRINGZ")
+            {
+            dataDict[pc + strLen] = CHAR;
+            pc+=1;
             writeWord(oStream, 0);
+            }
         }
-        pc += strLen + 1;
+        pc += strLen;
     }
 
         // main instructions
@@ -724,12 +755,24 @@ void Assembler::determineArgumentsOfOp(const string &instruction, bool thirdRegE
     }
 
         // string only
-    else if (instruction == ".STRINGZ") {
+    else if (instruction == ".STRINGZ" || instruction == ".STRING") {
         nOfRegs = 0;
         nOrL = stringOnly;
     }
 }
+data_t Assembler::getNumberType(std::string num)
+{
+    switch(num[0])
+    {
+    case '#':return INTEGER;
+    case 'b':return UNHANDLED;
+    case 'o':return UNHANDLED;
+    case 'x':return HEX;
+    default:
+        return INTEGER;
 
+    }
+}
 // might throw exception
 double Assembler::parseNumber(string num) {
 

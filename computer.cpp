@@ -2620,7 +2620,7 @@ QString Computer::displayData(mem_loc_t loc)
     {
     case CHAR:
     {
-        return "To Be Implemented";
+        return Utility::charToQString(loc.value);
     }
     case INSTRUCTION:
     {
@@ -2658,6 +2658,7 @@ QString Computer::mnemGen(mem_loc_t loc)const
     //    bool zero543    =(val&0x0038);
     bool imm5YN     =(val&0x0020) >> 5;
 
+
     //It is much easier to be able to handle them without needing to account for names
     switch(val&0xF000)
     {
@@ -2670,6 +2671,7 @@ QString Computer::mnemGen(mem_loc_t loc)const
     case ldiOpCode  :out.append("LDI ");break;
     case ldrOpCode  :out.append("LDR ");break;
     case leaOpCode  :out.append("LEA ");break;
+    case mulOpCode  :out.append("MUL ");break;
     case notOpCode  :out.append("NOT ");break;
     case rtiOpCode  :out.append("RTI ");break;
     case stOpCode   :out.append(" ST ");break;
@@ -2681,12 +2683,13 @@ QString Computer::mnemGen(mem_loc_t loc)const
     switch(val& 0xF000)
     {
     case addOpCode:
+
         if((val&0x0038) ==0x0010)
         {
             out = QString("SUB ");
-
         }
 
+    case mulOpCode:
     case andOpCode:
     {
 
@@ -2794,7 +2797,7 @@ QString Computer::mnemGen(mem_loc_t loc)const
     case ldrOpCode:
     case strOpCode:
     {
-        out.append("R"+ QSTRNUM(reg11)+", R"+ QSTRNUM(reg8)+ ", "+QSTRNUM(val&0x003F));
+        out.append("R"+ QSTRNUM(reg11)+", R"+ QSTRNUM(reg8)+ ", #"+QString().setNum((int16_t)getSignedImm6(val)));
         break;
     }
     case rtiOpCode:

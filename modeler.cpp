@@ -238,7 +238,26 @@ void modeler::setCopied(QModelIndexList *target)
     emit change();
 }
 
-
+QVariant modeler::handleDataValueColumn(mem_addr_t addr,int role) const
+{
+    switch(role)
+    {
+        case Qt::CheckStateRole: return QVariant();
+    case Qt::BackgroundRole:
+    {
+        switch (Computer::getDefault()->getMemDataType(addr)) {
+        case COLOR:
+            //TBI
+            break;
+        default:
+            break;
+        }
+    }
+//    case Qt::DisplayRole:
+//        return
+    }
+return "ABCDEFG";
+}
 
 QVariant modeler::data(const QModelIndex &index, int role) const
 {
@@ -275,35 +294,11 @@ QVariant modeler::data(const QModelIndex &index, int role) const
             return getHexString(Computer::getDefault()->getMemValue(addr));
         case NAMECOLUMN:
         {
-            //            if(addr<30)
-            //            {
-            //                QString* er = new QString();
-            //                Computer::getDefault()->proposedNewLocation(addr,TESTBEGIN,TESTEND,TESTOFFSET,er);
-            //                return *er;
-            //            }
-
-//            mem_loc_t ml = Computer::getDefault()->getMemLocation(addr);
-
-//            connector_t* qui = ml.connectors;
-//            QString ck = ":";
-//            if(qui!= nullptr)
-//            {
-//                ck = getHexString(ml.addr);
-//                while(qui != nullptr){
-//                    ck.append(getHexString(qui->connected));
-//                    qui = qui->next;
-//                }
-//                return ck;
-//            }
-
-
             return Computer::getDefault()->getMemNameSafe(addr);
-
         }
-
         case MNEMCOLUMN:
             return this->handleMNemColumn(addr);
-            return Computer::getDefault()->displayData(addr);
+//            return Computer::getDefault()->displayData(addr);
         case COMMCOLUMN:
             return Computer::getDefault()->getMemComment(addr);
         }
@@ -413,6 +408,7 @@ bool modeler::setData(const QModelIndex &index, const QVariant &value, int role)
     return true;
 
 }
+
 QVariant modeler::handleMNemColumn(mem_addr_t addr) const
 {
 //    QString inputStr = input.toString();
@@ -420,12 +416,14 @@ QVariant modeler::handleMNemColumn(mem_addr_t addr) const
 //    data_t newType = UNHANDLED;
     int out = 0;
     bool ok = true;
+    val_t value = Computer::getDefault()->getMemValue(addr);
     switch(Computer::getDefault()->getMemDataType(addr))
     {
     case UNHANDLED:return QVariant("Unhandled");
-    case HEX: return QVariant("Hex");
-    case INTEGER: return QVariant("Integer");
-    case INSTRUCTION: return QVariant("Instruction");
+    case HEX: return QVariant(getHexString(value));
+    case INTEGER: return QVariant(QString().setNum(value));
+    case INSTRUCTION: return QVariant(Computer::getDefault()->mnemGen(addr));
+    case CHAR: return QVariant(Utility::charToQString(value));
     case COLOR: return QVariant("Color");
     }
 //    switch(beginning)

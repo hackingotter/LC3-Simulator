@@ -1,0 +1,8 @@
+.ORIG x3000
+
+TEST_STRING .STRINGZ "abcdefg"
+.FILL -1
+
+.STRINGZ 'a'
+.FILL -1
+.END
