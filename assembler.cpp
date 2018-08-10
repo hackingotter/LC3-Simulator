@@ -38,7 +38,7 @@ using namespace std;
 
 Assembler::Assembler() : parserRegex(regex(
                                          R"abc([ \t]*((?!(?:ADD|SUB|AND|(?:BR[nzp]{0,3})|JMP|JMPT|JSRR|JSR|LDI|LDR|LD|LEA|NOT|RET|RTT|RTI|STI|STR|ST|TRAP|MUL|GETC|OUT|IN|PUTSP|PUTS|HALT)(?:\W|$))\w*)?[ \t]*(?:(?:(ADD|SUB|AND|(?:BR[nzp]{0,3})|JMP|JMPT|JSRR|JSR|LDI|LDR|LD|LEA|NOT|RET|RTT|RTI|STI|STR|ST|TRAP|MUL|\.FILL|\.STRINGZ?|\.ORIG|\.END|\.BLKW|PUTS|GETC|OUT|IN|PUTSP|HALT)(?:\W|$))[ \t]*(?:r(\d),?)?[ \t]*(?:r(\d),?)?[ \t]*(?:(?:r(\d))|((?:#|x|b|o|-(?!-))?-?[0-9A-F]+\.?[0-9]*)|(\w*)|((?:".*")|(?:'.*')))?)?[ \t]*(?:;+([\S \t]*))?[ \t]*$)abc",
-                                         std::regex_constants::icase)),
+                                         regex_constants::icase)),
                          programLength(0),
                          startingAddress(0xFFFF),
                          endingAddress(0),
@@ -59,7 +59,7 @@ void Assembler::assembleFile(const char *inFile, const char *outFile) {
     for (int runNum = 1; runNum <= 2; runNum++) {
 
         iStream.clear();
-        iStream.seekg(0,ios::beg);
+        iStream.seekg(0,ios_base::beg);
 
         if (!iStream.is_open()) {
             throw "Could not open in File";
@@ -127,7 +127,7 @@ void Assembler::passLabelsToComputer(Computer *comp)
     if (!comp)
         throw "Argument exception: comp";
 
-    for (mem_addr_t addr = startingAddress; addr <= endingAddress; addr ++) {
+    for (mem_addr_t addr = startingAddress; addr <= endingAddress && addr >= startingAddress; addr ++) {
         QString text = labelForAddress(addr);
 
         if (text.isEmpty()) {
@@ -219,7 +219,7 @@ uint16_t Assembler::processLine(string &line, RunType runType, uint16_t pc, ofst
         string e = checkInput(instruction, firstReg, secondReg, thirdReg, opNumber, opLabel, opString, nOfRegs,
                               nOrL);
         if (!e.empty()) {
-            throw  e + " >> " + line;
+            throw  getHexString(pc).toStdString() + ": " +e + " >> " + line;
         }
     }
 
@@ -321,6 +321,10 @@ uint16_t Assembler::writeInstruction(RunType runType, string &instruction, strin
             op |= getRegisters(instruction, nOfRegs, firstReg, secondReg, thirdReg);
             op |= getNumberOrOffset(instruction, nOrL, opNumber, opLabel, pc);
 
+            if(op == 0xB00A)
+            {
+                int j = 3;
+            }
             writeWord(oStream, op);
         }
     }
@@ -337,6 +341,7 @@ void Assembler::writeFill(ofstream &oStream, const string &opNumber, const strin
         }
     } else {
         // label
+
         uint16_t labelPos = labelDict[QString::fromStdString(opLabel)];
         writeWord(oStream, labelPos);
     }
@@ -744,7 +749,7 @@ void Assembler::determineArgumentsOfOp(const string &instruction, bool thirdRegE
     }
 
         // two + num or three
-    else if (instruction == "ADD" || instruction == "AND" || instruction == "MUL") {
+    else if (instruction == "ADD" || instruction == "AND" || instruction == "SUB" || instruction == "MUL") {
         if (thirdRegEmpty) {
             nOfRegs = 2;
             nOrL = numberOnly;

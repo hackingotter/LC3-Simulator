@@ -309,7 +309,7 @@ QVariant modeler::data(const QModelIndex &index, int role) const
         switch (column) {
         case VALUCOLUMN:
         {
-            return Computer::getDefault()->displayData(addr);
+            return getHexString(Computer::getDefault()->getMemValue(addr));
         }
         case NAMECOLUMN:
         {

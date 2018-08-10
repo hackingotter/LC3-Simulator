@@ -1,0 +1,8 @@
+// Symbol table
+// Scope level 0:
+//	Symbol Name       Page Address
+//	----------------  ------------
+//	ANOTHING          300B
+//	TEST_STRING       3000
+//	TE                3009
+

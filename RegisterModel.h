@@ -67,6 +67,7 @@ signals:
     void psrEdit(cond_t);
     void colorEdit(int row,QColor fresh);
     void change();
+    void requestUpdate();
 public slots:
 //    void setActive();
 

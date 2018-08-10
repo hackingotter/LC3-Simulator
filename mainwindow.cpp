@@ -368,7 +368,7 @@ void MainWindow::assembleNLoadFile(QString path)
 
     QString shortPath = path;
     shortPath.remove(0,path.lastIndexOf("/"));
-    QString namePath = "test.obj";
+    QString namePath = "tsest.obj";
     Computer::getDefault()->Undos->beginMacro("Assemble and Load "+shortPath);
     qDebug("assembling and loading");
 
@@ -483,7 +483,7 @@ void MainWindow::setupMemView(QTableView* view, bool setmodel, bool setScroll)
     //    connect(view, SIGNAL(customContextMenuRequested(const QPoint &)),
     //            this, SLOT(showClickOptions(const QPoint &,view)));
 
-    //    QObject::connect(Computer::getDefault(),SIGNAL(update()),view,SLOT(repaint()));
+        QObject::connect(Computer::getDefault(),SIGNAL(update()),view,SLOT(update()));
 }
 
 void MainWindow::setupInOut()
@@ -532,7 +532,7 @@ void MainWindow::setupStackView()
     QObject::connect(Computer::getDefault(),SIGNAL(memValueChanged(mem_addr_t)),StackModel,SLOT(stackFrameListener(mem_addr_t)));
 //    QObject::connect(Computer::getDefault(),SIGNAL(subRoutineCalled()),StackModel,SLOT(increaseStackFrameCounter()));
 //QObject::connect(Computer::getDefault(),SIGNAL(memValueChanged(mem_addr_t)),StackModel,SLOT(stackFrameListener(mem_addr_t)));
-    CONNECT(this,update(),StackWindow,kick());
+    CONNECT(this,signalUpdate(),StackWindow,kick());
 }
 
 void MainWindow::setupRegisterView()
@@ -563,7 +563,7 @@ void MainWindow::setupRegisterView()
         vert->setDefaultSectionSize(DEFAULT_TEXT_HEIGHT);
         vert->setSectionResizeMode(QHeaderView::Fixed);
     }
-
+    CONNECT(ui->RegisterView,requestChange(),this,update());
 
 
 

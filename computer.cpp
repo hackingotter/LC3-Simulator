@@ -636,6 +636,7 @@ void Computer::setRunning(bool run)
         mcr &= 0x7FFF; // unset bit 15
     }
     setMemValue(MCR,mcr);
+    IFNOMASK(update(););
 }
 
 // memory
@@ -707,6 +708,7 @@ void Computer::setMemValuesBlock(mem_addr_t addr, size_t blockSize, val_t *vals)
     MASK
             for (size_t i = 0; i < blockSize; i ++) {
         setMemValue(addr + i,vals[i]);
+        qDebug(getHexString(vals[i]).toLocal8Bit());
     }
     UNMASK
             Undos->endMacro();
@@ -881,7 +883,6 @@ void Computer::moveRow(mem_addr_t origin, mem_addr_t destination)
 
 size_t Computer::loadProgramFile(char* path) {
 
-
     FILE *file = fopen(path, "r");
 
     if (!file)
@@ -892,24 +893,24 @@ size_t Computer::loadProgramFile(char* path) {
     size_t programSize = fileLen/2 - 1;
 
     if (fileLen == 0) {
+        fclose(file);
         throw "ERROR: input file empty!";
+
     }
 
     rewind(file);
 
     mem_addr_t startingAddr;
-    val_t *buffer = (val_t *)malloc(programSize*sizeof(val_t));
-
     fread(&startingAddr, sizeof(mem_addr_t), 1, file);
     flipBytes(&startingAddr);
-    fread(buffer, sizeof(val_t), programSize, file);
-    for (int i = 0; i < programSize; i ++) {
-        flipBytes(&buffer[i]);
+    for(val_t i = 0; i < programSize; i++)
+    {
+        val_t freadIsNearUseless = ((val_t)(file->_ptr[2*i]))<<8;
+        val_t soIHaveToDoThis = (val_t)(file->_ptr[2*i+1]);
+        val_t thisIsSoDumb = freadIsNearUseless + soIHaveToDoThis;
+        setMemValue(startingAddr+i,thisIsSoDumb);
     }
 
-    setMemValuesBlock(startingAddr, programSize, buffer);
-
-    free(buffer);
 
     fclose(file);
 
@@ -2810,7 +2811,7 @@ QString Computer::mnemGen(mem_loc_t loc)const
         }
         else
         {
-            name_or_addr(val&0x00FF);//TODO this code could be wrong
+            out += " " + name_or_addr(_memory[val&0x00FF].value);//TODO this code could be wrong
         }
         break;
     }

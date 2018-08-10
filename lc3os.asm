@@ -521,16 +521,16 @@
 ;;; OS_START - operating system entry point (always starts at x0200)
 OS_START
 ;; set MPR
-LD R0, MPR_INIT
-STI R0, OS_MPR
+LD R0, MPR_INIT;
+STI R0, OS_MPR;
 
 ;; set timer interval
-LD R0, TIM_INIT
-STI R0, OS_TMI
+LD R0, TIM_INIT;
+STI R0, OS_TMI;
 
 ;; start running user code (clear Privilege bit w/ JMPT)
-LD R7, USER_CODE_ADDR
-JMPT	R7
+LD R7, USER_CODE_ADDR;
+JMPT	R7;
 
 OS_KBSR	.FILL xFE00		; keyboard status register
 OS_KBDR	.FILL xFE02		; keyboard data register

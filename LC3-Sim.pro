@@ -22,7 +22,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT
 #QMAKE_CXXFLAGS += -Ofast
 # -mpreferred-stack-boundary=2 -finline-small-functions -momit-leaf-frame-pointer
-#DEFINES += QT_NO_DEBUG_OUTPUT
+DEFINES += QT_NO_DEBUG_OUTPUT
 
 # You can also make your code fail to compile if you use deprecated APIs.
 # In order to do so, uncomment the following line.

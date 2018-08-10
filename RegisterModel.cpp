@@ -158,6 +158,7 @@ bool RegisterModel::setData(const QModelIndex &index, const QVariant&value,int r
             if(*ok)
             {
                 Computer::getDefault()->setRegister(row,newValue);
+                emit requestUpdate();
             }
 //            BATHTIME(CHARPTR2QSTRING(getHexString(getRegister(row))))
 //            emit dataChanged(index,index,QVector<int>() <<role);
