@@ -195,8 +195,8 @@ console_err_t executeCommand(console_cmd_t cmd, console_arg_t args)
         case run: return runCommand(args); break;
         case step: return stepCommand(args);break;
         case _continue: return continueCommand(args);break;
-    case trace: return traceCommand(args);break;
-    case assemble: return assembleCommand(args);break;
+        case trace: return traceCommand(args);break;
+        case assemble: return assembleCommand(args);break;
 
     }
 

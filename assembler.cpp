@@ -317,6 +317,10 @@ uint16_t Assembler::writeInstruction(RunType runType, string &instruction, strin
         if (runType == MainRun) {
             // everything left but .ORIG goes here
             uint16_t op = OpCodeForInstruction(instruction);
+            if(op == jmptOpCode)
+            {
+                int a = 0;
+            }
             op |= getConstantBits(instruction, nOfRegs, nOrL);
             op |= getRegisters(instruction, nOfRegs, firstReg, secondReg, thirdReg);
             op |= getNumberOrOffset(instruction, nOrL, opNumber, opLabel, pc);
@@ -366,12 +370,14 @@ uint16_t Assembler::getRegisters(string &instruction, int nOfRegs, string &first
             regOne = (uint16_t) stoi(firstReg);
             if (instruction == "JMP" || instruction == "JMPT" || instruction == "JSRR") {
                 regOne <<= 6;
+
             } else {
                 regOne <<= 9;
             }
             op |= regOne;
             break;
         case 0:
+
             break;
         default:
             throw "ERROR: invalid number of registers";
@@ -536,8 +542,6 @@ uint16_t Assembler::getConstantBits(const string &instruction, int nOfRegs, NumO
                 op |= 0x01C0;
             } else if (instruction == "RTT") {
                 op |= 0x01C1;
-            } else if (instruction == "JMPT") {
-                op |= 0x0001;
             } else if (instruction == "JSR") {
                 op |= 0x0800;
             } else if (instruction.compare(0, 2, "BR") == 0) {
@@ -580,6 +584,15 @@ uint16_t Assembler::getConstantBits(const string &instruction, int nOfRegs, NumO
                 }
             }
             break;
+        case 1:
+            if (instruction == "JMPT") {
+                op |= 0x0001;
+            }
+            else
+            {
+
+            }
+                break;
         case 2:
             if (instruction == "NOT") {
                 op |= 0x003F;
@@ -700,6 +713,7 @@ void Assembler::writeWord(ostream &stream, uint16_t value) {
     auto *p = reinterpret_cast<char *>(&value);
 
     // we want big endian
+
     stream.write(&p[1], sizeof(uint8_t));
     stream.write(&p[0], sizeof(uint8_t));
 }

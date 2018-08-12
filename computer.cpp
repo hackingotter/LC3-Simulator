@@ -673,12 +673,16 @@ void Computer::connectAddrs(mem_addr_t source, mem_loc_t target)
 }
 void Computer::setMemValue(mem_addr_t addr, val_t val,bool remember)
 {
-    qDebug("Settin' Mem");
+    qDebug(("Settin' Mem" +  getHexString(addr) + ": " + getHexString(val)).toLocal8Bit());
     MASK
 
             val_t oval = _memory[addr].value;
 
-    if(oval== val)return;
+    if(oval== val)
+    {
+        UNMASK
+        return;
+    }
     mem_addr_t connected = connectedAddress(addr);
     breakConnectionFromTo(addr,connected);
     _memory[addr].value = val;
@@ -905,9 +909,16 @@ size_t Computer::loadProgramFile(char* path) {
     flipBytes(&startingAddr);
     for(val_t i = 0; i < programSize; i++)
     {
-        val_t freadIsNearUseless = ((val_t)(file->_ptr[2*i]))<<8;
+        if(i == 0x200)
+        {
+                        int $$$ = 3;
+
+        }
+        val_t fread = (int8_t)(file->_ptr[2*i]);
+        val_t freadIsNearUseless = ((val_t)(fread)) << 8;
         val_t soIHaveToDoThis = (val_t)(file->_ptr[2*i+1]);
-        val_t thisIsSoDumb = freadIsNearUseless + soIHaveToDoThis;
+        val_t evenThoughItWouldBeEasier = soIHaveToDoThis & 0x00FF;
+        val_t thisIsSoDumb = freadIsNearUseless | evenThoughItWouldBeEasier;
         setMemValue(startingAddr+i,thisIsSoDumb);
     }
 
@@ -2746,14 +2757,22 @@ QString Computer::mnemGen(mem_loc_t loc)const
     }break;
     case jmpOpCode:
     {
-        if((val&0x0E3F))//if there are ones outside of the OpCode and BaseR
+        if(val & 0x0001)
+        {
+            out+= "T";
+        }
+        if((val&0x0E3E))//if there are ones outside of the OpCode and BaseR
             //Bad Op
         {
             out = BADOP;
         }
         else if(val&0x01C0)//if so, RET is the proper memn
         {
-            out = "RET";
+            out = "RET" + out.remove(0,3);
+            if( val & 0x0001)
+            {
+//                out.replace()
+            }
         }
         else
         {

@@ -150,6 +150,11 @@ void modeler::setSelectMode(modeler::SelectMode mode, mem_addr_t begin, mem_addr
 
     emit change();
 }
+
+void modeler::setIfMNemIsDisplayedAfterDataType(bool display)
+{
+    displayMNemonicAfterDataType =  display;
+}
 QBrush modeler::rowPainter(mem_addr_t addr,const QModelIndex &index) const
 {
 
@@ -414,18 +419,32 @@ QVariant modeler::handleMNemColumn(mem_addr_t addr) const
 //    QString inputStr = input.toString();
 //    QChar beginning = inputStr.at(0);
 //    data_t newType = UNHANDLED;
-    int out = 0;
+    QString out = "";
+
     bool ok = true;
     val_t value = Computer::getDefault()->getMemValue(addr);
+    data_t type = Computer::getDefault()->getMemDataType(addr);
     switch(Computer::getDefault()->getMemDataType(addr))
     {
-    case UNHANDLED:return QVariant("Unhandled");
-    case HEX: return QVariant(getHexString(value));
-    case INTEGER: return QVariant(QString().setNum(value));
-    case INSTRUCTION: return QVariant(Computer::getDefault()->mnemGen(addr));
-    case CHAR: return QVariant(Utility::charToQString(value));
-    case COLOR: return QVariant("Color");
+
+    case HEX: out = getHexString(value); break;
+    case INTEGER: out = QString().setNum(value);break;
+    case INSTRUCTION: out = Computer::getDefault()->mnemGen(addr);break;
+    case CHAR: out = Utility::charToQString(value);break;
+    case COLOR: out = "Color";break;
+    case UNHANDLED:
+    default:
+         out = "Unhandled"; break;
     }
+    if(type  != INSTRUCTION)
+    {
+        QString mnem = Computer::getDefault()->mnemGen(addr);
+        if(mnem != BADOP)
+        {
+            out += " (" + mnem +")";
+        }
+    }
+    return out;
 //    switch(beginning)
 //    {
 //    case "#":

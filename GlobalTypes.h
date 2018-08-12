@@ -108,8 +108,8 @@ typedef struct mem_loc_t {
     label_t *label; /** a pointer to the label for that position. might be null. */
     breakpoint_t *breakpt; /** a pointer to the breakpoint set at that position. might be null. */
     connector_t* connectors;/** a pointer to a list of addresses which connect to it.*/
-    QString comment; /** a pointer to a possible comment string. might be null. */
     data_t dataType = INSTRUCTION; /** describes how a value should be seen*/
+    QString comment; /** a pointer to a possible comment string. might be null. */
 
     mem_loc_t() :
         addr(0),

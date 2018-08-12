@@ -368,7 +368,7 @@ void MainWindow::assembleNLoadFile(QString path)
 
     QString shortPath = path;
     shortPath.remove(0,path.lastIndexOf("/"));
-    QString namePath = "tsest.obj";
+    QString namePath = "test.obj";
     Computer::getDefault()->Undos->beginMacro("Assemble and Load "+shortPath);
     qDebug("assembling and loading");
 
@@ -407,6 +407,10 @@ void MainWindow::assembleNLoadFile(QString path)
     if(loadFile(namePath))
     {
         qDebug("successfully loaded");
+
+    }
+    else
+    {
 
     }
 
