@@ -7,54 +7,52 @@ Saver::Saver()
 {
 
 }
+void Saver::handleLabels(std::ofstream & destination, mem_addr_t addr)
+{
+    data_t data = Computer::getDefault()->getMemDataType(addr);
+    std::string labelString = Computer::getDefault()->getMemNameSafe(addr).toStdString();
+
+    if(labelString != "")
+    {
+        destination<<labelString;
+        if(data == INSTRUCTION)
+        {
+            destination<<std::endl;
+        }
+    }
+    destination<<"    ";
+
+}
+void Saver::handleValues(std::ofstream & destination, mem_addr_t addr)
+{
+    destination << Computer::getDefault()->displayAddressValue(addr,false).toStdString()<<"\t";
+}
+void Saver::handleComments(std::ofstream & destination, mem_addr_t addr)
+{
+
+    QString comment = Computer::getDefault()->getMemComment(addr);
+
+    comment.replace(QRegExp("\n"),"\n\t");
+
+    destination << comment.toStdString()<< std::endl;
+}
+void Saver::handleEnd(std::ofstream & destination)
+{
+    destination << ".END" << std::endl;
+}
 void Saver::savePortable( mem_addr_t beginning, mem_addr_t end, bool takeCommentBefore)
 {
     QString fileName = QString("TestSaveProt.asm");
     std::ofstream destination;
     destination.open(fileName.toLocal8Bit().toStdString());
-
+    destination << "\t.ORIG " << getHexString(beginning).toStdString() <<"\n";
     for(mem_addr_t index = beginning; index <= end; index +=1)
     {
-        //if the scan includes the final address, then the unsigned index will
-        //wrap over to 0, which is still less than the end index, so this must
-        // be addressed.
-        if(index < beginning)
-        {
-            break;
-        }
-        {
-
-
-            std::string labelString = Computer::getDefault()->getMemNameSafe(index).toStdString();
-            data_t data = Computer::getDefault()->getMemDataType(index);
-
-            if(labelString != "")
-            {
-                destination<<labelString;
-                if(data == INSTRUCTION)
-                {
-                    destination<<std::endl;
-                }
-            }
-            destination<<"    ";
-
-            switch(Computer::getDefault()->getMemDataType(index))
-            {
-            case INSTRUCTION:
-                destination<<Computer::getDefault()->mnemGen(index).toStdString();
-                break;
-            default:
-                destination<<"Nothing Yet";
-            }
-
-//            std::string mnemString = (Computer::getDefault()->mnemGen(index)).toStdString();
-
-//            destination<<mnemString;
-
-            destination<<std::endl;
-
-        }
+        handleLabels(destination,index);
+        handleValues(destination,index);
+        handleComments(destination,index);
     }
+    handleEnd(destination);
     destination.close();
 }
 

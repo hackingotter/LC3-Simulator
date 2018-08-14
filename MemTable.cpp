@@ -55,6 +55,10 @@ MemTable::MemTable(modeler* model,QWidget* parent):QTableView(parent)
 
     setupConnections();
 
+
+    setWordWrap(true);
+
+
     setupActions();
 }
 
@@ -98,6 +102,7 @@ void MemTable::setupActions()
     ADDSHORTCUT("Insert Above",Qt::CTRL + Qt::SHIFT + Qt::Key_Enter             , insertAbove());
     ADDSHORTCUT("Go Backward"   , Qt::Key_Alt + Qt::Key_Left                    , goBackward(););
     ADDSHORTCUT("Go Forward"   , Qt::Key_Alt + Qt::Key_Right                    , goForward(););
+
 
 
 }
@@ -159,7 +164,14 @@ void MemTable::showClickOptions(const QPoint &pos)
             DataTypeMenu->addAction(displayAsChar);
             ClickMenu.addMenu(DataTypeMenu);
 //            ClickMenu.addAction("Go to Connected", this, [this]{changeDisplayType(row);});
-        }
+        }break;
+    case Memory_Modulos::COMMCOLUMN:
+    {
+        QAction * CommentAction = new QAction("Comment");
+
+        connect(CommentAction, &QAction::triggered, this, [=](){this->resizeRowToContents(row);});
+        ClickMenu.addAction(CommentAction);
+    }
     }
 
     //    connect(shift,SIGNAL(triggered()),this, handleShift());

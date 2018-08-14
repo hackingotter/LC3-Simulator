@@ -333,6 +333,7 @@ public:
     QString displayData(mem_addr_t addr);
     QString displayData(mem_loc_t loc);
 
+    QString displayAddressValue(mem_addr_t addr, bool displayMnemAfter) const;
     QString mnemGen(mem_loc_t loc) const;
     QString name_or_addr(mem_addr_t target) const;
     QString name_or_addr(mem_loc_t target) const;

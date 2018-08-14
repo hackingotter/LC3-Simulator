@@ -302,7 +302,7 @@ QVariant modeler::data(const QModelIndex &index, int role) const
             return Computer::getDefault()->getMemNameSafe(addr);
         }
         case MNEMCOLUMN:
-            return this->handleMNemColumn(addr);
+            return Computer::getDefault()->displayAddressValue(addr,displayMNemonicAfterDataType);
 //            return Computer::getDefault()->displayData(addr);
         case COMMCOLUMN:
             return Computer::getDefault()->getMemComment(addr);
@@ -319,6 +319,10 @@ QVariant modeler::data(const QModelIndex &index, int role) const
         case NAMECOLUMN:
         {
             return Computer::getDefault()->getMemNameSafe(addr);
+        }
+        case COMMCOLUMN:
+        {
+            return Computer::getDefault()->getMemComment(addr);
         }
         default:
             break;
@@ -414,67 +418,7 @@ bool modeler::setData(const QModelIndex &index, const QVariant &value, int role)
 
 }
 
-QVariant modeler::handleMNemColumn(mem_addr_t addr) const
-{
-//    QString inputStr = input.toString();
-//    QChar beginning = inputStr.at(0);
-//    data_t newType = UNHANDLED;
-    QString out = "";
 
-    bool ok = true;
-    val_t value = Computer::getDefault()->getMemValue(addr);
-    data_t type = Computer::getDefault()->getMemDataType(addr);
-    switch(Computer::getDefault()->getMemDataType(addr))
-    {
-
-    case HEX: out = getHexString(value); break;
-    case INTEGER: out = QString().setNum(value);break;
-    case INSTRUCTION: out = Computer::getDefault()->mnemGen(addr);break;
-    case CHAR: out = Utility::charToQString(value);break;
-    case COLOR: out = "Color";break;
-    case UNHANDLED:
-    default:
-         out = "Unhandled"; break;
-    }
-    if(type  != INSTRUCTION)
-    {
-        QString mnem = Computer::getDefault()->mnemGen(addr);
-        if(mnem != BADOP)
-        {
-            out += " (" + mnem +")";
-        }
-    }
-    return out;
-//    switch(beginning)
-//    {
-//    case "#":
-//    {
-//        out = (inputStr.remove(0,1)).toInt(&ok);
-//        newType = INTEGER;
-//    }
-//        break;
-//    case "x":
-//    {
-//        out = (inputStr.remove(0,1)).toInt(&ok);
-//        newType = HEX;
-//    }
-//        break;
-//    case "'":
-//    {
-////        out = inputStr.at(1).to;
-//        newType = CHAR;
-//    }
-//        break;
-//    default:
-//    {
-
-//    }
-//        if(newType != UNHANDLED && ok)
-//        {
-//            Computer::getDefault()->setMemValue(addr,out);
-//        }
-
-}
 Qt::ItemFlags modeler::flags(const QModelIndex &index) const
 {
     if((*threadRunning) && threadRunning!=Q_NULLPTR)return 0;

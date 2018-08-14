@@ -37,7 +37,7 @@ using namespace std;
 #define  haltTrap 0xF025
 
 Assembler::Assembler() : parserRegex(regex(
-                                         R"abc([ \t]*((?!(?:ADD|SUB|AND|(?:BR[nzp]{0,3})|JMP|JMPT|JSRR|JSR|LDI|LDR|LD|LEA|NOT|RET|RTT|RTI|STI|STR|ST|TRAP|MUL|GETC|OUT|IN|PUTSP|PUTS|HALT)(?:\W|$))\w*)?[ \t]*(?:(?:(ADD|SUB|AND|(?:BR[nzp]{0,3})|JMP|JMPT|JSRR|JSR|LDI|LDR|LD|LEA|NOT|RET|RTT|RTI|STI|STR|ST|TRAP|MUL|\.FILL|\.STRINGZ?|\.ORIG|\.END|\.BLKW|PUTS|GETC|OUT|IN|PUTSP|HALT)(?:\W|$))[ \t]*(?:r(\d),?)?[ \t]*(?:r(\d),?)?[ \t]*(?:(?:r(\d))|((?:#|x|b|o|-(?!-))?-?[0-9A-F]+\.?[0-9]*)|(\w*)|((?:".*")|(?:'.*')))?)?[ \t]*(?:;+([\S \t]*))?[ \t]*$)abc",
+                                         R"abc([ \t]*((?!(?:ADD|SUB|AND|(?:BR[nzp]{0,3})|JMP|JMPT|JSRR|JSR|LDI|LDR|LD|LEA|NOT|RET|RTT|RTI|STI|STR|ST|TRAP|MUL|GETC|OUT|IN|PUTSP|PUTS|HALT)(?:\W|$))\w*)?[ \t]*(?:(?:(ADD|SUB|AND|(?:BR[nzp]{0,3})|JMP|JMPT|JSRR|JSR|LDI|LDR|LD|LEA|NOT|RET|RTT|RTI|STI|STR|ST|TRAP|MUL|\.FILL|\.STRINGZ?|\.ORIG|\.END|\.BLKW|PUTS|GETC|OUT|IN|PUTSP|HALT)(?:\W|$))[ \t]*(?:r(\d),?)?[ \t]*(?:r(\d),?)?[ \t]*(?:(?:r(\d))|((?:#|x|b|o|-(?!-))?-?[0-9A-F]+\.?[0-9]*)|(\w*)|((?:".*")|(?:'.*')))?)?[ \t]*(?:(;+[\S \t]*))?$)abc",
                                          regex_constants::icase)),
                          programLength(0),
                          startingAddress(0xFFFF),
@@ -226,6 +226,7 @@ uint16_t Assembler::processLine(string &line, RunType runType, uint16_t pc, ofst
     // .END
     if (instruction == ".END") {
         hitDotEND = true;
+        commentDict[pc] = annotatedComment;
         return pc;
     }
 
@@ -254,7 +255,8 @@ uint16_t Assembler::processLine(string &line, RunType runType, uint16_t pc, ofst
         pc = writeInstruction(runType, instruction, firstReg, secondReg, thirdReg, opNumber, opLabel, opString,
                               nOfRegs, nOrL, oStream, pc);
     } else {
-        annotatedComment.append(QString::fromStdString(comment + "\n"));
+        annotatedComment = "";
+        commentDict[pc-1] = commentDict[pc-1] + QString::fromStdString(comment+"\n");
     }
 
     return pc;

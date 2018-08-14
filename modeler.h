@@ -29,7 +29,7 @@ class modeler : public QStandardItemModel
 public:
 
     enum SelectMode{Normal,Copy,Cut};
-
+    bool displayMNemonicAfterDataType = false;
     SelectMode currentMode = SelectMode::Normal;
     mem_loc_t * copied ;
     mem_addr_t specialSelectStart;
@@ -77,6 +77,8 @@ public:
     QBrush column0Painter(mem_addr_t addr) const;
     QBrush column3Painter(mem_addr_t addr) const;
     void setSelectMode(SelectMode mode, mem_addr_t begin, mem_addr_t end);
+    void setIfMNemIsDisplayedAfterDataType(bool display);
+
 signals:
 
     void dataChan(mem_addr_t);
@@ -88,7 +90,6 @@ signals:
     void change();
 private:
 
-    QVariant handleMNemColumn(mem_addr_t addr) const;
     QVariant dataCheck(const QModelIndex &index) const;
     QVariant dataBack(const QModelIndex &index) const;
     QVariant handleDataValueColumn(mem_addr_t addr, int role) const;

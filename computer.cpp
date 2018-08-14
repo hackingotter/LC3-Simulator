@@ -2648,7 +2648,67 @@ QString Computer::displayData(mem_loc_t loc)
     }
     }
 }
+QString Computer::displayAddressValue(mem_addr_t addr,bool displayMnemAfter) const
+{
+//    QString inputStr = input.toString();
+//    QChar beginning = inputStr.at(0);
+//    data_t newType = UNHANDLED;
+    QString out = "";
 
+    bool ok = true;
+    val_t value = Computer::getDefault()->getMemValue(addr);
+    data_t type = Computer::getDefault()->getMemDataType(addr);
+    switch(Computer::getDefault()->getMemDataType(addr))
+    {
+
+    case HEX: out = getHexString(value); break;
+    case INTEGER: out = QString().setNum(value);break;
+    case INSTRUCTION: out = Computer::getDefault()->mnemGen(addr);break;
+    case CHAR: out = Utility::charToQString(value);break;
+    case COLOR: out = "Color";break;
+    case UNHANDLED:
+    default:
+         out = "Unhandled"; break;
+    }
+    if(type  != INSTRUCTION && displayMnemAfter)
+    {
+        QString mnem = Computer::getDefault()->mnemGen(addr);
+        if(mnem != BADOP)
+        {
+            out += " (" + mnem +")";
+        }
+    }
+    return out;
+//    switch(beginning)
+//    {
+//    case "#":
+//    {
+//        out = (inputStr.remove(0,1)).toInt(&ok);
+//        newType = INTEGER;
+//    }
+//        break;
+//    case "x":
+//    {
+//        out = (inputStr.remove(0,1)).toInt(&ok);
+//        newType = HEX;
+//    }
+//        break;
+//    case "'":
+//    {
+////        out = inputStr.at(1).to;
+//        newType = CHAR;
+//    }
+//        break;
+//    default:
+//    {
+
+//    }
+//        if(newType != UNHANDLED && ok)
+//        {
+//            Computer::getDefault()->setMemValue(addr,out);
+//        }
+
+}
 QString Computer::mnemGen(mem_addr_t addr) const
 {
     return mnemGen(_memory[addr]);
@@ -2679,14 +2739,14 @@ QString Computer::mnemGen(mem_loc_t loc)const
     case brOpCode   :out.append(" BR");break;
     case jmpOpCode  :out.append("JMP ");break;
     case jsrOpCode  :out.append("JSR");break;
-    case ldOpCode   :out.append(" LD ");break;
+    case ldOpCode   :out.append("LD  ");break;
     case ldiOpCode  :out.append("LDI ");break;
     case ldrOpCode  :out.append("LDR ");break;
     case leaOpCode  :out.append("LEA ");break;
     case mulOpCode  :out.append("MUL ");break;
     case notOpCode  :out.append("NOT ");break;
     case rtiOpCode  :out.append("RTI ");break;
-    case stOpCode   :out.append(" ST ");break;
+    case stOpCode   :out.append("ST  ");break;
     case stiOpCode  :out.append("STI ");break;
     case strOpCode  :out.append("STR ");break;
     case trapOpCode :out.append("TRAP ");break;
@@ -2787,8 +2847,8 @@ QString Computer::mnemGen(mem_loc_t loc)const
         {
             val_t offset = val& 0x07FF;
 
-            if(offset&0x400)offset |= 0xF400;
-            mem_addr_t target = addr + (val & 0x07FF);
+            if(offset&0x400)val |= 0xF400;
+            mem_addr_t target = addr + val;
             out.append(" " + name_or_addr(target));
         }
         else if(!(val&0x0E3F))//or, it could be jsrr
