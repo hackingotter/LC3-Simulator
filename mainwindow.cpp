@@ -402,6 +402,8 @@ void MainWindow::assembleNLoadFile(QString path)
     catch(const std::string& e)
     {
         std::cout<<e<<endl;
+        Computer::getDefault()->Undos->endMacro();
+        Computer::getDefault()->Undos->undo();
         return;
     }
     if(loadFile(namePath))

@@ -371,7 +371,8 @@ public:
         _selectionEnd(selectionEnd),
         _delta(delta)
     {
-        setText("Shifted Memory"+getHexString(selectionBegin));
+//        setText("Shifted Memory"+getHexString(selectionBegin));
+        setText("Temporary Text");
     }
     void undo()
     {
@@ -791,9 +792,9 @@ label_t* Computer::getMemLabel(mem_addr_t addr)
 }
 
 void Computer::setMemBreakPoint(mem_addr_t addr,breakpoint_t* breakpt){
-    breakpoint_t* obreakptr =_memory[addr].breakpt;
+//    breakpoint_t* obreakptr =_memory[addr].breakpt;
     _memory[addr].breakpt = breakpt;
-    TRY2PUSH(obreakptr,breakpt,changeMemBreak(addr,obreakptr,breakpt));
+//    TRY2PUSH(obreakptr,breakpt,changeMemBreak(addr,obreakptr,breakpt));
 
     IFNOMASK(emit update();)
 }
@@ -1824,7 +1825,7 @@ void Computer::moveMemory(mem_addr_t selectionBegin, mem_addr_t selectionEnd, in
             thisIsDumb = -1;
         }
     }
-    delete[] temp;
+//    delete[] temp;
     TRY2PUSH(0,0,moveMemDoer(selectionBegin,selectionEnd,delta, makeAgreement));
     UNMASK
             IFNOMASK(emit update();)
