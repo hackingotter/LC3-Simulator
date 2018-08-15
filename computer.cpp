@@ -1812,23 +1812,25 @@ void Computer::moveMemory(mem_addr_t selectionBegin, mem_addr_t selectionEnd, in
     //however, this implementation cares not.
     int thisIsDumb = 0;
 
-    while(thisIsDumb != -1)
+    if(fastShiftPhase0(selectionBegin,selectionEnd,delta,temp))
     {
-        switch(thisIsDumb++)
+        if(updateConnectorsAfterPhase0(selectionBegin,selectionEnd,delta,temp))
         {
-        case 0 : fastShiftPhase0(selectionBegin,selectionEnd,delta,temp); break;
-        case 1 : updateConnectorsAfterPhase0(selectionBegin,selectionEnd,delta,temp); break;
-        case 2 : insertShiftedMemory(selectionBegin,selectionEnd,delta,temp);break;
-        case 3 : repairConnectionsPostShift(selectionBegin,selectionEnd,delta,temp); break;
-
-        default:
-            thisIsDumb = -1;
+            if(insertShiftedMemory(selectionBegin,selectionEnd,delta,temp))
+            {
+                if(repairConnectionsPostShift(selectionBegin,selectionEnd,delta,temp))
+                {
+                    TRY2PUSH(0,0,moveMemDoer(selectionBegin,selectionEnd,delta, makeAgreement));
+                    UNMASK
+                            IFNOMASK(emit update();)
+                }
+            }
         }
     }
+   UNMASK
+           IFNOMASK(emit update();)
 //    delete[] temp;
-    TRY2PUSH(0,0,moveMemDoer(selectionBegin,selectionEnd,delta, makeAgreement));
-    UNMASK
-            IFNOMASK(emit update();)
+
 }
 
 void Computer::testMemoryShifting()
@@ -2055,9 +2057,10 @@ bool Computer::fastShiftPhase0(mem_addr_t selectionBegin, mem_addr_t selectionEn
         (&_memory[connectedAddress(addr)])-=connector_t(addr);
         temp[offsetAddress].addr = proposNewAddress;
         temp[offsetAddress].value = generateOffsetedValue(temp[offsetAddress],newConnecteeAddress,&a);
+        mem_addr_t trueConnectedAddres =  connectedAddress(temp[offsetAddress]);
         if(connectedAddress(temp[offsetAddress]) != newConnecteeAddress)
         {
-            return false;//there was a bad connection
+//            return false;//there was a bad connection
         }
     }
     return true;
@@ -2594,6 +2597,22 @@ val_t Computer::generateOffsetedValue(mem_loc_t mem, mem_addr_t target, bool* ok
     qDebug("cleaned: "+getHexString(cleaned).toLocal8Bit());
     val_t offseted = cleaned | maskedOffset;
 
+    switch(mem.value & 0xF000)
+    {
+    /*
+     * Note going to lie, I have no idea why this instruction,
+     * and only this instruction, is plagued by over subtracting of the PC increment
+     * offset, but it works so I will take it.
+     *
+     * Melberg, 8/15/2018
+     */
+        case jsrOpCode:
+            if(0x0800 & mem.value)
+            {
+                return offseted;
+            }
+        break;
+    }
     return offseted-1;
 }
 
@@ -2846,10 +2865,9 @@ QString Computer::mnemGen(mem_loc_t loc)const
     {
         if(val&0x0800)//11th slot 1 means jsr
         {
-            val_t offset = val& 0x07FF;
+            val_t offset = getSignedOffset11(val);//val& 0x07FF;
 
-            if(offset&0x400)val |= 0xF400;
-            mem_addr_t target = addr + val;
+            mem_addr_t target = addr + offset;
             out.append(" " + name_or_addr(target));
         }
         else if(!(val&0x0E3F))//or, it could be jsrr

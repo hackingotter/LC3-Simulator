@@ -25,38 +25,12 @@ QRect rekt;
 Hope::Hope(QWidget *parent):QLabel(parent,0)
 {
     qDebug("Setting up screen");
+//    QPicture pi = new QPicture();
 
-//    model = guardin->get
-    mag = new QImage(DISPLAY_WIDTH*DISPLAY_SCALE+50,DISPLAY_HEIGHT*DISPLAY_SCALE+50,QImage::Format_RGB32);
-
-    setMouseTracking(true);
-    QPainter p(&pi);
-    p.setRenderHint(QPainter::Antialiasing,true);
-    p.setPen(Qt::black);
-
-//    p.end();
-    setPicture(pi);
-    rekt = pi.boundingRect();
-    qDebug("Done finding picture size");
-
-    QPicture picture = QPicture();
-//    QSize cursorsize = new QCursor(Qt::CrossCursor)->bitmap()->size();
-//    QPixmap* pix = new QPixmap(cursorsize.width(),cursorsize.height());
-    QString* str = new QString();
-//            str->setNum(cursorsize.height());
-            str->append('\0');
-
-            qInfo(str->toLatin1());
-//    QPainter* paint();
+    mag = new QImage(DISPLAY_WIDTH*DISPLAY_SCALE,DISPLAY_HEIGHT*DISPLAY_SCALE,QImage::Format_RGB32);
+    setPixmap(QPixmap::fromImage(*mag));
     Hope::customCursor(0,0);
-    qDebug("hey");
-    qDebug(QString(styleSheet()).toLatin1().data());
-
-    ADDSHORTCUT("Left"     ,Qt::Key_Left                    ,left());
-
-    ADDSHORTCUT("Right"     ,Qt::Key_Right                    ,right());
-    ADDSHORTCUT("Up"     ,Qt::Key_Up                    ,up());
-    ADDSHORTCUT("Down"     ,Qt::Key_Down                    ,down());
+    setMouseTracking(true);
 }
 void Hope::left()
 {
@@ -169,29 +143,39 @@ void Hope::fillScreen(val_t val)
 }
 void Hope::update()
 {
+
     IFCANUPDATE(
     qDebug("Hope is updating");
 //    QPainter qpp(&pi);
     for(mem_addr_t i = VIDEO_ADDR;i<0xFE00;i++)
     {
+        int x = (i - VIDEO_ADDR) % DISPLAY_WIDTH;
+        int y = (i - VIDEO_ADDR - x) / DISPLAY_WIDTH;
+
+//            mag->setPixel(x+1, y+1, translater(i).rgb());
 //        mag.setPen(translater(getMemValue(i)));
 //        DRAWPOINT(ADDR2X(i),ADDR2Y(i),qpp);
 
-        setPoint(ADDR2X(i),ADDR2Y(i),translater(Computer::getDefault()->getMemValue(i)).rgb(),mag);
+        setPoint(x*DISPLAY_SCALE,y*DISPLAY_SCALE,translater(Computer::getDefault()->getMemValue(i)).rgb(),mag);
     }
     setPixmap(QPixmap::fromImage(*mag));
+    qDebug((QString().setNum(pixmap()->width()) + QString().setNum(pixmap()->height())).toLocal8Bit());
 //    qpp.end();
 //    setPicture(pi);
 )
 }
 void Hope::update(mem_addr_t addr)
 {
+
     if(VIDEO_ADDR<= addr && addr<0xfe00)
     {
-    QPainter qpp(&pi);
+//    QPainter qpp(&pi);
 //    mag.setPixel(ADDR2X(addr),ADDR2Y(addr),translater(getMemValue(addr)).rgb());
+    int x = (addr - VIDEO_ADDR) % DISPLAY_WIDTH;
+    int y = (addr - VIDEO_ADDR - x) / DISPLAY_WIDTH;
 
-    setPoint(ADDR2X(addr),ADDR2Y(addr),translater(Computer::getDefault()->getMemValue(addr)).rgb(),mag);
+        mag->setPixel(x+1, y+1, translater(1).rgb());
+    setPoint(x,y,translater(Computer::getDefault()->getMemValue(addr)).rgb(),mag);
 //    qpp.end();
     QPixmap pix = QPixmap::fromImage(*mag);
 
@@ -203,10 +187,10 @@ void Hope::update(mem_addr_t addr)
 }
 void Hope::setPoint(int x, int y,QRgb rgb, QImage*image)
 {
-image->setPixel(x  ,y  ,rgb);
-image->setPixel(x  ,y+1,rgb);
-image->setPixel(x+1,y+1,rgb);
-image->setPixel(x+1,y  ,rgb);
+    image->setPixel(x  ,y  ,rgb);
+    image->setPixel(x  ,y+1,rgb);
+    image->setPixel(x+1,y+1,rgb);
+    image->setPixel(x+1,y  ,rgb);
 /*    if(x<0||y<0) return;
     {
         for(int i = 0;i<DISPLAY_SCALE;i++)
