@@ -283,6 +283,13 @@ QVariant modeler::data(const QModelIndex &index, int role) const
         }
         return  QVariant();
     }
+    if(role == Qt::ToolTip)
+    {
+        switch (column) {
+        case COMMCOLUMN:
+            return QVariant(Computer::getDefault()->getMemComment(addr));
+        }
+    }
     if(role == Qt::DisplayRole)
     {
 
@@ -400,6 +407,11 @@ bool modeler::setData(const QModelIndex &index, const QVariant &value, int role)
 
         {
             QString newComment = value.toString();
+
+            if(newComment != "" && newComment.at(0) != ";")
+            {
+                newComment = "; " + newComment;
+            }
             Computer::getDefault()->setMemComment(addr,newComment);
             emit commentChanged(addr,newComment);
         }

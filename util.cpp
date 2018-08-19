@@ -16,8 +16,9 @@ QString getHexString(uint16_t val)
     out[3]=TO_HEX(((val&0x00F0)>>4));
     out[4]=TO_HEX(((val&0x000F)));
     out[5] = '\0';
-
-    return QString(out);
+    QString outString(out);
+    free(out);
+    return outString;
 }
 
 QString getBinString(uint16_t val)

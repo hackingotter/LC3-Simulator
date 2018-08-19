@@ -44,9 +44,9 @@ QString charToQString(char ch)
 int QSTRING2INTBASE(QString source,int suggestedBase)
 {
     qDebug("Looks like we are changing a QString to a Int ");
-    bool* noError;
+    bool noError = 0;
     //First things first, let's see what Qt gives us
-    int qtAttempt = source.toInt(noError,suggestedBase);
+    int qtAttempt = source.toInt(&noError,suggestedBase);
     if(noError)
     {
         //If it worked, use it

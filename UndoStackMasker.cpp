@@ -63,6 +63,7 @@ const QSize UndoStackMasker::constructSize()
     const QSize conout =  QSize(out->width(),out->height());
     qDebug(QString().setNum(conout.height()).toLocal8Bit());
     qDebug(QString().setNum(conout.width()).toLocal8Bit());
+    delete(out);
     return conout;
 }
 

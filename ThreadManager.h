@@ -3,8 +3,8 @@
 
 #include <QObject>
 #include <QThread>
-#include "Bridge.h"
 #include "computer.h"
+class Bridge;
 class ThreadManager : public QObject
 {
     Q_OBJECT
@@ -23,7 +23,7 @@ signals:
     void stopped();
     void requestHalt();
 public slots:
-    void activate(int runningMode = 0);
+    void activate(ThreadManager::RunUntil runningMode = Step);
 private slots:
     void done();
 

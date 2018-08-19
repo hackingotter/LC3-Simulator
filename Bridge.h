@@ -1,24 +1,21 @@
 #ifndef BRIDGE_H
 #define BRIDGE_H
+#include "ThreadManager.h"
 
 #include <QObject>
 #include "Utility.h"
 #include <QThread>
 
+class ThreadManager;
+
 class Bridge :public QObject
 {
     Q_OBJECT
-int runningMode;
+    ThreadManager::RunUntil runningMode;
 public:
-    enum Mode
-    {
-        Step = 0,
-        Next = 1,
-        Done = 2,
-        Break = 3
-    };
 
-    Bridge(int run);
+
+    Bridge(ThreadManager::RunUntil run);
     ~Bridge();
 
     static void doWork();

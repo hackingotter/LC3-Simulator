@@ -90,7 +90,7 @@ void MemWindow::setupInput()
     suggestions<<(KEY);\
     labelDict[KEY] = (VALUE);
 
-    for(val_t i = 0;i<65535;i++)
+    for(val_t i = 0;i!=MEMSIZE;i++)
     {
         label_t* lab = Computer::getDefault()->getMemLabel(i);
         if(lab)
@@ -99,7 +99,7 @@ void MemWindow::setupInput()
 
         }
     }
-    for(int i =0;i<8;i++)
+    for(int i =0;i<8/*number of general purpose registers*/;i++)
     {
         const QString reg ="r"+QString().setNum(i);
         SUGGEST(reg,Computer::getDefault()->getRegister((reg_t)i))
@@ -127,12 +127,20 @@ void MemWindow::setFlipped(bool upIsDown)
     if(upIsDown)
     {
         SpecialReg = SPR;
-        SpecialButton->setText("SPR");
+        SpecialButton->setText("SP");
+
+        QString red = QString().setNum(R6COLOR.red());
+        QString green = QString().setNum(R6COLOR.green());
+        QString blue    = QString().setNum(R6COLOR.blue());
+        SpecialButton->setStyleSheet("QPushButton:pressed{ color:  rgb(" +red + "," + green + "," + blue +")}");
     }
     else
     {
         SpecialReg = PC;
         SpecialButton->setText("PC");
+        SpecialButton->setStyleSheet(QString::fromUtf8("QPushButton:pressed"
+                                                       "{ color: yellow }"
+                                                       ));
     }
 }
 void MemWindow::handleSRPress()
@@ -165,8 +173,24 @@ void MemWindow::handleTracking()
     qDebug("double");
 
     followmode=!followmode;
+
+
+    QString red = QString().setNum(R6COLOR.red());
+    QString green = QString().setNum(R6COLOR.green());
+    QString blue    = QString().setNum(R6COLOR.blue());
+    QString r6colorString = "rgb(" +red + "," + green + "," + blue +")}";
+    QString color;
+    switch(SpecialReg)
+    {
+    case PC:
+        color = "yellow";
+        break;
+    case R6:
+        color = r6colorString;
+        break;
+    }
     SpecialButton->setStyleSheet(QString("QPushButton:enabled"
-                                         "{ Background-color: ")+QString((followmode)?"yellow":"light grey")+QString("}")
+                                         "{ Background-color: ")+QString((followmode)?color:"light grey")+QString("}")
                                  );
     //    PCButton->setStyleSheet("{background-color:rgb(150,150,255)}");
 }

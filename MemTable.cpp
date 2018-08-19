@@ -69,14 +69,14 @@ void MemTable::setupWarnings()
                                     "\n"
                                     "The slide function is the most dangerous action that one can do with this program. I have taken precations\n"
                                     "in effort to protect the code, but I feel that this ability is far too powerful to deny you its use, so beware.\n"
-               "\n"
-               "\n";
+                                    "\n"
+                                    "\n";
 }
 void MemTable::setupActions()
 {
     qDebug("JJ");
     QShortcut* copy = new QShortcut(this);
-//    copy->setKey(/*Qt::CTRL + Qt::Key_C*/);
+    //    copy->setKey(/*Qt::CTRL + Qt::Key_C*/);
     connect(copy,SIGNAL(activated()),this,SLOT(setCopied()));
     copy->setContext(Qt::WidgetShortcut);
 
@@ -141,37 +141,37 @@ void MemTable::showClickOptions(const QPoint &pos)
     }
     switch(column)
     {
-        case Memory_Modulos::MNEMCOLUMN:
-        {
-            QMenu  * DataTypeMenu = new QMenu("Display value as...");
+    case Memory_Modulos::MNEMCOLUMN:
+    {
+        QMenu  * DataTypeMenu = new QMenu("Display value as...");
 
 
-            QAction* displayAsInstruction = new QAction("Instruction");
-            QAction* displayAsBase10 = new QAction("Base 10");
-            QAction* displayAsBase16 = new QAction("Base 16");
-            QAction* displayAsColor = new QAction("Color");
-            QAction* displayAsChar  =   new QAction("Char");
-             Computer* comp = Computer::getDefault();
-            connect(displayAsInstruction,  &QAction::triggered,comp, [=](){ comp->setMemDataType(row,INSTRUCTION); });
-            connect(displayAsBase10,  &QAction::triggered,comp, [=](){ comp->setMemDataType(row,INTEGER); });
-            connect(displayAsBase16,  &QAction::triggered,comp, [=](){ comp->setMemDataType(row,HEX); });
-            connect(displayAsColor,  &QAction::triggered,comp, [=](){ comp->setMemDataType(row,COLOR); });
-            connect(displayAsChar,  &QAction::triggered,comp, [=](){ comp->setMemDataType(row,CHAR); });
-            DataTypeMenu->addAction(displayAsInstruction);
-            DataTypeMenu->addAction(displayAsBase10);
-            DataTypeMenu->addAction(displayAsBase16);
-            DataTypeMenu->addAction(displayAsColor);
-            DataTypeMenu->addAction(displayAsChar);
-            ClickMenu.addMenu(DataTypeMenu);
-//            ClickMenu.addAction("Go to Connected", this, [this]{changeDisplayType(row);});
-        }break;
+        QAction* displayAsInstruction = new QAction("Instruction");
+        QAction* displayAsBase10 = new QAction("Base 10");
+        QAction* displayAsBase16 = new QAction("Base 16");
+        QAction* displayAsColor = new QAction("Color");
+        QAction* displayAsChar  =   new QAction("Char");
+        Computer* comp = Computer::getDefault();
+        connect(displayAsInstruction,  &QAction::triggered,comp, [=](){ comp->setMemDataType(row,INSTRUCTION); });
+        connect(displayAsBase10,  &QAction::triggered,comp, [=](){ comp->setMemDataType(row,INTEGER); });
+        connect(displayAsBase16,  &QAction::triggered,comp, [=](){ comp->setMemDataType(row,HEX); });
+        connect(displayAsColor,  &QAction::triggered,comp, [=](){ comp->setMemDataType(row,COLOR); });
+        connect(displayAsChar,  &QAction::triggered,comp, [=](){ comp->setMemDataType(row,CHAR); });
+        DataTypeMenu->addAction(displayAsInstruction);
+        DataTypeMenu->addAction(displayAsBase10);
+        DataTypeMenu->addAction(displayAsBase16);
+        DataTypeMenu->addAction(displayAsColor);
+        DataTypeMenu->addAction(displayAsChar);
+        ClickMenu.addMenu(DataTypeMenu);
+        //            ClickMenu.addAction("Go to Connected", this, [this]{changeDisplayType(row);});
+    }break;
     case Memory_Modulos::COMMCOLUMN:
     {
-        QAction * CommentAction = new QAction("Comment");
+        //        QAction * CommentAction = new QAction("Comment");
+        //        connect(CommentAction, &QAction::triggered, this, [=](){this->resizeRowToContents(row);});
+        //        ClickMenu.addAction(CommentAction);
+    }break;
 
-        connect(CommentAction, &QAction::triggered, this, [=](){this->resizeRowToContents(row);});
-        ClickMenu.addAction(CommentAction);
-    }
     }
 
     //    connect(shift,SIGNAL(triggered()),this, handleShift());
@@ -304,14 +304,14 @@ void MemTable::handlePasteOver()
 }
 void MemTable::swap()
 {
-//    if(model->currentMode==modeler::SelectMode::Cut)
-//    {
-//        bool b = 0;
-//        mem_addr_t begin = model->specialSelectStart;
-//        mem_addr_t end = model->specialSelectEnd;
-//        val_t delta = selectedIndexes().constFirst().row()-begin+1;
-//        //        Computer::getDefault()->slideMemory(model->specialSelectStart,model->specialSelectEnd,,delta,&b);
-//    }
+    //    if(model->currentMode==modeler::SelectMode::Cut)
+    //    {
+    //        bool b = 0;
+    //        mem_addr_t begin = model->specialSelectStart;
+    //        mem_addr_t end = model->specialSelectEnd;
+    //        val_t delta = selectedIndexes().constFirst().row()-begin+1;
+    //        //        Computer::getDefault()->slideMemory(model->specialSelectStart,model->specialSelectEnd,,delta,&b);
+    //    }
 }
 void MemTable::setCut()
 {
@@ -353,7 +353,7 @@ void MemTable::shiftUp(bool makeAgreement)
         mem_addr_t end =    selectedIndexes().constLast().row();
 
         Computer::getDefault()->slideMemory(begin,end,-1,makeAgreement,&b);
-//        Computer::getDefault()->moveMemory(begin,end, -1);
+        //        Computer::getDefault()->moveMemory(begin,end, -1);
 
         setCurrentIndex(model->index(begin-1,original.column()));
 
@@ -376,7 +376,7 @@ void MemTable::fastShiftUp(bool makeAgreement)
         mem_addr_t begin =  selectedIndexes().constFirst().row();
         mem_addr_t end =    selectedIndexes().constLast().row();
 
-//        Computer::getDefault()->fastMemorySlide(begin,end,-1,makeAgreement,&b);
+        //        Computer::getDefault()->fastMemorySlide(begin,end,-1,makeAgreement,&b);
         Computer::getDefault()->moveMemory(begin,end, -1);
         setCurrentIndex(model->index(begin-1,original.column()));
         clearSelection();
@@ -412,14 +412,14 @@ void MemTable::shiftDown(bool makeAgreement)
 void MemTable::fastShiftDown(bool makeAgreement)
 {
     qDebug("shifting down Fast");
-            bool b = false;
+    bool b = false;
     if(selectedIndexes().size()>0)
     {
         QModelIndex original = currentIndex();
         qDebug("wor");
         mem_addr_t begin =  selectedIndexes().constFirst().row();
         mem_addr_t end   =   selectedIndexes().constLast().row();
-//        Computer::getDefault()->fastMemorySlide(begin,end,1,makeAgreement,&b);
+        //        Computer::getDefault()->fastMemorySlide(begin,end,1,makeAgreement,&b);
         Computer::getDefault()->moveMemory(begin, end, 1);
         setCurrentIndex(model->index(begin+1,original.column()));
         clearSelection();
@@ -492,5 +492,10 @@ void MemTable::goForward()
 void MemTable::setFlipped(bool upIsDown)
 {
     flipped=upIsDown;
+
+}
+
+void MemTable::setButtonText(QString st)
+{
 
 }

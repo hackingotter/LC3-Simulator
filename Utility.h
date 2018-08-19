@@ -22,6 +22,8 @@
 
 #define SYMBOL_SUFFIX ".sym"
 
+
+#define COLOR_SPLITTER(QCOLOR) (QCOLOR).red(),(QCOLOR).green(),(QCOLOR).blue()
 #define PCCOLOR (QColor(255,255,0))
 #define R0COLOR (QColor(0,102,204))
 #define R1COLOR (QColor(255,102,205))
@@ -70,7 +72,7 @@ void systemInfoDebug();
 int qColor2Int(QColor color);
 QColor int2QColor(int color);
 
-val_t unifiedInput2Val(QString input, bool* defaultTo);
+val_t unifiedInput2Val(QString input, bool* ok);
 }
 #define BADOP "Bad Op"
 

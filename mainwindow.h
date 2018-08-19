@@ -176,8 +176,10 @@ public slots:
     void setupThreadManager();
 
     void setupMenuBar();
-
+    void setupScreenMenuDropdown(QMenu &menu);
+    void setupConsoleInterface();
     void handleFiles();
+
     bool loadFile(QString path = QString());
     QString assembleFile(QString path);
     void assembleNLoadFile(QString path = QString());

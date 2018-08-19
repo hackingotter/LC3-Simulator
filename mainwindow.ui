@@ -610,7 +610,6 @@
     <addaction name="actionLoad"/>
     <addaction name="actionSave_2"/>
     <addaction name="actionClear"/>
-    <addaction name="actionFill"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">

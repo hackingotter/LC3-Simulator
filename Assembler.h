@@ -128,6 +128,8 @@ public:
     data_t dataTypeForAddress(mem_addr_t addr);
 
     void passDataTypesToComputer(Computer* comp);
+    
+    val_t singleLineAssemble(QString machineCode,mem_addr_t addr);
 };
 
 

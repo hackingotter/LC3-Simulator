@@ -1,4 +1,5 @@
 #include "ThreadManager.h"
+#include "Bridge.h"
 #include "Utility.h"
 
 
@@ -7,7 +8,7 @@ ThreadManager::ThreadManager(QObject *parent) : QObject(parent)
     qDebug("Initializing Thread");
 }
 
-void ThreadManager::activate(int runningMode)
+void ThreadManager::activate(ThreadManager::RunUntil runningMode)
 {
     qDebug("Activating Thread with number " + QString().setNum(runningMode).toLocal8Bit());
     emit started(); // for safety reasons, we will say we started before we actually start

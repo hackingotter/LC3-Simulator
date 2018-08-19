@@ -25,6 +25,11 @@ void Saver::handleLabels(std::ofstream & destination, mem_addr_t addr)
 }
 void Saver::handleValues(std::ofstream & destination, mem_addr_t addr)
 {
+    data_t typey = Computer::getDefault()->getMemDataType(addr);
+    if(typey != INSTRUCTION)
+    {
+        destination << ".FILL ";
+    }
     destination << Computer::getDefault()->displayAddressValue(addr,false).toStdString()<<"\t";
 }
 void Saver::handleComments(std::ofstream & destination, mem_addr_t addr)
@@ -45,6 +50,10 @@ void Saver::savePortable( mem_addr_t beginning, mem_addr_t end, bool takeComment
     QString fileName = QString("TestSaveProt.asm");
     std::ofstream destination;
     destination.open(fileName.toLocal8Bit().toStdString());
+    if(takeCommentBefore)
+    {
+        handleComments(destination,beginning-1);
+    }
     destination << "\t.ORIG " << getHexString(beginning).toStdString() <<"\n";
     for(mem_addr_t index = beginning; index <= end; index +=1)
     {

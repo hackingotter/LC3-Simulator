@@ -138,8 +138,11 @@ void Hope::clearScreen()
 }
 void Hope::fillScreen(val_t val)
 {
+    Computer::getDefault()->Undos->beginMacro("Filling screen with "+ getHexString(val));
+    MASK
     Computer::getDefault()->fillBlock(VIDEO_ADDR,0xFE00,val);
-
+    UNMASK
+    Computer::getDefault()->Undos->endMacro();
 }
 void Hope::update()
 {
@@ -174,7 +177,7 @@ void Hope::update(mem_addr_t addr)
     int x = (addr - VIDEO_ADDR) % DISPLAY_WIDTH;
     int y = (addr - VIDEO_ADDR - x) / DISPLAY_WIDTH;
 
-        mag->setPixel(x+1, y+1, translater(1).rgb());
+//        mag->setPixel(x+1, y+1, translater(1).rgb());
     setPoint(x,y,translater(Computer::getDefault()->getMemValue(addr)).rgb(),mag);
 //    qpp.end();
     QPixmap pix = QPixmap::fromImage(*mag);

@@ -179,6 +179,11 @@ void Assembler::passDataTypesToComputer(Computer *comp)
     UNMASK
 }
 
+//val_t Assembler::singleLineAssemble(QString machineCode, mem_addr_t addr)
+//{
+
+//}
+
 uint16_t Assembler::processLine(string &line, RunType runType, uint16_t pc, ofstream &oStream) {
     std::smatch match;
 
@@ -319,18 +324,9 @@ uint16_t Assembler::writeInstruction(RunType runType, string &instruction, strin
         if (runType == MainRun) {
             // everything left but .ORIG goes here
             uint16_t op = OpCodeForInstruction(instruction);
-            if(op == jmptOpCode)
-            {
-                int a = 0;
-            }
             op |= getConstantBits(instruction, nOfRegs, nOrL);
             op |= getRegisters(instruction, nOfRegs, firstReg, secondReg, thirdReg);
             op |= getNumberOrOffset(instruction, nOrL, opNumber, opLabel, pc);
-
-            if(op == 0xB00A)
-            {
-                int j = 3;
-            }
             writeWord(oStream, op);
         }
     }

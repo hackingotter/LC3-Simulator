@@ -13,7 +13,7 @@ bool Bridge::isHalting = false;
 
 
 
-Bridge::Bridge(int protocol) : QObject(nullptr)
+Bridge::Bridge(ThreadManager::RunUntil protocol) : QObject(nullptr)
 {
     runningMode = protocol;
 }
@@ -36,10 +36,10 @@ void Bridge::process()
     }
     Bridge::isRunning = true;
 
-    int *ok = new int(0);
+//    int ok =0;
     switch(runningMode)
     {
-    case Next:
+    case ThreadManager::RunUntil::Next:
     {
         val_t target_PC = Computer::getDefault()->getRegister(PC)+1;
 
@@ -52,19 +52,20 @@ void Bridge::process()
 
         qDebug("Am I done? Starting at"+ QString().setNum(target_PC).toLocal8Bit());
         Computer::getDefault()->executeUntilAddress(target_PC);
+
         Bridge::isHalting = false;
 
         break;
     }
-    case Step:
+    case ThreadManager::RunUntil::Step:
     {
         qDebug("Steppin");
 
         executeCommand(step,nullptr);
-        qDebug(QString().setNum(*ok).toLocal8Bit());
+//        qDebug(QString().setNum(&ok).toLocal8Bit());
         break;
     }
-    case Break:
+    case ThreadManager::RunUntil::Flag:
     {
         qDebug("Until Break");
         executeCommand(_continue,nullptr);

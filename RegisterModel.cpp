@@ -118,7 +118,7 @@ QVariant RegisterModel::data(const QModelIndex &index,int role) const
             case R6:return "User Stack Pointer";
             case R7:return "Return Register";
             case PC:return "Program Counter";
-            case MPR:return "Memory Protection Register";
+            case MPR_SLOT:return "Memory Protection Register";
             case PSR:return "Program Status Register";
             case 11:return "Condition Code";
             }
@@ -190,9 +190,9 @@ QString RegisterModel::regNameColumnHelper(int row) const
 {
     switch(row)
     {
-    case PC :return QString("PC");
+    case PC :return "PC";
     case PSR:return "PSR";
-    case MPR:return "MPR";
+    case MPR_SLOT:return "MPR";
     case 11: return "CC";
     default :return QString("R").append(QString().setNum(row));
     }
@@ -244,7 +244,7 @@ cond_t RegisterModel::handle_CC_RegisterView_Input(QString in)
     PSR_HANDLER(lowered,"nnn"   ,   cond_n)
     PSR_HANDLER(lowered,"-"     ,   cond_n)
     //Handle positive
-            PSR_HANDLER(lowered,"😀",cond_p)
+    PSR_HANDLER(lowered,"😀"    ,   cond_p)
     PSR_HANDLER(lowered,"p"     ,   cond_p)
     PSR_HANDLER(lowered,"positive" ,cond_p)
     PSR_HANDLER(lowered,":)"    ,   cond_p)

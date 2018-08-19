@@ -22,6 +22,7 @@ typedef enum reg_column{
 #define REGNAMECOlUMN  1
 #define REGVALUECOLUMN 2
 
+#define MPR_SLOT 10
 
 
 #define PSR_HANDLER(INPUT,CHECK,VALUE) if(INPUT==CHECK) return VALUE;

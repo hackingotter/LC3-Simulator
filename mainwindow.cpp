@@ -114,12 +114,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     QFuture<void> f1 = QtConcurrent::run(threadTest,QString("1"));
     f1.waitForFinished();
 
-    QProcess* th = new QProcess(this);
-
-
-    qDebug(QString().setNum(th->processId()).toLocal8Bit());
-
-
 
     qDebug("About to setup ui");
     ui->setupUi(this);//this puts everything in place
@@ -132,6 +126,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     setupInOut();
     setupWatches();
     setupUndoInterface();
+    setupConsoleInterface();
 
 
 
@@ -148,23 +143,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 //    ui->undoStackSpot->addWidget();f
     //    QObject::connect(ui->NextButton,SIGNAL(on_NextButton_pressed()),ui->RegisterView,SLOT(update()));
     readSettings();
-    //    setupMenuBar();
-    //    Computer::getDefault()->loadProgramFile(QString("testing.asm").toLocal8Bit().data());
-
     update();
-    //    qDebug(QString().setNum(th->processId()).toLocal8Bit());
-
-
-
-
-    //    ui->MemView1->layout()->addWidget(new MemWindow(model));
-
-//    Computer::getDefault()->setMemValue(0,0x1FFF);
-//    Computer::getDefault()->setMemValue(1,0x7fc0);
-//    Computer::getDefault()->setMemValue(2,0x0FFD);
-
-    Computer::getDefault()->setRegister(R7,0xBFFF);
-
 
 }
 MainWindow::~MainWindow()
@@ -244,6 +223,41 @@ void MainWindow::setupMenuBar()
     CONNECT(actionLoad_File,triggered(),this,loadFile());
     CONNECT(actionAssemble_Load_File,triggered(),this, assembleNLoadFile());
     CONNECT(actionTestingSave,triggered(),this, testingSave());
+
+    QMenu* fillMenu = new QMenu("Fill...");
+    setupScreenMenuDropdown(*fillMenu);
+    ui->menuScreen->addMenu(fillMenu);
+}
+
+void MainWindow::setupScreenMenuDropdown(QMenu & menu)
+{
+    QAction* actionFill_White = new QAction("White",this);
+    QAction* actionFill_Black = new QAction("Black",this);
+    QAction* actionFill_Red = new QAction("Red",this);
+    QAction* actionFill_Green = new QAction("Green",this);
+    QAction* actionFill_Blue = new QAction("Blue",this);
+    QAction* actionFill_Puce = new QAction("Puce",this);
+
+    QList<QAction*> fillActions;
+
+    fillActions<<actionFill_White<<actionFill_Black<<actionFill_Red<<actionFill_Green<<actionFill_Blue<<actionFill_Puce;
+
+
+    connect(actionFill_White,   &QAction::triggered, disp, [=](){ disp->fillScreen(0x7FFF);});
+    connect(actionFill_Black,   &QAction::triggered, disp, [=](){ disp->fillScreen(0x0000);});
+    connect(actionFill_Red,     &QAction::triggered, disp, [=](){ disp->fillScreen(0x7C00);});
+    connect(actionFill_Green,   &QAction::triggered, disp, [=](){ disp->fillScreen(0x03C0);});
+    connect(actionFill_Blue,    &QAction::triggered, disp, [=](){ disp->fillScreen(0x001F);});
+    connect(actionFill_Puce,    &QAction::triggered, disp, [=](){ disp->fillScreen(0x3466);});
+    menu.addActions(fillActions);
+
+}
+
+void MainWindow::setupConsoleInterface()
+{
+    ui->plainTextEdit->insertPlainText("Hello");
+//    QFuture<void> f1 = QtConcurrent::run(startConsole(),QString("1"));
+//    f1.begin();
 }
 void MainWindow::testingSave()
 {
@@ -259,7 +273,10 @@ void MainWindow::storeState()
 }
 void MainWindow::setupControlButtons()
 {
-    CONNECT(ui->haltButton,pressed(),manager,requestHalt());
+
+    Computer* comp = Computer::getDefault();
+    connect(ui->haltButton,  &QPushButton::pressed,comp, [=](){ comp->setRunning(false); });
+//    CONNECT(ui->haltButton,pressed(),Computer::getDefault(),);
 
 }
 void MainWindow::setupConnections()
@@ -341,7 +358,7 @@ QString MainWindow::assembleFile(QString path)
     }
     catch(...)
     {
-        std::cout<<"An unforseen error has occured"<<endl;
+        std::cout<<"An unforseen error has occured"<<std::endl;
         return "";
     }
 
@@ -425,7 +442,7 @@ void MainWindow::handleFiles()
     Assembler Bill;
     QString inputPath = QFileDialog::getOpenFileName().toLocal8Bit().data();
     Bill.assembleFile(inputPath.toLatin1().data(),"LC3Maybe.obj");
-    Computer::getDefault()->loadProgramFile("LC3Maybe.obj");
+    Computer::getDefault()->loadProgramFile(QString("LC3Maybe.obj").toLatin1().data());
     IFNOMASK(emit update();)
 }
 void MainWindow::setupDisplay()
@@ -500,10 +517,6 @@ void MainWindow::setupInOut()
 }
 void MainWindow::onTableClicked(const QModelIndex & current)
 {
-    int column = current.column();
-    int row = current.row();
-
-    qDebug("Selection at (" + QString().setNum(row).toLocal8Bit() + ", " + QString().setNum(column).toLocal8Bit() + ")");
 
 }
 
@@ -512,10 +525,12 @@ void MainWindow::setupStackView()
     qDebug("Setting up Stack View");
     qDebug("Showing Grid");
     MemWindow* StackWindow = new MemWindow(StackModel,Saturn->generateBar());
+
     CONNECT(this,signalUpdate(),StackWindow,kick());
     ui->StackBox->layout()->addWidget(StackWindow);
     MemTable* view = StackWindow->getMemView();
-    view->setFlipped(true);
+    StackWindow->setFlipped(true);
+//    view->setButtonText("SP");
     //    qDebug("Setting Model");
     //    view->hide();
     //    view->setModel(StackModel);
@@ -627,7 +642,7 @@ void MainWindow::on_NextButton_pressed()
 {
     qDebug("Executing Single instruction");
     //    executeSingleInstruction();
-    manager->activate(1);
+    manager->activate(ThreadManager::Next);
     //    update();
 
 }
@@ -685,7 +700,7 @@ void MainWindow::on_pushButton_4_pressed()
 
 
     qDebug("Next");
-    manager->activate(Bridge::Next);
+    manager->activate(ThreadManager::Next);
 
     update();
 
@@ -700,7 +715,7 @@ void MainWindow::on_Update_Temp_pressed()
 void MainWindow::on_IntoButton_pressed()
 {
     qDebug("Step");
-    manager->activate(Bridge::Step);
+    manager->activate(ThreadManager::Step);
 }
 
 void MainWindow::readSettings()
@@ -792,11 +807,25 @@ void MainWindow::on_consoleEnterButton_pressed()
 {
     qDebug("I want to take the input");
 
+    freopen("temp.txt","w",stdout);
+    handleConsoleIn(ui->lineEdit->text().toLocal8Bit().data());
+    std::fclose(stdout);
+
+
+    QFile phil("temp.txt");
+    phil.open(QIODevice::ReadWrite);
+    qDebug("handled");
+    QTextStream streamy(&phil);
+    while(!streamy.atEnd())
+        ui->plainTextEdit->insertPlainText(streamy.readLine()+"\n");
+
+
 }
 
 void MainWindow::on_continueButton_pressed()
 {
-    executeCommand(_continue,nullptr);
+    manager->activate(ThreadManager::Flag);
+
 }
 
 void MainWindow::on_RestoreButton_pressed()

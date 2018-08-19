@@ -62,8 +62,8 @@ typedef enum reg_t {
     R4 = 4,
     R5 = 5,
     R6 = 6,
+    SPR = 6,
     R7 = 7,
-    SPR = 7,
     PC = 8,
     PSR = 9
 } reg_t;

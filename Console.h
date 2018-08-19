@@ -71,4 +71,6 @@ char * getConsoleErrorDescription(console_err_t err);
 
 // TODO printing
 
+bool handleSaveCommand(char * * argv, int remaining);
+bool handleConsoleIn(char * line);
 #endif /* Console_h */

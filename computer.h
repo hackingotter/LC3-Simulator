@@ -54,14 +54,14 @@
 
 #define ISINUSERSPACE(ADDR) (ADDR>=USERSPACE_BEGIN && ADDR<=USERSPACE_END)
 
-#define VIDEOSPACE_START  (0xC000)
-#define VIDEO_ADDR        (VIDEOSPACE_START)
+#define VIDEOSPACE_BEGIN  (0xC000)
+#define VIDEO_ADDR        (VIDEOSPACE_BEGIN)
 #define VIDEOSPACE_END    (USERSPACE_END)
 
 #define ISINVIDEOSPACE(ADDR) (ADDR>=VIDEOSPACE_BEGIN && ADDR<=VIDEOSPACE_END)
 
 #define STACKSPACE_BEGIN  (USERSPACE_BEGIN)
-#define STACKSPACE_END    (VIDEOSPACE_START-1)
+#define STACKSPACE_END    (VIDEOSPACE_BEGIN-1)
 //#define ISINSTACKSPACE(ADDR)
 #define ISINSTACKSPACE(ADDR) (ADDR>=STACKSPACE_BEGIN && ADDR<=STACKSPACE_END)
 
@@ -493,6 +493,8 @@ private:
     void loadMemLoc(std::ifstream *source, mem_loc_t *locptr);
     void loadMemory(std::ifstream *source);
     void saveUndos(std::ofstream *destination);
+    bool prepareDataTypes();
+    void prepareRegisters();
 };
 
 #endif // COMPUTER_H

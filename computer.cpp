@@ -426,10 +426,38 @@ Computer::Computer(QObject *parent) : QObject(parent)
 
     //critical for being able to undo the moves
     prepareMemory();
-    prepareConnectors();
+//    prepareConnectors();
+    prepareDataTypes();
     savedSSP = 0;
     savedUSP = 0;
     activeStack = supervisorStack;
+}
+void Computer::prepareRegisters()
+{
+    for(int i  = 0; i < 11; i ++)
+    {
+        switch((reg_t)i)
+        {
+        case R0:
+        case R1:
+        case R2:
+        case R3:
+        case R4:
+        case R5:
+        case R6:
+        case R7:
+        {
+            registers[i] = 0x0000;
+        }
+            break;
+        case PC:
+        {
+            registers[PC] = 0x0200;
+            break;
+        }
+        }
+
+    }
 }
 void Computer::prepareMemory()
 {
@@ -440,31 +468,39 @@ void Computer::prepareMemory()
 }
 void Computer::prepareConnectors()
 {
-    qDebug("Preparing Connecotrs");
-    for(int i = 0;i<=MEMSIZE;i++)
+//    qDebug("Preparing Connecotrs");
+//    for(int i = 0;i<=MEMSIZE;i++)
+//    {
+//        _memory[i].connectors=nullptr;//set the address numbers.
+//    }
+
+//    for(int i = 0; i < 10; i++)
+//    {
+//        (&_memory[1])+=connector_t(i+10);
+//    }
+//    formConnectionFromTo(1,2);
+//    formConnectionFromTo(4,2);
+//    (&_memory[2])-=connector_t(4);
+//    //    formConnectionFromTo(3,2);
+//    (&_memory[2])+=connector_t(3);
+
+//    (&_memory[2])-=connector_t(4);
+//    (&_memory[2])-=connector_t(1);
+
+//    (&_memory[2])-=connector_t(1);
+
+//    //    breakConnectionFromTo(1,2);
+//    //    repointConnecters(2,5);
+
+
+}
+bool Computer::prepareDataTypes()
+{
+    _memory[KBDR].dataType = CHAR;
+    for(mem_addr_t addr = VIDEO_ADDR; ISINVIDEOSPACE(addr);addr++)
     {
-        _memory[i].connectors=nullptr;//set the address numbers.
+        _memory[addr].dataType = COLOR;
     }
-
-    for(int i = 0; i < 10; i++)
-    {
-        (&_memory[1])+=connector_t(i+10);
-    }
-    formConnectionFromTo(1,2);
-    formConnectionFromTo(4,2);
-    (&_memory[2])-=connector_t(4);
-    //    formConnectionFromTo(3,2);
-    (&_memory[2])+=connector_t(3);
-
-    (&_memory[2])-=connector_t(4);
-    (&_memory[2])-=connector_t(1);
-
-    (&_memory[2])-=connector_t(1);
-
-    //    breakConnectionFromTo(1,2);
-    //    repointConnecters(2,5);
-
-
 }
 void Computer::lowerBoundTimes()
 {
@@ -910,11 +946,6 @@ size_t Computer::loadProgramFile(char* path) {
     flipBytes(&startingAddr);
     for(val_t i = 0; i < programSize; i++)
     {
-        if(i == 0x200)
-        {
-                        int $$$ = 3;
-
-        }
         val_t fread = (int8_t)(file->_ptr[2*i]);
         val_t freadIsNearUseless = ((val_t)(fread)) << 8;
         val_t soIHaveToDoThis = (val_t)(file->_ptr[2*i+1]);
@@ -1554,7 +1585,7 @@ void Computer::startExecution()
 void Computer::continueExecution()
 {
     MASK
-            val_t valuePC = getRegister(PC);
+//            val_t valuePC = getRegister(PC);
     Undos->beginMacro("continue ");
     setRunning(true);
     do
@@ -1638,7 +1669,7 @@ mem_addr_t Computer::idLastOptionAfter(mem_addr_t addr)
     {
         return STACKSPACE_END;
     }
-    if(addr>=VIDEOSPACE_START && addr <= VIDEOSPACE_END)
+    if(addr>=VIDEOSPACE_BEGIN && addr <= VIDEOSPACE_END)
     {
         return VIDEOSPACE_END;
     }
@@ -1800,17 +1831,14 @@ void Computer::moveMemory(mem_addr_t selectionBegin, mem_addr_t selectionEnd, in
 {
 
     MASK
-            bool a = 0;
+
     mem_addr_t rangeBegin = 0;
     mem_addr_t rangeEnd   = 0;
     identifyRangeBounds(&rangeBegin,&rangeEnd,selectionBegin,selectionEnd,delta);
     val_t length = rangeEnd + 1 - rangeBegin;
     mem_loc_t temp[length];
 
-    //copy everything into a temp buffer and adjust them so they point the right way.
-    //the compiler thinks it fun to compile things out of order.
-    //however, this implementation cares not.
-    int thisIsDumb = 0;
+
 
     if(fastShiftPhase0(selectionBegin,selectionEnd,delta,temp))
     {
@@ -2159,15 +2187,13 @@ void Computer::fastJuggleShiftPhase2(mem_addr_t startSearch, mem_addr_t endSearc
 }
 bool Computer::updateConnectorsAfterPhase0(mem_addr_t selectionBegin, mem_addr_t selectionEnd, int32_t delta, mem_loc_t* temp)
 {
-
-    bool a = 0;
     mem_addr_t rangeBegin = 0;
     mem_addr_t rangeEnd   = 0;
     identifyRangeBounds(&rangeBegin,&rangeEnd,selectionBegin,selectionEnd,delta);
     for(mem_addr_t addr = rangeBegin; addr <= rangeEnd; addr++)
     {
         connector_t** cur = &(temp[addr-rangeBegin].connectors);
-        bool ok = true;
+
 
         while((*cur) != nullptr)
         {
@@ -2180,7 +2206,6 @@ bool Computer::updateConnectorsAfterPhase0(mem_addr_t selectionBegin, mem_addr_t
 }
 bool Computer::insertShiftedMemory(mem_addr_t selectionBegin, mem_addr_t selectionEnd, int32_t delta, mem_loc_t* temp)
 {
-    bool a = 0;
     mem_addr_t rangeBegin = 0;
     mem_addr_t rangeEnd   = 0;
     identifyRangeBounds(&rangeBegin,&rangeEnd,selectionBegin,selectionEnd,delta);
