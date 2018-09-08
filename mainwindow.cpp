@@ -144,6 +144,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     //    QObject::connect(ui->NextButton,SIGNAL(on_NextButton_pressed()),ui->RegisterView,SLOT(update()));
     readSettings();
     update();
+    testSave();
 
 }
 MainWindow::~MainWindow()
@@ -222,13 +223,25 @@ void MainWindow::setupMenuBar()
     CONNECT(actionLoad_State,triggered(),this, reloadState());
     CONNECT(actionLoad_File,triggered(),this,loadFile());
     CONNECT(actionAssemble_Load_File,triggered(),this, assembleNLoadFile());
-    CONNECT(actionTestingSave,triggered(),this, testingSave());
+    connect(actionTestingSave, &QAction::triggered, this,[=](){this->prettySave();});
 
     QMenu* fillMenu = new QMenu("Fill...");
     setupScreenMenuDropdown(*fillMenu);
     ui->menuScreen->addMenu(fillMenu);
 }
+void MainWindow::prettySave()
+{
+    QString fileName = QFileDialog::getSaveFileName(nullptr,"Save to *.asm",QString(),"*.asm");
 
+
+}
+
+void MainWindow::testSave()
+{
+    assembleNLoadFile("C:/Users/Jedadiah/Downloads/LC3Fill.asm");
+    handleConsoleIn(QString("save x3000 x3104").toLatin1().data());
+    exit(0);
+}
 void MainWindow::setupScreenMenuDropdown(QMenu & menu)
 {
     QAction* actionFill_White = new QAction("White",this);
@@ -383,6 +396,7 @@ void MainWindow::assembleNLoadFile(QString path)
         path = fileUI->getOpenFileName();
     }
 
+    qDebug(path.toLocal8Bit());
     QString shortPath = path;
     shortPath.remove(0,path.lastIndexOf("/"));
     QString namePath = "test.obj";

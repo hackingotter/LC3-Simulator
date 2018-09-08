@@ -3,6 +3,7 @@
 #include "ctime"
 #include <iostream>
 #include <fstream>
+#include <QFileDialog>
 Saver::Saver()
 {
 
@@ -14,6 +15,7 @@ void Saver::handleLabels(std::ofstream & destination, mem_addr_t addr)
 
     if(labelString != "")
     {
+
         destination<<labelString;
         if(data == INSTRUCTION)
         {
@@ -38,6 +40,7 @@ void Saver::handleComments(std::ofstream & destination, mem_addr_t addr)
     QString comment = Computer::getDefault()->getMemComment(addr);
 
     comment.replace(QRegExp("\n"),"\n\t");
+//    comment.replace(QRegExp("\b"),Computer::getDefault()->getMemLabel(addr)->name);
 
     destination << comment.toStdString()<< std::endl;
 }
@@ -45,9 +48,9 @@ void Saver::handleEnd(std::ofstream & destination)
 {
     destination << ".END" << std::endl;
 }
-void Saver::savePortable( mem_addr_t beginning, mem_addr_t end, bool takeCommentBefore)
+void Saver::savePortable( mem_addr_t beginning, mem_addr_t end, bool takeCommentBefore, QString fileName)
 {
-    QString fileName = QString("TestSaveProt.asm");
+
     std::ofstream destination;
     destination.open(fileName.toLocal8Bit().toStdString());
     if(takeCommentBefore)
@@ -74,6 +77,11 @@ void Saver::vanguard()
     loadState();
 
 }
+//void Saver::prettySave()
+//{
+
+//    savePortable();
+//}
 void Saver::saveState()
 {
     std::time_t timer;

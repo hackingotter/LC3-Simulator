@@ -37,7 +37,7 @@ using namespace std;
 #define  haltTrap 0xF025
 
 Assembler::Assembler() : parserRegex(regex(
-                                         R"abc([ \t]*((?!(?:ADD|SUB|AND|(?:BR[nzp]{0,3})|JMP|JMPT|JSRR|JSR|LDI|LDR|LD|LEA|NOT|RET|RTT|RTI|STI|STR|ST|TRAP|MUL|GETC|OUT|IN|PUTSP|PUTS|HALT)(?:\W|$))\w*)?[ \t]*(?:(?:(ADD|SUB|AND|(?:BR[nzp]{0,3})|JMP|JMPT|JSRR|JSR|LDI|LDR|LD|LEA|NOT|RET|RTT|RTI|STI|STR|ST|TRAP|MUL|\.FILL|\.STRINGZ?|\.ORIG|\.END|\.BLKW|PUTS|GETC|OUT|IN|PUTSP|HALT)(?:\W|$))[ \t]*(?:r(\d),?)?[ \t]*(?:r(\d),?)?[ \t]*(?:(?:r(\d))|((?:#|x|b|o|-(?!-))?-?[0-9A-F]+\.?[0-9]*)|(\w*)|((?:".*")|(?:'.*')))?)?[ \t]*(?:(;+[\S \t]*))?$)abc",
+                                         R"abc([ \t]*((?!(?:ADD|SUB|AND|(?:BR[nzp]{0,3})|JMP|JMPT|JSRR|JSR|LDI|LDR|LD|LEA|NOT|RET|RTT|RTI|STI|STR|ST|TRAP|MUL|GETC|OUT|IN|PUTSP|PUTS|HALT)(?:\W|$))\w*)?[ \t]*(?:(?:(ADD|SUB|AND|(?:BR[nzp]{0,3})|JMP|JMPT|JSRR|JSR|LDI|LDR|LD|LEA|NOT|RET|RTT|RTI|STI|STR|ST|TRAP|MUL|\.FILL|\.STRINGZ?|\.ORIG|\.END|\.BLKW|PUTS|GETC|OUT|IN|PUTSP|HALT)(?:\W|$))[ \t]*(?:r(\d),?)?[ \t]*(?:r(\d),?)?[ \t]*(?:(?:r(\d))|((?:#|x|b|o|-(?!-))?-?[0-9A-F]+\.?[0-9]*)|(\w*)|((?:".*")|(?:'.*')))?)?[ \t]*((?:(?:;+.*))?))abc",
                                          regex_constants::icase)),
                          programLength(0),
                          startingAddress(0xFFFF),
@@ -152,13 +152,18 @@ QString Assembler::commentForAddress(mem_addr_t addr)
 
 void Assembler::passCommentsToComputer(Computer *comp)
 {
+    cleanComments();
     MASK
     foreach (const auto n, commentDict) {
         comp->setMemComment(n.first,n.second);
     }
     UNMASK
 }
-
+void Assembler::cleanComments()
+{
+    commentDict[startingAddress-1] =  commentDict[0xFFFE] + commentDict[startingAddress-1] ;
+    commentDict[0xFFFE] = "";
+}
 data_t Assembler::dataTypeForAddress(mem_addr_t addr)
 {
     auto match = dataDict.find(addr);
@@ -253,15 +258,29 @@ uint16_t Assembler::processLine(string &line, RunType runType, uint16_t pc, ofst
 
     // if no op -> skip
     if (!instruction.empty()) {
+
         QString comm = annotatedComment.append(QString::fromStdString(comment));
         commentDict[pc] = comm;
         annotatedComment = QString();
 
         pc = writeInstruction(runType, instruction, firstReg, secondReg, thirdReg, opNumber, opLabel, opString,
-                              nOfRegs, nOrL, oStream, pc);
+                               nOfRegs, nOrL, oStream, pc);
     } else {
-        annotatedComment = "";
+        if( runType != PreRun)
+        {
+//        annotatedComment;
+//
+            if(!comment.empty() && label.empty())
+            {
+                commentDict[pc-1] = commentDict[pc-1] + "";
+            }
+            if(comment.empty() && !label.empty())
+            {
+                commentDict[pc-1] = commentDict[pc-1] + "\b";
+            }
+
         commentDict[pc-1] = commentDict[pc-1] + QString::fromStdString(comment+"\n");
+        }
     }
 
     return pc;

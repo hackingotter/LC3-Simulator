@@ -62,6 +62,8 @@ class MainWindow : public QMainWindow
     int getScreenHeight();
 
     void saveWorkSpace();
+    void prettySave();
+    void testSave();
 public:
     /**
      * @brief model The main model for the memory tables
@@ -139,6 +141,9 @@ public:
 
 
     void setupConnections();
+
+
+
 public slots:
     /**
      * on_MemView2GotoButton_pressed
