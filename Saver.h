@@ -27,6 +27,7 @@ private:
     void static handleValues(std::ofstream &destination, mem_addr_t addr);
     void static handleComments(std::ofstream &destination, mem_addr_t addr);
     void static handleEnd(std::ofstream &destination);
+    void getSaveBounds(mem_addr_t &start, mem_addr_t &end);
 };
 
 #endif // SAVER_H

@@ -216,6 +216,10 @@ bool handleConsoleIn(char * line)
     {
 
     }
+    CASE("welcome","w",argv,0)
+    {
+
+    }
     return false;
 }
 bool handleSaveCommand(char ** argv, int remaining)
@@ -290,6 +294,10 @@ console_err_t traceCommand(console_arg_t args)
 }
 console_err_t runCommand(console_arg_t args)
 {
+    if(args == nullptr)
+    {
+
+    }
 //    if(!strcmp("-s",args[0]))
 //    {
 //        return stepCommand(nullptr);

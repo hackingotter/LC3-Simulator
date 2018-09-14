@@ -240,6 +240,7 @@ public:
         if(mem_addr == DDR)
         {
             Computer::getDefault()->popDisplay();
+            Computer::getDefault()->setMemValue(KBSR,0x7000);
         }
         Computer::getDefault()->remember--;
     }
@@ -249,11 +250,14 @@ public:
         {
             Computer::getDefault()->remember++;
             Computer::getDefault()->setMemValue(mem_addr,newValue);
-            if(mem_addr == DDR)
-            {
-                Computer::getDefault()->pushDisplay(newValue);
-            }
+
             Computer::getDefault()->remember--;
+        }
+        if(mem_addr == DDR)
+        {
+            Computer::getDefault()->pushDisplay(newValue);
+            Computer::getDefault()->setMemValue(KBSR,0x0000);
+
         }
         age = 0;
     }
@@ -269,7 +273,7 @@ class changeMemLabel: public QUndoCommand
 public:
     changeMemLabel(mem_addr_t addr,label_t* oldLabel,label_t* newLabel):mem_addr(addr),oldLabelPtr(oldLabel),newLabelPtr(newLabel)
     {
-        setText("set Label");
+//        setText("set Label at" + QString().setNum(addr) +" to " + QString(newLabel->name));
         qDebug("You made a memlable under");
 //        QUndoCommand::setObsolete(oldLabelPtr && // null check
 //                                  (newLabelPtr->name == oldLabelPtr->name) &&
@@ -283,16 +287,13 @@ public:
     }
     void redo()
     {
-        qDebug("am I going to redo?");
         if(age == 0)
         {
             Computer::getDefault()->remember++;
             Computer::getDefault()->setMemLabel(mem_addr,newLabelPtr);
             Computer::getDefault()->remember--;
-            qDebug("yes");
             return;
         }
-        qDebug("no");
         age = 0;
     }
 
@@ -425,6 +426,7 @@ Computer::Computer(QObject *parent) : QObject(parent)
     Undos->setUndoLimit(65535);
 
     //critical for being able to undo the moves
+
     prepareMemory();
 //    prepareConnectors();
     prepareDataTypes();
@@ -465,6 +467,9 @@ void Computer::prepareMemory()
     {
         _memory[i].addr=i;//set the address numbers.
     }
+    _memory[DSR].value = 0x8000;
+    _memory[KBSR].value = 0x0000;
+//    setupConstants();
 }
 void Computer::prepareConnectors()
 {
@@ -527,7 +532,6 @@ Computer* Computer::getDefault() {
         return defaultComputer;
     }
     defaultComputer = new Computer();
-    defaultComputer->testRunner();
     return defaultComputer;
 }
 
@@ -1361,6 +1365,7 @@ void Computer::ldi(val_t inst) {
     checkMemAccess(addr);
     val_t memVal = getMemValue(innerAddr);
 
+
     setRegister(dr, memVal);
 
     if (memVal & bitMask(15)) {
@@ -1371,6 +1376,10 @@ void Computer::ldi(val_t inst) {
         setProgramStatus(cond_p);
     }
 
+    switch(addr)
+    {
+    case KBDR: setMemValue(KBSR,0);break;
+    }
     checkSpecialAddressRead(innerAddr);
 }
 
@@ -1477,6 +1486,7 @@ void Computer::str(val_t inst) {
 }
 
 void Computer::trap(val_t inst) {
+    incrementPC();
     if (inst & 0x0F00) {
         // bits 11-8 should be 0
         throw "INVALID OP ERROR: bits 11-8 should be 0 in TRAP";
@@ -1626,6 +1636,7 @@ bool Computer::setKeyboardCharacter(char c, bool force)
     if (!needsForce || force) {
         Undos->beginMacro(QString(&c) + " key pressed");
         setMemValue(KBDR,c);
+        setMemValue(KBSR,0x8000);
         Undos->endMacro();
     }
     return !needsForce;
@@ -1634,7 +1645,7 @@ bool Computer::setKeyboardCharacter(char c, bool force)
 char Computer::getKeyboardCharacter()
 {
     val_t val = getMemValue(KBDR);
-    setMemValue(KBSR,0x8000);
+    setMemValue(KBSR,0x0000);
     //    val >>= 8;
     return (char)val;
 }
@@ -2049,6 +2060,19 @@ mem_addr_t Computer::getFurthestConnection(mem_loc_t loc)
         }
     }
     return furthest;
+
+}
+
+void Computer::setupConstants()
+{
+    setMemLabelText(KBSR,"KBSR");
+    setMemLabelText(KBDR,"KBDR");
+    setMemLabelText(DSR,"DSR");
+    setMemLabelText(DDR,"DDR");
+    setMemLabelText(TMR,"TMR");
+    setMemLabelText(MPR,"MPR");
+    setMemLabelText(MCR,"MCR");
+    setMemLabelText(MCC,"MCC");
 
 }
 mem_addr_t Computer::terribadInsertLineAlgorithm(mem_addr_t destination)
@@ -2713,7 +2737,7 @@ QString Computer::displayData(mem_loc_t loc)
     }
     }
 }
-QString Computer::displayAddressValue(mem_addr_t addr,bool displayMnemAfter) const
+QString Computer::displayAddressValue(mem_addr_t addr,bool displayMnemAfter, bool suppressBADOP) const
 {
 //    QString inputStr = input.toString();
 //    QChar beginning = inputStr.at(0);
@@ -2735,13 +2759,18 @@ QString Computer::displayAddressValue(mem_addr_t addr,bool displayMnemAfter) con
     default:
          out = "Unhandled"; break;
     }
+    QString mnem = Computer::getDefault()->mnemGen(addr);
     if(type  != INSTRUCTION && displayMnemAfter)
     {
-        QString mnem = Computer::getDefault()->mnemGen(addr);
+
         if(mnem != BADOP)
         {
             out += " (" + mnem +")";
         }
+    }
+    if(suppressBADOP && mnem == BADOP)
+    {
+        out = getHexString(value);
     }
     return out;
 //    switch(beginning)

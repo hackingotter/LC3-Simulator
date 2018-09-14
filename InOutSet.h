@@ -12,14 +12,14 @@ class InOutSet : public QWidget
     Q_OBJECT
 public:
     InOutSet(QWidget *parent = 0);
-    void clearText();
+
     void update();
     void keyPressEvent(QKeyEvent *event);
 public slots:
     void kick();
     void pushChar(val_t);
     void popChar();
-
+    void clearText();
 
 private:
     QPushButton* Clear;

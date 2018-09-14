@@ -3,7 +3,11 @@
 #include "QLabel"
 #include "QHBoxLayout"
 #include "QTabWidget"
+#include "QCoreApplication"
+#include "QTextEdit"
+#include "QGridLayout"
 
+#include "QScrollArea"
 
 #define TABUTILITY(SOURCE,GENERATOR,NAME,TARGET)\
 SOURCE = GENERATOR;\
@@ -35,9 +39,80 @@ void HelpMenu::generateTabs()
 QWidget* HelpMenu::generateGeneralTab()
 {
     QWidget* genTab = new QWidget();
+    QTextEdit* generalInfo = new QTextEdit("A");
+    generalInfo->setParent(genTab);
+    QGridLayout* QVB = new QGridLayout(genTab);
+    genTab->setLayout(QVB);
+
+    QString* info = new QString("Hello!\n"
+                   "\n"
+                   "Welcome to LC3-Sim v"+QCoreApplication::applicationVersion()+
+                   "\n"
+                   "\n"
+                   "Right now this program is in Beta.  There are many bugs, many things that aren't implemented,"
+                   " and somethings are implemented incorrectly, or worse partially correctly.\n"
+                   "\n"
+                   "In light of this, I beg that you heed this warning:\n"
+                   "\n"
+                   "Do not trust this simulator!\n"
+                   "\n"
+                   "I can guarentee that the assembler won't break your file, but I can't guarentee that the assembler "
+                   "is fully functional.  If you must save, it can be done by typing \n\n\t'save x<starting_address> x<ending_address>'\n\n"
+                   "into the console, and it will try to save the file.\n"
+                   "I can't guarentee that the save will work.  It probably will, but I beg that you make your adjustments either"
+                   "with great care or somewhere that has reputable saving features, like notepad.exe or any word processor.\n"
+                   "\n"
+                   "Known bad implementations:\n\n"
+                   "\t The console doesn't really do much, and what it does do it doesn't clearly communicate that.  Just don't use it unless"
+                   "you feel like risking it all and saving.\n\n"
+                   "\t Don't undo with input.  It will likely crash"
+                   "\n"
+                   "\n"
+
+                   "Bugs:\n"
+                   "\n"
+                   "\t There are going to be bugs.  I apologize beforehand for any time lost, but know that every bug you find for"
+                   "me is a bug someone won't suffer in a future version.\n"
+                   "\n"
+                   "\t If you are able to find a bug, I ask that you first check that you have the newest version of the simulator."
+                   "you can reach me at jbmelberg@eiu.edu\n"
+                   "Please give me a description of what you were doing, what happened, and the code that you were using. I can't promise "
+                   "that I will be able to fix it that day, but I plan on bugfixing on a weekly basis.\n"
+                   "\n"
+                   "If you would like to avoid the bugs, just follow these tips:\n\n"
+                   "\tUse a different simulator.  This program is in Beta, so there are bugs that you can see and bugs you can't see.\n\n"
+                   "\tUse the interface slowly, as not every button is shut off when it should be.\n\n"
+                   "\tCheck the performance against a different simulator.\n"
+                   "\n"
+                   "Suggestions:\n"
+                   "\n"
+                   "\n If you think of a feature which you would like to see added, please let me know.  I have much planned for "
+                   "this simulator, and your input is definitely appreciated.\n"
+                   "\n"
+                   "\n"
+                   "Things to do and see:\n"
+                   "\n"
+                   "\t Down in the bottom right corner, there is a box that says \"<empty>\".  This is one of the most useful features I "
+                   "have ever implemented.\n"
+                   "That thing lets you run and unrun code!  It is sorta buggy, like the rest of the program, but it is something that "
+                   "I sorely miss whenever I code some other language.  Treat it gently, and it will likely serve you well."
+                   "");
 
 
+    generalInfo->setText(*info);
+    generalInfo->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    generalInfo->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+#define QUICKER QSizePolicy::MinimumExpanding
+    generalInfo->setSizePolicy(QUICKER,QUICKER);
+//    QScrollArea* QSA = new QScrollArea(genTab);
+//    QSA->setWidget(generalInfo);
+//    QSA->setSizePolicy(QUICKER,QUICKER);
 
+
+    QVB->addWidget(generalInfo,1,0);
+    generalInfo->adjustSize();
+
+    genTab->setSizePolicy(QUICKER,QUICKER);
     return genTab;
 }
 QWidget* HelpMenu::generateMemViewTab()

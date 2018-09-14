@@ -95,9 +95,7 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
 
-    HelpMenu* help = new HelpMenu();
-    help->show();
-    help->activateWindow();
+
 
 //    Computer::getDefault()->lowerBoundTimes();
     std::cout<<Computer::getDefault()->proposedNewAddress(8,5,10,-2)<<std::endl;
@@ -144,12 +142,18 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     //    QObject::connect(ui->NextButton,SIGNAL(on_NextButton_pressed()),ui->RegisterView,SLOT(update()));
     readSettings();
     update();
-    testSave();
+//    testSave();
 
 }
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+void MainWindow::importantInfo()
+{
+    HelpMenu* help = new HelpMenu();
+    help->show();
+    help->activateWindow();
 }
 //MemWindow* MainWindow::makeNConnectNewMemWindow(modeler* model)
 //{
@@ -211,12 +215,20 @@ void MainWindow::setupMenuBar()
     QAction* actionLoad_State = new QAction("Load IDE State",this);
     QAction* actionTestingSave = new QAction("Test saving",this);
 
-    actionAssemble_Load_File->setShortcut(QKeySequence(tr("Ctrl+D")));
-
-
     QList<QAction*> fileActions;
-    fileActions <<actionLoad_File<<actionAssemble_File<<actionAssemble_Load_File<<actionSave_File<<actionSave_File_As<<actionSave_State<<actionLoad_State;
-    fileActions << actionTestingSave;
+    fileActions <<actionLoad_File;
+//    fileActions <<actionAssemble_File;
+    fileActions <<actionAssemble_Load_File;
+//    fileActions <<actionSave_File;
+    fileActions <<actionSave_File_As;
+//    fileActions <<actionSave_State;
+//    fileActions <<actionLoad_State;
+//    fileActions <<actionTestingSave;
+    actionAssemble_Load_File->setShortcut(QKeySequence(tr("Ctrl+D")));
+    actionSave_File_As->setShortcut(QKeySequence(tr("Ctrl+S")));
+
+//    <<actionAssemble_File<<actionAssemble_Load_File<<actionSave_File<<actionSave_File_As<<actionSave_State<<actionLoad_State;
+//    fileActions << actionTestingSave;
     ui->menuFile->addActions(fileActions);
 
     CONNECT(actionSave_State,triggered(),this, storeState());
@@ -238,6 +250,8 @@ void MainWindow::prettySave()
 
 void MainWindow::testSave()
 {
+    QFrame* pictu = new QFrame();
+
     assembleNLoadFile("C:/Users/Jedadiah/Downloads/LC3Fill.asm");
     handleConsoleIn(QString("save x3000 x3104").toLatin1().data());
     exit(0);
@@ -295,6 +309,7 @@ void MainWindow::setupControlButtons()
 void MainWindow::setupConnections()
 {
     qRegisterMetaType<mem_addr_t>("mem_addr_t");
+    qRegisterMetaType<val_t>("val_t");
     //    qRegisterMetaType<ProcessHandle*>("ProcessHandle*const");
 }
 void MainWindow::setupUndoInterface()
@@ -312,7 +327,7 @@ bool MainWindow::loadFile(QString path)
     if(path==QString())
     {
         qDebug("Looks like there was no file specified.  Time for the user to choose.");
-        path = QFileDialog::getOpenFileName(this,"Select a file to load");
+        path = QFileDialog::getOpenFileName(this,"Select a file to load",QString(),"*.obj");
     }
     if(path!=QString())
     {
@@ -383,7 +398,7 @@ void MainWindow::assembleNLoadFile(QString path)
 {
 
     QFileDialog* fileUI = new QFileDialog();
-    fileUI->setNameFilter(QString("Assmbly (*").append(ASSEMBLY_SUFFIX).append(")"));
+    fileUI->setNameFilter(QString("Assembly (*").append(ASSEMBLY_SUFFIX).append(")"));
     fileUI->setReadOnly(true);
     fileUI->setWindowTitle("Choose a file to assemble and load into memory");
 
@@ -444,6 +459,7 @@ void MainWindow::assembleNLoadFile(QString path)
     }
     else
     {
+        qDebug("didn't work");
 
     }
 
@@ -527,6 +543,13 @@ void MainWindow::setupInOut()
 {
     InOutPut = new InOutSet(this);
     ui->inOutHome->addWidget(InOutPut);
+    QMenu* InOutMenuBar = new QMenu("Text Options");
+
+    QAction* actionClearInput= new QAction("Clear Input Space",this);
+
+     CONNECT(actionClearInput,triggered(),InOutPut, clearText());
+     InOutMenuBar->addAction(actionClearInput);
+    ui->menuBar->addMenu(InOutMenuBar);
     CONNECT(this, reCheck(), InOutPut, update());
 }
 void MainWindow::onTableClicked(const QModelIndex & current)

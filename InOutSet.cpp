@@ -51,9 +51,10 @@ InOutSet::InOutSet(QWidget *parent) : QWidget(parent)
     hLayout->addLayout(vLayout);
     vLayout->addWidget(Clear);
     vLayout->addWidget(Take);
-    textDisplay->setText("Hello");
+    textDisplay->setText("");
 
 }
+
 void InOutSet::keyPressEvent(QKeyEvent *event)
 {
     qDebug("key pressed processing begin");
@@ -92,8 +93,7 @@ void InOutSet::keyPressEvent(QKeyEvent *event)
 }
 void InOutSet::clearText()
 {
-
-
+    textDisplay->setText("");
 }
 void InOutSet::update()
 {
@@ -108,8 +108,12 @@ void InOutSet::popChar()
 }
 void InOutSet::pushChar(val_t val)
 {
+    Computer::getDefault()->setMemValue(DSR,Computer::getDefault()->getMemValue(DSR)|0x7FFF);
+
     qDebug("pushChar requested");
+    qDebug(QString().setNum(val).toLocal8Bit());
     textDisplay->setText(textDisplay->text()+(char)val);
+    Computer::getDefault()->setMemValue(DSR,Computer::getDefault()->getMemValue(DSR)&0x8000);
 }
 
 void InOutSet::kick()

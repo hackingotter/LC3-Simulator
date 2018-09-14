@@ -144,6 +144,7 @@ public:
 
 
 
+    void importantInfo();
 public slots:
     /**
      * on_MemView2GotoButton_pressed

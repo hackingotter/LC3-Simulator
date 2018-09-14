@@ -262,7 +262,7 @@
          <enum>QTabWidget::Rounded</enum>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>4</number>
         </property>
         <property name="elideMode">
          <enum>Qt::ElideRight</enum>
@@ -617,18 +617,11 @@
     </property>
     <addaction name="actionInfo"/>
    </widget>
-   <widget class="QMenu" name="menutest">
-    <property name="title">
-     <string>test</string>
-    </property>
-    <addaction name="actiontest1"/>
-   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuOptions"/>
    <addaction name="menuMore_Options"/>
    <addaction name="menuScreen"/>
    <addaction name="menuHelp"/>
-   <addaction name="menutest"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">

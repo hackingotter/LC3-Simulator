@@ -8,6 +8,10 @@ Saver::Saver()
 {
 
 }
+void Saver::getSaveBounds(mem_addr_t & start, mem_addr_t &end)
+{
+
+}
 void Saver::handleLabels(std::ofstream & destination, mem_addr_t addr)
 {
     data_t data = Computer::getDefault()->getMemDataType(addr);
@@ -32,7 +36,8 @@ void Saver::handleValues(std::ofstream & destination, mem_addr_t addr)
     {
         destination << ".FILL ";
     }
-    destination << Computer::getDefault()->displayAddressValue(addr,false).toStdString()<<"\t";
+
+    destination << Computer::getDefault()->displayAddressValue(addr,false,true).toStdString()<<"\t";
 }
 void Saver::handleComments(std::ofstream & destination, mem_addr_t addr)
 {
