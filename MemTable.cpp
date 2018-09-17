@@ -94,14 +94,14 @@ void MemTable::setupActions()
     budgeDown->setKey(Qt::CTRL+Qt::SHIFT+Qt::Key_Down);
     connect(budgeDown,SIGNAL(activated()),this, SLOT(fastShiftDown()));
     budgeDown->setContext(Qt::WidgetShortcut);
-    ADDSHORTCUT("Paste"     ,Qt::CTRL + Qt::Key_V                               , paste());
-    ADDSHORTCUT("Paste Above",Qt::CTRL+ Qt::ALT + Qt::Key_V                     , pasteBrute());
-    ADDSHORTCUT("Force Down",Qt::CTRL + Qt::SHIFT + Qt::ALT + Qt::Key_Down      , fastShiftDown(););
-    ADDSHORTCUT("Force Up"  ,Qt::CTRL + Qt::SHIFT + Qt::ALT + Qt::Key_Up        , shiftUpBrute());
-    ADDSHORTCUT("Insert Below",Qt::CTRL + Qt::Key_Enter                         , insertBelow());
-    ADDSHORTCUT("Insert Above",Qt::CTRL + Qt::SHIFT + Qt::Key_Enter             , insertAbove());
-    ADDSHORTCUT("Go Backward"   , Qt::Key_Alt + Qt::Key_Left                    , goBackward(););
-    ADDSHORTCUT("Go Forward"   , Qt::Key_Alt + Qt::Key_Right                    , goForward(););
+    ADDSHORTCUT("Paste"     ,Qt::CTRL + Qt::Key_V                               ,this, paste());
+    ADDSHORTCUT("Paste Above",Qt::CTRL+ Qt::ALT + Qt::Key_V                     ,this, pasteBrute());
+    ADDSHORTCUT("Force Down",Qt::CTRL + Qt::SHIFT + Qt::ALT + Qt::Key_Down      ,this, fastShiftDown(););
+    ADDSHORTCUT("Force Up"  ,Qt::CTRL + Qt::SHIFT + Qt::ALT + Qt::Key_Up        ,this, shiftUpBrute());
+    ADDSHORTCUT("Insert Below",Qt::CTRL + Qt::Key_Enter                         ,this, insertBelow());
+    ADDSHORTCUT("Insert Above",Qt::CTRL + Qt::SHIFT + Qt::Key_Enter             ,this, insertAbove());
+    ADDSHORTCUT("Go Backward"   , Qt::Key_Alt + Qt::Key_Left                    ,this, goBackward(););
+    ADDSHORTCUT("Go Forward"   , Qt::Key_Alt + Qt::Key_Right                    ,this, goForward(););
 
 
 

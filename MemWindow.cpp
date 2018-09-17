@@ -188,6 +188,8 @@ void MemWindow::handleTracking()
     case R6:
         color = r6colorString;
         break;
+    default:
+        color = "white";
     }
     SpecialButton->setStyleSheet(QString("QPushButton:enabled"
                                          "{ Background-color: ")+QString((followmode)?color:"light grey")+QString("}")

@@ -119,8 +119,6 @@ QWidget* HelpMenu::generateMemViewTab()
 {
     QWidget* memTab = new QWidget();
 
-
-
     return memTab;
 }
 QWidget* HelpMenu::generateStackViewTab()

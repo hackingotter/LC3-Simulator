@@ -48,9 +48,15 @@ void HistoryHandler::redo(int level)
 bool HistoryHandler::add(QUndoCommand *cmd)
 {
 //qDebug(cmd->actionText().toLocal8Bit()+ " " +QString().setNum(this->index()).toLocal8Bit());
-if(doing==0)this->QUndoStack::push(cmd);
+if(doing==0)push(cmd);
 //qDebug("hy");
 return true;
+}
+void HistoryHandler::push(QUndoCommand *cmd)
+{
+
+//    qDebug(QString().setNum(cmd->id()).toLocal8Bit());
+    this->QUndoStack::push(cmd);
 }
 
 

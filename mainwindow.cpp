@@ -8,11 +8,13 @@
 #include "BetterScrollbar.h"
 #include "RegisterModel.h"
 //#include "Simulator.h"
+#include "QProgressDialog"
 #include "ModelDelegate.h"
 #include "Util.h"
 #include "MemWindow.h"
 #include "stdio.h"
 #include "hope.h"
+#include "QErrorMessage"
 #include <QColorDialog>
 #include <QtConcurrent/QtConcurrentRun>
 #include <QStatusBar>
@@ -95,7 +97,7 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
 
-
+    setWindowTitle("LC-3 Sim");
 
 //    Computer::getDefault()->lowerBoundTimes();
     std::cout<<Computer::getDefault()->proposedNewAddress(8,5,10,-2)<<std::endl;
@@ -167,8 +169,7 @@ void MainWindow::setupViews()
     this->model = new modeler(this, threadRunning);
 
     this->StackModel = new StackModeler(this,threadRunning);
-    qInfo("Header made");
-    qInfo("Size Set");
+
     QString str;
     Saturn = new ScrollBarHandler();
     for(int i = 0;i<3;i++)
@@ -216,7 +217,7 @@ void MainWindow::setupMenuBar()
     QAction* actionTestingSave = new QAction("Test saving",this);
 
     QList<QAction*> fileActions;
-    fileActions <<actionLoad_File;
+//    fileActions <<actionLoad_File;
 //    fileActions <<actionAssemble_File;
     fileActions <<actionAssemble_Load_File;
 //    fileActions <<actionSave_File;
@@ -250,7 +251,7 @@ void MainWindow::prettySave()
 
 void MainWindow::testSave()
 {
-    QFrame* pictu = new QFrame();
+//    QFrame* pictu = new QFrame();
 
     assembleNLoadFile("C:/Users/Jedadiah/Downloads/LC3Fill.asm");
     handleConsoleIn(QString("save x3000 x3104").toLatin1().data());
@@ -335,6 +336,7 @@ bool MainWindow::loadFile(QString path)
         try
         {
             Computer::getDefault()->loadProgramFile(path.toLocal8Bit().data());
+            success = true;
         }
         catch(const std::string& e)
         {
@@ -394,6 +396,11 @@ QString MainWindow::assembleFile(QString path)
 
 
 }
+void MainWindow::indicatingAssembleNLoad(QString path)
+{
+
+
+}
 void MainWindow::assembleNLoadFile(QString path)
 {
 
@@ -414,19 +421,25 @@ void MainWindow::assembleNLoadFile(QString path)
     qDebug(path.toLocal8Bit());
     QString shortPath = path;
     shortPath.remove(0,path.lastIndexOf("/"));
-    QString namePath = "test.obj";
+    QString namePath = shortPath+".obj";
     Computer::getDefault()->Undos->beginMacro("Assemble and Load "+shortPath);
     qDebug("assembling and loading");
+
 
 
     qDebug("Trying " + path.toLocal8Bit());
 
     try
     {
+
+
         embler.assembleFile(path.toLocal8Bit().data(),namePath.toLocal8Bit().data());
     }
     catch(const std::string& e)
     {
+//        progressy->cancel();
+        QErrorMessage* errory = new QErrorMessage(this);
+        errory->showMessage(QString().fromStdString(e));
         std::cout<<e<<std::endl;
         Computer::getDefault()->Undos->endMacro();
         Computer::getDefault()->Undos->undo();//no need in saving this
@@ -434,33 +447,44 @@ void MainWindow::assembleNLoadFile(QString path)
     }
     catch(...)
     {
-
+//        progressy->cancel();
+        QErrorMessage* errory = new QErrorMessage(this);
+        errory->showMessage("An unforseen error has occured");
         std::cout<<"An unforseen error has occured"<<std::endl;
         Computer::getDefault()->Undos->endMacro();
         Computer::getDefault()->Undos->undo();//no need in saving this
         return;
     }
     try{
+//        progress= 1;
+//        progressy->setLabelText("Passing values over.");
         embler.passLabelsToComputer(Computer::getDefault());
         embler.passCommentsToComputer(Computer::getDefault());
         embler.passDataTypesToComputer(Computer::getDefault());
     }
     catch(const std::string& e)
     {
+
         std::cout<<e<<endl;
         Computer::getDefault()->Undos->endMacro();
         Computer::getDefault()->Undos->undo();
         return;
     }
+//    progressy->setValue(2);
+//    progressy->setLabelText("Loading file.");
     if(loadFile(namePath))
     {
+//        progressy->setLabelText("File loaded.");
+//        progressy->setValue(3);
         qDebug("successfully loaded");
 
     }
     else
     {
         qDebug("didn't work");
-
+        QErrorMessage* errory = new QErrorMessage(this);
+        errory->showMessage("This file couldn't be loaded.");
+//        progressy->cancel();
     }
 
     Computer::getDefault()->Undos->endMacro();
@@ -621,7 +645,7 @@ void MainWindow::setupRegisterView()
         vert->setDefaultSectionSize(DEFAULT_TEXT_HEIGHT);
         vert->setSectionResizeMode(QHeaderView::Fixed);
     }
-    CONNECT(ui->RegisterView,requestChange(),this,update());
+//    CONNECT(ui->RegisterView,requestChange(),this,update());
 
 
 
@@ -646,10 +670,6 @@ void MainWindow::on_MemView3Input_returnPressed()
 {
     //This is just here so that the corressponding GotoButton can listen to it
 }
-void MainWindow::on_StackViewInput_returnPressed()
-{
-    //This is just here so that the corressponding GotoButton can listen to it
-}
 
 void MainWindow::on_MemView3PCButton_pressed()
 {
@@ -665,16 +685,7 @@ void MainWindow::on_MemView3GotoButton_pressed()
     }
     CLEAR(ui->MemView3Input)
 }
-void MainWindow::on_StackViewGotoButton_pressed()
-{
-    //    bool ok = true;
-    //    int target =Utility::unifiedInput2Val(ui->StackViewInput->text(),&ok);
-    //    if(ok)
-    //    {
-    //        SCROLLTO(ui->StackViewView,target);
-    //    }
-    //    CLEAR(ui->StackViewInput)
-}
+
 void MainWindow::on_NextButton_pressed()
 {
     qDebug("Executing Single instruction");
@@ -703,11 +714,6 @@ void MainWindow::threadTest(QString name)
 
     }
     qDebug()<< name << QThread::currentThread();
-}
-
-void MainWindow::on_pushButton_7_clicked()
-{
-
 }
 
 void MainWindow::gotoRunningMode()
@@ -744,10 +750,6 @@ void MainWindow::on_pushButton_4_pressed()
 }
 
 
-void MainWindow::on_Update_Temp_pressed()
-{
-
-}
 
 void MainWindow::on_IntoButton_pressed()
 {
@@ -825,10 +827,6 @@ void MainWindow::saveWorkSpace()
 {
 //    Computer::getDefault()->saveWorkSpace();
 }
-void MainWindow::on_MemView1_destroyed()
-{
-    qDebug("Hey");
-}
 
 void MainWindow::on_undoButton_pressed()
 {
@@ -863,17 +861,6 @@ void MainWindow::on_continueButton_pressed()
 {
     manager->activate(ThreadManager::Flag);
 
-}
-
-void MainWindow::on_RestoreButton_pressed()
-{
-    MASK
-}
-
-void MainWindow::on_SaveButton_pressed()
-{
-    UNMASK
-            IFNOMASK(update();)
 }
 
 void MainWindow::on_haltButton_pressed()

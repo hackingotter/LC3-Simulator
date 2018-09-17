@@ -64,6 +64,7 @@ class MainWindow : public QMainWindow
     void saveWorkSpace();
     void prettySave();
     void testSave();
+    void indicatingAssembleNLoad(QString path);
 public:
     /**
      * @brief model The main model for the memory tables
@@ -158,7 +159,7 @@ public slots:
      */
     void on_MemView3GotoButton_pressed();
 
-    void on_StackViewGotoButton_pressed();
+
 
     void setupDisplay();
     void setupViews();
@@ -192,7 +193,7 @@ public slots:
 
     void on_MemView3Input_returnPressed();
 
-    void on_StackViewInput_returnPressed();
+
 
 
 
@@ -204,9 +205,6 @@ public slots:
 
     static void  threadTest(QString);
 
-
-
-    void on_pushButton_7_clicked();
 
     void my_int_func(int x)
     {
@@ -231,15 +229,12 @@ public slots:
     void storeState();
 private slots:
     void on_pushButton_4_pressed();
-    void on_Update_Temp_pressed();
+
     void on_IntoButton_pressed();
-    void on_MemView1_destroyed();
     void on_undoButton_pressed();
     void on_redoButton_pressed();
     void on_consoleEnterButton_pressed();
     void on_continueButton_pressed();
-    void on_RestoreButton_pressed();
-    void on_SaveButton_pressed();
     void on_haltButton_pressed();
     void testingSave();
 };

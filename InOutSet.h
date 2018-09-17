@@ -22,8 +22,8 @@ public slots:
     void clearText();
 
 private:
-    QPushButton* Clear;
-    QPushButton* Take;
+    QLabel* InputMonitor;
+    QLabel* OutputMonitor;
     QLabel* textDisplay;
 
 

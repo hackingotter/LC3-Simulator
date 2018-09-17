@@ -28,6 +28,7 @@ public:
     bool add(QUndoCommand *cmd);
 
 
+    void push(QUndoCommand *cmd);
 public slots:
     void setIndex(int idx) ;
 };

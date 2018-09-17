@@ -72,6 +72,7 @@
 #define ISINDEVICESPACE(ADDR) (ADDR>=DEVICESPACE_BEGIN && ADDR<=DEVICESPACE_END)
 
 #define MAXOFFSET 1024
+namespace Action{}
 class Computer : public QObject
 {
     Q_OBJECT

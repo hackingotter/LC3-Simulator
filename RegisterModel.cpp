@@ -102,7 +102,8 @@ QVariant RegisterModel::data(const QModelIndex &index,int role) const
         case reg_name_column :
             return regNameColumnHelper(row);
         case reg_value_column:
-            return getHexString(Computer::getDefault()->getRegister(static_cast<reg_t>(row)));
+
+            return regValueHelper((reg_t)row);
         }
     }
     if(role == Qt::ToolTipRole)
@@ -132,7 +133,24 @@ QVariant RegisterModel::data(const QModelIndex &index,int role) const
 
     return QVariant();
 }
-
+QString RegisterModel::regValueHelper(reg_t reggy)
+{
+    Computer* Computy = Computer::getDefault();
+    switch(reggy)
+    {
+    case 11:
+        switch(Computy->getProgramStatus())
+        {
+        case cond_n:return "N";
+        case cond_z:return "Z";
+        case cond_p:return "P";
+        default:
+            return "ERROR";
+        }
+    default:
+        return getHexString(Computy->getRegister(reggy));
+    }
+}
 bool RegisterModel::setData(const QModelIndex &index, const QVariant&value,int role)
 {
      reg_t row = static_cast<reg_t>(index.row());
@@ -147,7 +165,7 @@ bool RegisterModel::setData(const QModelIndex &index, const QVariant&value,int r
         case reg_color_column:qDebug("TBI");return false;
         case reg_name_column :qDebug("Isn't possible"); return false;
         case reg_value_column:
-        if(row<=9)
+        if(row<=10)
         {
             qDebug("EDIT");
 
@@ -164,10 +182,11 @@ bool RegisterModel::setData(const QModelIndex &index, const QVariant&value,int r
 //            emit dataChanged(index,index,QVector<int>() <<role);
             return true;
         }
-        if(row==9)
+        else
         {
-
+            Computer::getDefault()->setProgramStatus(handle_CC_RegisterView_Input(value.toString()));
         }
+
     }
 
  return false;
@@ -186,7 +205,7 @@ Qt::ItemFlags RegisterModel::flags(const QModelIndex&index) const
     return 0;
 }
 
-QString RegisterModel::regNameColumnHelper(int row) const
+QString RegisterModel::regNameColumnHelper(int row)
 {
     switch(row)
     {

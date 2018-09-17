@@ -290,7 +290,10 @@ console_err_t assembleCommand(console_arg_t args)
 }
 console_err_t traceCommand(console_arg_t args)
 {
+    if(args)
+    {
 
+    }
 }
 console_err_t runCommand(console_arg_t args)
 {

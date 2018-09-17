@@ -7,6 +7,7 @@
 #include <QLabel>
 #include <string>
 #include <time.h>
+#include "RegisterModel.h"
 #include "iostream"
 
 #define UNDOS
@@ -190,7 +191,7 @@ public:
     changeRegValue(reg_t reg,val_t oval, val_t nval):regName(reg),newValue(nval),oldValue(oval)
     {
 
-        setText(    QString("Set "+ ((regName<8)?"R"+QString().setNum(regName):" other") + " to "+QString().setNum(newValue)));
+        setText(    QString("Set "+ RegisterModel::regNameColumnHelper(reg) + " to "+QString().setNum(newValue)));
     }
     void undo()
     {
@@ -240,7 +241,7 @@ public:
         if(mem_addr == DDR)
         {
             Computer::getDefault()->popDisplay();
-            Computer::getDefault()->setMemValue(KBSR,0x7000);
+//            Computer::getDefault()->setMemValue(KBSR,0x8000);
         }
         Computer::getDefault()->remember--;
     }
@@ -255,8 +256,9 @@ public:
         }
         if(mem_addr == DDR)
         {
+
             Computer::getDefault()->pushDisplay(newValue);
-            Computer::getDefault()->setMemValue(KBSR,0x0000);
+//            Computer::getDefault()->setMemValue(KBSR,0x0000);
 
         }
         age = 0;
@@ -401,7 +403,65 @@ private:
     int age = 1;
 };
 
+class keyboardDoer: public QUndoCommand
+{
+public:
+    keyboardDoer(val_t newChar,val_t oldChar,val_t oldKBSRVal):newChar(newChar),oldChar(oldChar),oldKBSRVal(oldKBSRVal)
+    {
+        qDebug(QString("My ID is "+ QString().setNum(id())).toLocal8Bit());
+        setText(QString("'"+QString(QChar(newChar))+"' key pressed. ("+getHexString(oldKBSRVal)+") -> "+getHexString(0x8000)));
+    }
+    void undo()
+    {
+        Computer* def = Computer::getDefault();
+        def->remember++;
+        def->setMemValue(KBDR,oldChar);
+        def->setMemValue(KBSR,oldKBSRVal);
+        def->remember--;
+    }
+    void redo()
+    {
+        qDebug("Readio");
+            Computer* def = Computer::getDefault();
+            def->remember++;
+            def->setMemValue(KBDR,newChar);
+            def->setMemValue(KBSR,0x8000);
+            def->remember--;
 
+    }
+    QString text() const
+    {
+        return (QString("'"+QString(QChar(newChar))+"' key pressed. ("+getHexString(oldKBSRVal)+") -> "+getHexString(0x8000)));
+    }
+    bool mergeWith(const QUndoCommand *other)
+    {
+
+        qDebug("Attempting to merge");
+        if(other->id() != id())
+        {
+            return false;
+        }
+        const keyboardDoer *morphed = static_cast<const keyboardDoer *>(other);
+
+        newChar = morphed->newChar;
+
+        setText((QString("'"+QString(QChar(newChar))+"' key pressed. ("+getHexString(oldKBSRVal)+") -> "+getHexString(0x8000))));
+        return true;
+    }
+
+    int id() const
+    {
+      return 512;
+    }
+
+    val_t newChar;
+    val_t oldKBSRVal;
+private:
+    int age = 1;
+    val_t oldChar;
+
+
+};
 
 }
 
@@ -532,6 +592,7 @@ Computer* Computer::getDefault() {
         return defaultComputer;
     }
     defaultComputer = new Computer();
+    defaultComputer->setupConstants();
     return defaultComputer;
 }
 
@@ -1631,14 +1692,17 @@ bool Computer::setKeyboardCharacter(char c, bool force)
 {
 
     val_t sr = getMemValue(KBSR);
+    val_t previous = getMemValue(KBDR);
     bool needsForce = sr == 0x8000;
 
-    if (!needsForce || force) {
-        Undos->beginMacro(QString(&c) + " key pressed");
-        setMemValue(KBDR,c);
-        setMemValue(KBSR,0x8000);
-        Undos->endMacro();
-    }
+//    if (!needsForce || force) {
+
+        Undos->push(new Action::keyboardDoer(c&0x00FF,previous,sr));
+
+//        const QUndoCommand* temp = Undos->command(Undos->index());
+
+//        Undos->command(Undos->index()-1)->mergeWith(temp);
+//    }
     return !needsForce;
 }
 
@@ -2065,6 +2129,7 @@ mem_addr_t Computer::getFurthestConnection(mem_loc_t loc)
 
 void Computer::setupConstants()
 {
+    Undos->beginMacro("Naming Useful Constants");
     setMemLabelText(KBSR,"KBSR");
     setMemLabelText(KBDR,"KBDR");
     setMemLabelText(DSR,"DSR");
@@ -2073,6 +2138,7 @@ void Computer::setupConstants()
     setMemLabelText(MPR,"MPR");
     setMemLabelText(MCR,"MCR");
     setMemLabelText(MCC,"MCC");
+    Undos->endMacro();
 
 }
 mem_addr_t Computer::terribadInsertLineAlgorithm(mem_addr_t destination)

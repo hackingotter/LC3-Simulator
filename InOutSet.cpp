@@ -11,8 +11,6 @@
 
 
 
-
-
 InOutSet::InOutSet(QWidget *parent) : QWidget(parent)
 {
 
@@ -23,13 +21,13 @@ InOutSet::InOutSet(QWidget *parent) : QWidget(parent)
     QHBoxLayout* hLayout = new QHBoxLayout(this);
     QVBoxLayout* vLayout = new QVBoxLayout();
 
-    Clear = new QPushButton(this);
-    Clear->setText("Clear");
+    InputMonitor = new QLabel("");
+    InputMonitor->setText("I");
 
-    Take = new QPushButton(this);
-    Take->setText("Take");
+    OutputMonitor = new QLabel();
+    OutputMonitor->setText("O");
 
-    connect(Take,SIGNAL(released()),this,SLOT(kick()));
+    connect(OutputMonitor,SIGNAL(released()),this,SLOT(kick()));
     connect(Computer::getDefault(),SIGNAL(pushDisplay(val_t)),this,SLOT(pushChar(val_t)));
     connect(Computer::getDefault(),SIGNAL(popDisplay()),this,SLOT(popChar()));
 //    CONNECT(Take,QPushButton::pressed(),this,update());
@@ -49,9 +47,10 @@ InOutSet::InOutSet(QWidget *parent) : QWidget(parent)
     setLayout(hLayout);
     hLayout->addWidget(textDisplay);
     hLayout->addLayout(vLayout);
-    vLayout->addWidget(Clear);
-    vLayout->addWidget(Take);
+    vLayout->addWidget(InputMonitor);
+    vLayout->addWidget(OutputMonitor);
     textDisplay->setText("");
+//    this->setStyleSheet("background-color:rgb(150,150,150)");
 
 }
 
@@ -103,23 +102,27 @@ void InOutSet::update()
 void InOutSet::popChar()
 {
     QString text = textDisplay->text();
-    text.chop(1);
+    if(text.length()>=1)
+    {
+        text.chop(1);
+    }
     textDisplay->setText(text);
 }
 void InOutSet::pushChar(val_t val)
 {
-    Computer::getDefault()->setMemValue(DSR,Computer::getDefault()->getMemValue(DSR)|0x7FFF);
+
+//    Computer::getDefault()->setMemValue(DSR,0x0000);
 
     qDebug("pushChar requested");
     qDebug(QString().setNum(val).toLocal8Bit());
     textDisplay->setText(textDisplay->text()+(char)val);
-    Computer::getDefault()->setMemValue(DSR,Computer::getDefault()->getMemValue(DSR)&0x8000);
+//    Computer::getDefault()->setMemValue(DSR,Computer::getDefault()->getMemValue(DSR)&0x8000);
 }
 
 void InOutSet::kick()
 {
     qDebug("Kicked");
-    Computer::getDefault()->setMemValue(DDR,Computer::getDefault()->getMemValue(KBDR));
+//    Computer::getDefault()->setMemValue(DDR,Computer::getDefault()->getMemValue(KBDR));
 }
 
 

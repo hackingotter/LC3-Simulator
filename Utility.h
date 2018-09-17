@@ -46,11 +46,11 @@
 
 #define CHARPTR2QSTRING(CHARPTR)(QString::fromLocal8Bit(CHARPTR))
 
-#define ADDSHORTCUT(NAME,KEY,FUNCTION)\
+#define ADDSHORTCUT(NAME,KEY,WHERE,FUNCTION)\
 {\
-    QShortcut* cut = new QShortcut(this);\
+    QShortcut* cut = new QShortcut(WHERE);\
     cut->setKey(KEY);\
-    connect(cut,SIGNAL(activated()),this,SLOT(FUNCTION));\
+    connect(cut,&QShortcut::activated,WHERE, [=](){WHERE->FUNCTION;});\
     cut->setContext(Qt::WidgetShortcut);\
     cut->setObjectName(NAME);\
     }
