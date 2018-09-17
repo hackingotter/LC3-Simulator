@@ -19,7 +19,7 @@ MemWindow::MemWindow(modeler *model, HighlightScrollBar* scroll, QWidget *parent
 
     setupInput();
     GotoButton = new QPushButton("GOTO",this);
-    GotoButton->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
+    GotoButton->setSizePolicy(QSizePolicy::Maximum,QSizePolicy::Fixed);
     GotoButton->setMinimumWidth(40);
     GotoButton->setContentsMargins(0,0,0,0);
 

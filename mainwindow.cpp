@@ -759,7 +759,7 @@ void MainWindow::on_IntoButton_pressed()
 
 void MainWindow::readSettings()
 {
-    QSettings settings("Melberg & Ott","PennSim++");
+    QSettings settings(QCoreApplication::organizationName(),QCoreApplication::applicationName());
     settings.beginGroup("MainWindow");
     qDebug("heylo");
 
@@ -797,7 +797,7 @@ int MainWindow::getScreenHeight()
 }
 void MainWindow::saveSettings()
 {
-    QSettings settings(ORGANIZATION,APPNAME);
+    QSettings settings(QCoreApplication::organizationName(),QCoreApplication::applicationName());
     settings.beginGroup("MainWindow");
     settings.setValue("Window Height",this->height());
     settings.setValue("Window Width",this->width());
