@@ -433,7 +433,7 @@ void MainWindow::assembleNLoadFile(QString path)
     {
 
 
-        embler.assembleFile(path.toLocal8Bit().data(),namePath.remove(".asm").append("obj").toLocal8Bit().data());
+        embler.assembleFile(path.toLocal8Bit().data(),namePath.remove(".asm").append(".obj").toLocal8Bit().data());
     }
     catch(const std::string& e)
     {
@@ -472,7 +472,7 @@ void MainWindow::assembleNLoadFile(QString path)
     }
 //    progressy->setValue(2);
 //    progressy->setLabelText("Loading file.");
-    if(loadFile(namePath.remove(".asm").append("obj")))
+    if(loadFile(namePath.remove(".asm").append(".obj")))
     {
 //        progressy->setLabelText("File loaded.");
 //        progressy->setValue(3);
