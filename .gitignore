@@ -54,3 +54,5 @@ CMakeLists.txt.user*
 *0.exe
 
 object_script*
+debug/
+

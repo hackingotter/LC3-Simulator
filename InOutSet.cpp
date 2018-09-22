@@ -27,7 +27,7 @@ InOutSet::InOutSet(QWidget *parent) : QWidget(parent)
     OutputMonitor = new QLabel();
     OutputMonitor->setText("O");
 
-    connect(OutputMonitor,SIGNAL(released()),this,SLOT(kick()));
+//    connect(OutputMonitor,SIGNAL(released()),this,SLOT(kick()));
     connect(Computer::getDefault(),SIGNAL(pushDisplay(val_t)),this,SLOT(pushChar(val_t)));
     connect(Computer::getDefault(),SIGNAL(popDisplay()),this,SLOT(popChar()));
 //    CONNECT(Take,QPushButton::pressed(),this,update());

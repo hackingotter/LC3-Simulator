@@ -8,7 +8,7 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET =  LC3-Sim900234
+TARGET =  LC3-Sim
 
 TEMPLATE = app
 
@@ -18,7 +18,7 @@ TEMPLATE = app
 # deprecated API in order to know how to port your code away from it.
 DEFINES += QT_DEPRECATED_WARNINGS
 #CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT
-#QMAKE_CXXFLAGS += -Ofast
+QMAKE_CXXFLAGS += -Wunused-parameter --qmldir
 # -mpreferred-stack-boundary=2 -finline-small-functions -momit-leaf-frame-pointer
 DEFINES += QT_NO_DEBUG_OUTPUT
 

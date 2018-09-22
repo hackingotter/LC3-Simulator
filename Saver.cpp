@@ -75,7 +75,7 @@ void Saver::savePortable( mem_addr_t beginning, mem_addr_t end, bool takeComment
 
 void Saver::vanguard()
 {
-    qInfo("Saving and Loading");
+//    qInfo("Saving and Loading");
 
     std::ifstream myfileSource;
     saveState();
