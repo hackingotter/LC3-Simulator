@@ -72,8 +72,8 @@ void Assembler::assembleFile(const char *inFile, const char *outFile) {
             qDebug("It's not open");
         }
 //        iStream.seekg(0,ios_base::end);
-        iStream.clear();
-        iStream.seekg(0,ios_base::beg);
+//        iStream.clear();
+//        iStream.seekg(0,ios_base::beg);
 
         if (!iStream.is_open()) {
             throw "Could not open in File";

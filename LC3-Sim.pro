@@ -8,7 +8,7 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET =  LC3-Sim
+TARGET =  LC3-Sim900234
 
 TEMPLATE = app
 
