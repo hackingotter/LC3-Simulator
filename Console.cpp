@@ -7,7 +7,6 @@
 //
 
 #include <stdio.h>
-#include <QFileDialog>
 //#include "Simulator.h"
 #include "Console.h"
 #include "Saver.h"
@@ -193,7 +192,7 @@ bool handleConsoleIn(char * line)
         if(!a){return false;}
         mem_addr_t stop  = Utility::unifiedInput2Val(QString(argv[2]),&a);
         if(!a){return false;}
-        Saver::savePortable(start,stop,true,QFileDialog::getSaveFileName(nullptr,"Save to *.asm",QString(),"*.asm"));
+        Saver::savePortable(start,stop,true);
         return true;
     }
     CASE("script","script",argv,0)

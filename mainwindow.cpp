@@ -144,7 +144,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     //    QObject::connect(ui->NextButton,SIGNAL(on_NextButton_pressed()),ui->RegisterView,SLOT(update()));
     readSettings();
     update();
+<<<<<<< HEAD
 //    testSave();
+=======
+>>>>>>> parent of a02168e... A lack of guarantee
 
 }
 MainWindow::~MainWindow()
@@ -236,19 +239,14 @@ void MainWindow::setupMenuBar()
     CONNECT(actionLoad_State,triggered(),this, reloadState());
     CONNECT(actionLoad_File,triggered(),this,loadFile());
     CONNECT(actionAssemble_Load_File,triggered(),this, assembleNLoadFile());
-    connect(actionTestingSave, &QAction::triggered, this,[=](){this->prettySave();});
+    CONNECT(actionTestingSave,triggered(),this, testingSave());
 
     QMenu* fillMenu = new QMenu("Fill...");
     setupScreenMenuDropdown(*fillMenu);
     ui->menuScreen->addMenu(fillMenu);
 }
-void MainWindow::prettySave()
-{
-    QString fileName = QFileDialog::getSaveFileName(nullptr,"Save to *.asm",QString(),"*.asm");
 
-
-}
-
+<<<<<<< HEAD
 void MainWindow::testSave()
 {
 //    QFrame* pictu = new QFrame();
@@ -257,6 +255,8 @@ void MainWindow::testSave()
     handleConsoleIn(QString("save x3000 x3104").toLatin1().data());
     exit(0);
 }
+=======
+>>>>>>> parent of a02168e... A lack of guarantee
 void MainWindow::setupScreenMenuDropdown(QMenu & menu)
 {
     QAction* actionFill_White = new QAction("White",this);
@@ -418,7 +418,6 @@ void MainWindow::assembleNLoadFile(QString path)
         path = fileUI->getOpenFileName();
     }
 
-    qDebug(path.toLocal8Bit());
     QString shortPath = path;
     shortPath.remove(0,path.lastIndexOf("/"));
     QString namePath = shortPath+".obj";

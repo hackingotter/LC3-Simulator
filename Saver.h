@@ -19,8 +19,7 @@ public:
      *
      * \todo file end name checking
      */
-    void static savePortable(mem_addr_t beginning = 0x3000, mem_addr_t end = 0x3100, bool takeCommentBefore = true, QString fileName = "testing123.asm");
-
+    void static savePortable( mem_addr_t beginning = 0x3000, mem_addr_t end = 0x3100, bool takeCommentBefore = true);
 private:
 
     void static handleLabels(std::ofstream &destination, mem_addr_t addr);
