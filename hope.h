@@ -12,7 +12,7 @@
 #include <QImage>
 #include "GlobalTypes.h"
 
-#define COLORSLICE 0x1F
+
 
 #define CLEAR_SCREEN_COLOR (0)
 
@@ -39,7 +39,7 @@ public:
      */
     void mousePressEvent(QMouseEvent *);
     void Setup();
-    QColor translater(int in);
+
 //
     void mouseMoveEvent(QMouseEvent *ev);
 

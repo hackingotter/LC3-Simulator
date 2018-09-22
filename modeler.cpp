@@ -139,6 +139,10 @@ QBrush modeler::column0Painter(mem_addr_t addr) const
 
 QBrush modeler::column3Painter(mem_addr_t addr) const
 {
+    if(addr!= 0)
+    {
+
+    }
     return QBrush();//TBI
 }
 
@@ -181,47 +185,14 @@ QBrush modeler::rowPainter(mem_addr_t addr,const QModelIndex &index) const
 
 
     }break;
-    case 2:
-    {
-        //        for(int i = 0; i < 30; i++)
-        //        {
 
-
-        //            int value = Computer::getDefault()->proposedNewLocation(i,TESTBEGIN,TESTEND,TESTOFFSET);
-        //            if(addr == value)
-        //            {
-
-        //                if(addr == i)
-        //                {
-        //                    return QBrush(QColor(250,100,100));
-        //                }
-        //                else
-        //                if(addr > i)
-        //                {
-        //                    return QBrush(QColor(100,220,100));
-        //                }
-        //                else
-        //                if(addr < i)
-        //                {
-        //                    return QBrush(QColor(100,100,220));
-        //                }
-
-        //            }
-        //            if(Computer::getDefault()->connectedAddress(addr)==value)
-        //            {
-        //                return QBrush(QColor(150,150,200));
-        //            }
-
-
-        //        }
-    }
-    case VALUCOLUMN:
+    case MNEMCOLUMN:
     {
         if(Computer::getDefault()->getMemDataType(addr) == COLOR)
         {
-            return QBrush(Utility::int2QColor(Computer::getDefault()->getMemValue(addr)));
+            return QBrush(Utility::translater(Computer::getDefault()->getMemValue(addr)));
         }
-    }
+    }break;
 
     }
 
@@ -356,6 +327,7 @@ QVariant modeler::dataBack(const QModelIndex &index)const
 {
     //    int column = index.column();
     mem_addr_t addr = index.row();
+
 
     return rowPainter(addr,index);
 }

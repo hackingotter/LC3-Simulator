@@ -22,7 +22,8 @@
 
 #define SYMBOL_SUFFIX ".sym"
 
-
+#define COLORSLICE 0x1F
+//#define color(in)((in/31.0)*255)
 #define COLOR_SPLITTER(QCOLOR) (QCOLOR).red(),(QCOLOR).green(),(QCOLOR).blue()
 #define PCCOLOR (QColor(255,255,0))
 #define R0COLOR (QColor(0,102,204))
@@ -68,7 +69,7 @@ QString charToQString(char ch);
 int QSTRING2INTBASE(QString source,int suggestedBase);
 
 void systemInfoDebug();
-
+QColor translater(val_t in);
 int qColor2Int(QColor color);
 QColor int2QColor(int color);
 

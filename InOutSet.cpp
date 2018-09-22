@@ -17,8 +17,11 @@ InOutSet::InOutSet(QWidget *parent) : QWidget(parent)
     qDebug("Initializing InOutSet");
 
 
+    QVBoxLayout* bigVLayout = new QVBoxLayout(this);
 
-    QHBoxLayout* hLayout = new QHBoxLayout(this);
+    QLabel* testingLabel = new QLabel("Testing 1 2 3 ");
+
+    QHBoxLayout* hLayout = new QHBoxLayout();
     QVBoxLayout* vLayout = new QVBoxLayout();
 
     InputMonitor = new QLabel("");
@@ -36,23 +39,27 @@ InOutSet::InOutSet(QWidget *parent) : QWidget(parent)
 
 
     textDisplay = new QLabel(this);
-    textDisplay->setStyleSheet("background-color:x0000FFF;");
+    textDisplay->setStyleSheet("QLabel { background-color : rgb(225,225,225); color : white; }");
     textDisplay->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
     textDisplay->setWordWrap(true);
     textDisplay->setAlignment(Qt::AlignTop|Qt::AlignLeft);
     textDisplay->setFocusPolicy(Qt::StrongFocus);
-    textDisplay->setStyleSheet(":focus{background-color:rgb(150,150,255)}");
+//    textDisplay->setStyleSheet(":focus{background-color:rgb(255,225,255)}");
 
 
-    setLayout(hLayout);
+    setLayout(bigVLayout);
+    bigVLayout->addWidget(testingLabel);
     hLayout->addWidget(textDisplay);
     hLayout->addLayout(vLayout);
     vLayout->addWidget(InputMonitor);
     vLayout->addWidget(OutputMonitor);
+    bigVLayout->addLayout(hLayout);
     textDisplay->setText("");
 //    this->setStyleSheet("background-color:rgb(150,150,150)");
 
 }
+
+//void InOutSet::setupInOutInput()
 
 void InOutSet::keyPressEvent(QKeyEvent *event)
 {

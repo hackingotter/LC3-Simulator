@@ -433,7 +433,7 @@ void MainWindow::assembleNLoadFile(QString path)
     {
 
 
-        embler.assembleFile(path.toLocal8Bit().data(),namePath.toLocal8Bit().data());
+        embler.assembleFile(path.toLocal8Bit().data(),namePath.remove(".asm").toLocal8Bit().data());
     }
     catch(const std::string& e)
     {
@@ -494,8 +494,8 @@ void MainWindow::assembleNLoadFile(QString path)
 void MainWindow::handleFiles()
 {
     Assembler Bill;
-    QString inputPath = QFileDialog::getOpenFileName().toLocal8Bit().data();
-    Bill.assembleFile(inputPath.toLatin1().data(),"LC3Maybe.obj");
+    const char* inputPath = QFileDialog::getOpenFileName().toLocal8Bit().data();
+    Bill.assembleFile(inputPath,"LC3Maybe.obj");
     Computer::getDefault()->loadProgramFile(QString("LC3Maybe.obj").toLatin1().data());
     IFNOMASK(emit update();)
 }
@@ -866,4 +866,9 @@ void MainWindow::on_continueButton_pressed()
 void MainWindow::on_haltButton_pressed()
 {
     Computer::getDefault()->setRunning(false);
+}
+
+void MainWindow::on_Big_Undo_pressed()
+{
+
 }

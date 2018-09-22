@@ -70,12 +70,9 @@ void Hope::mouseMoveEvent(QMouseEvent *ev)
     int y = ev->y()/DISPLAY_SCALE;
 
     Hope::customCursor(ev->x(),ev->y());
-    QString xstr = QString("");
-    xstr.setNum(x,10);
-    QString ystr = QString("");
-    ystr.setNum(y,10);
-    QString astr = QString("");
-    astr.setNum(x+y*DISPLAY_WIDTH + VIDEO_ADDR,16);
+    QString xstr = QString("").setNum(x,10).rightJustified(3,' ');
+    QString ystr = QString("").setNum(y,10).rightJustified(3,' ');
+    QString astr = QString("").setNum(x+y*DISPLAY_WIDTH + VIDEO_ADDR,16);
     QString ostr = getHexString(Computer::getDefault()->getMemValue(x+y*DISPLAY_WIDTH + VIDEO_ADDR));
     ostr.append(" ("+xstr);
     ostr.append(",");
@@ -83,7 +80,7 @@ void Hope::mouseMoveEvent(QMouseEvent *ev)
     ostr.append(" @");
     ostr.append(astr);
     xstr.append('\0');
-    emit Hope::mouseMoved(ostr);
+    emit Hope::mouseMoved("Current Mouse Position:" +ostr);
 //    BATHTIME(ostr.toLatin1());
     DRAWPOINT(x,y,p)
     p.end();
@@ -98,18 +95,7 @@ void Hope::mousePressEvent(QMouseEvent *)
     update();
 
 }
-QColor Hope::translater(int in)
-{
-    /*
-     *Since the colors are 5 bits, they are compared with five 1's then recorded
-     * three times, getting the r, g, and b , which are then changed from a
-     * range of 31 to 255, and composed into a color
-     */
-    double b = in&COLORSLICE;in>>= 5;
-    double g = in&COLORSLICE;in>>= 5;
-    double r = in&COLORSLICE;
-    return QColor(color(r),color(g),color(b),255);
-}
+
 void Hope::customCursor(int x,int y)
 {
     /**
@@ -160,7 +146,7 @@ void Hope::update()
 //        mag.setPen(translater(getMemValue(i)));
 //        DRAWPOINT(ADDR2X(i),ADDR2Y(i),qpp);
 
-        setPoint(x*DISPLAY_SCALE,y*DISPLAY_SCALE,translater(Computer::getDefault()->getMemValue(i)).rgb(),mag);
+        setPoint(x*DISPLAY_SCALE,y*DISPLAY_SCALE,Utility::translater(Computer::getDefault()->getMemValue(i)).rgb(),mag);
     }
     setPixmap(QPixmap::fromImage(*mag));
     qDebug((QString().setNum(pixmap()->width()) + QString().setNum(pixmap()->height())).toLocal8Bit());
@@ -179,7 +165,7 @@ void Hope::update(mem_addr_t addr)
     int y = (addr - VIDEO_ADDR - x) / DISPLAY_WIDTH;
 
 //        mag->setPixel(x+1, y+1, translater(1).rgb());
-    setPoint(x,y,translater(Computer::getDefault()->getMemValue(addr)).rgb(),mag);
+    setPoint(x,y,Utility::translater(Computer::getDefault()->getMemValue(addr)).rgb(),mag);
 //    qpp.end();
     QPixmap pix = QPixmap::fromImage(*mag);
 

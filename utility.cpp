@@ -2,11 +2,22 @@
 #include "opcodes.h"
 
 
-
+#define color(in)((in/31.0)*255)
 namespace Utility {
 
 
-
+QColor translater(val_t in)
+{
+    /*
+     *Since the colors are 5 bits, they are compared with five 1's then recorded
+     * three times, getting the r, g, and b , which are then changed from a
+     * range of 31 to 255, and composed into a color
+     */
+    double b = in&COLORSLICE;in>>= 5;
+    double g = in&COLORSLICE;in>>= 5;
+    double r = in&COLORSLICE;
+    return QColor(color(r),color(g),color(b),255);
+}
 QString charToQString(char ch)
 {
     if(ch > 0x7E)
