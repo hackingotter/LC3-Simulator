@@ -92,6 +92,7 @@ private:
     uint16_t processLine(std::string &line, RunType runType, uint16_t pc, std::ofstream &oStream);
 
     data_t getNumberType(std::string num);
+    void cleanComments();
 public:
     Assembler();
 

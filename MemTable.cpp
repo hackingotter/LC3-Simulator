@@ -199,7 +199,7 @@ void MemTable::insertAbove()
 }
 void MemTable::insertBelow()
 {
-
+    handleInsertRow();
 }
 
 void MemTable::paste(bool makeAgreement)
@@ -268,10 +268,7 @@ void MemTable::handleInsertRow()
     int row = selected.at(0).row();
     Computer::getDefault()->Undos->beginMacro("Insert Row at " + getHexString(row));
     MASK
-            for( int i = 1000; i >= 0;i--)
-    {
-        Computer::getDefault()->moveRow(row+i,row+i+1);
-    }
+    this->insertRow(row);
     UNMASK
             Computer::getDefault()->Undos->endMacro();
 }
@@ -433,26 +430,7 @@ void MemTable::insertRow(mem_addr_t target)
 
     //Step 1, do this fast and bad
 
-    Computer::getDefault()->moveMemory(target, target + 0x100,1);
-
-
-
-    mem_addr_t source = target;
-    while( ++source<=STACKSPACE_END && combo<MINIMUMINSERTCOMBO)
-    {
-        if( Computer::getDefault()->getMemValue(source)==0)
-        {
-            combo++;
-        }
-        else
-        {
-            combo=0;
-        }
-    }
-    if(combo == MINIMUMINSERTCOMBO)
-    {
-
-    }
+    Computer::getDefault()->insertLine(target);
 }
 void MemTable::saveSettings()
 {

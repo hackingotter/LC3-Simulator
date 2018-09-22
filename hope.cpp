@@ -126,6 +126,7 @@ void Hope::fillScreen(val_t val)
 {
     Computer::getDefault()->Undos->beginMacro("Filling screen with "+ getHexString(val));
     MASK
+
     Computer::getDefault()->fillBlock(VIDEO_ADDR,0xFE00,val);
     UNMASK
     Computer::getDefault()->Undos->endMacro();

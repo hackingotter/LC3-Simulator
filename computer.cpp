@@ -1754,12 +1754,21 @@ mem_addr_t Computer::idLastOptionAfter(mem_addr_t addr)
     }
     return 0;
 }
-bool Computer::findGoodBlankRowAfter(mem_addr_t addr)
+bool Computer::findGoodBlankRowAfter(mem_addr_t & addr)
 {
-    mem_addr_t lastPossible = idLastOptionAfter(addr);
+    int count = 100;
+    while(count && addr )
+    {
+        count = (_memory[addr++].value == 0x0000)?(count - 1):(100);
+    }
+    if(!addr)
+    {
+        return false;
+    }
+//    mem_addr_t lastPossible = idLastOptionAfter(addr);
 
-    qDebug(getHexString(lastPossible).toLocal8Bit());
-
+//    qDebug(getHexString(lastPossible).toLocal8Bit());
+    return true;
 
 }
 bool Computer::insertBlankRow(mem_addr_t addr)
@@ -1934,6 +1943,17 @@ void Computer::moveMemory(mem_addr_t selectionBegin, mem_addr_t selectionEnd, in
            IFNOMASK(emit update();)
 //    delete[] temp;
 
+}
+
+void Computer::insertLine(mem_addr_t addr)
+{
+    Undos->beginMacro("Inserting line at " + getHexString(addr));
+    mem_addr_t targetAddr = addr;
+    if(findGoodBlankRowAfter(targetAddr))
+    {
+        moveMemory(addr,targetAddr-1,1);
+    }
+    Undos->endMacro();
 }
 
 void Computer::testMemoryShifting()

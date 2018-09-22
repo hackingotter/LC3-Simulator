@@ -274,6 +274,7 @@ public:
 
 
     void shiftMemory(mem_addr_t origin, val_t length, mem_addr_t destination);
+
     void moveRow(mem_addr_t origin, mem_addr_t destination);
 
     mem_addr_t findSpace(mem_addr_t startSearch, int minimumSize);
@@ -355,7 +356,7 @@ public:
      * \todo implement failure handling
      */
     void moveMemory(mem_addr_t selectionBegin, mem_addr_t selectionEnd, int32_t delta, bool  makeAgreement = true);
-
+    void insertLine(mem_addr_t addr);
     mem_addr_t getFurthestConnection(mem_loc_t loc);
 
 
@@ -412,8 +413,11 @@ private:
     bool connectedToRange(mem_addr_t start, mem_addr_t end, mem_addr_t pov);
     void executeShiftCycle(mem_loc_t curLoc, mem_addr_t begin, mem_addr_t end, int32_t delta, int *changed, int offset, bool makeAgreement);
 
-
-    bool findGoodBlankRowAfter(mem_addr_t addr);
+    /** findGoodBlankRowAfter This is a blind alorigthm.  Don't expect it to respect your program.
+     * @param addr
+     * @return
+     */
+    bool findGoodBlankRowAfter(mem_addr_t &addr);
     /** idLastOptionAfter
      * \param addr The address which is to be moved
      * \return The last possible address in the same section as the given address.

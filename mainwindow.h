@@ -62,12 +62,9 @@ class MainWindow : public QMainWindow
     int getScreenHeight();
 
     void saveWorkSpace();
-<<<<<<< HEAD
     void prettySave();
     void testSave();
     void indicatingAssembleNLoad(QString path);
-=======
->>>>>>> parent of a02168e... A lack of guarantee
 public:
     /**
      * @brief model The main model for the memory tables
@@ -145,13 +142,10 @@ public:
 
 
     void setupConnections();
-<<<<<<< HEAD
 
 
 
     void importantInfo();
-=======
->>>>>>> parent of a02168e... A lack of guarantee
 public slots:
     /**
      * on_MemView2GotoButton_pressed
