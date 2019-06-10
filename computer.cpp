@@ -276,7 +276,8 @@ public:
     changeMemLabel(mem_addr_t addr,label_t* oldLabel,label_t* newLabel):mem_addr(addr),oldLabelPtr(oldLabel),newLabelPtr(newLabel)
     {
 //        setText("set Label at" + QString().setNum(addr) +" to " + QString(newLabel->name));
-        qDebug("You made a memlable under");
+        qDebug("You made a memlable for " + QString().setNum(addr).toLocal8Bit()
+               + ": " + QString(newLabel->name).toLocal8Bit());
 //        QUndoCommand::setObsolete(oldLabelPtr && // null check
 //                                  (newLabelPtr->name == oldLabelPtr->name) &&
 //                                  (newLabelPtr->addr==oldLabelPtr->addr));
@@ -992,14 +993,20 @@ size_t Computer::loadProgramFile(char* path) {
     FILE *file = fopen(path, "r");
 
     if (!file)
+    {
+        qDebug("Couldn't open File");
         throw "ERROR: could not open file";
+    }
 
     fseek(file, 0, SEEK_END);
+    char temp;
+    while((temp = getc(file))!=EOF){qDebug(QString(QChar(temp)).toLocal8Bit());}
     size_t fileLen = ftell(file);
     size_t programSize = fileLen/2 - 1;
-
+    qDebug("The program that is currently being written is trying to tell me that the file is size "+QString().setNum(fileLen).toLocal8Bit());
     if (fileLen == 0) {
         fclose(file);
+        qDebug("The file was empty");
         throw "ERROR: input file empty!";
 
     }

@@ -345,6 +345,7 @@ bool MainWindow::loadFile(QString path)
         }
         catch(...)
         {
+            qDebug("SOMETHING WENT WRONG WITH THE FILE!");
             std::cout<<"An unexpected error has occurred"<<std::endl;
             success = false;
         }
@@ -419,10 +420,10 @@ void MainWindow::assembleNLoadFile(QString path)
     }
 
     qDebug(path.toLocal8Bit());
-    QString shortPath = path;
-    shortPath.remove(0,path.lastIndexOf("/"));
-    QString namePath = shortPath+".obj";
-    Computer::getDefault()->Undos->beginMacro("Assemble and Load "+shortPath);
+//    QString shortPath = QString(path);
+//    shortPath.remove(".asm");
+//    QString namePath = shortPath+".obj";
+    Computer::getDefault()->Undos->beginMacro("Assemble and Load "+path);
     qDebug("assembling and loading");
 
 
@@ -432,8 +433,20 @@ void MainWindow::assembleNLoadFile(QString path)
     try
     {
 
+//        QString test("a");
+//        qDebug(test.toLocal8Bit());
+//        qDebug(test.toLocal8Bit().data());
+//        const char* ccp = (test.toLocal8Bit().data());
 
-        embler.assembleFile(path.toLocal8Bit().data(),namePath.remove(".asm").append(".obj").toLocal8Bit().data());
+//        const char* ccpp = namePath.toLocal8Bit().data();
+//        qDebug(QString("I am attempting to assemble the file" + ccp + " into " + QString(ccpp)).toLocal8Bit());
+        const QByteArray qba = path.toLocal8Bit();
+
+        const char* ccpp = qba.constData();
+
+//        path.append("obj")
+
+        embler.assembleFile(ccpp,"/TemporaryFile.obj");
     }
     catch(const std::string& e)
     {
@@ -443,6 +456,11 @@ void MainWindow::assembleNLoadFile(QString path)
         std::cout<<e<<std::endl;
         Computer::getDefault()->Undos->endMacro();
         Computer::getDefault()->Undos->undo();//no need in saving this
+        return;
+    }
+    catch(char e)
+    {
+        std::cout<<e<<std::endl;
         return;
     }
     catch(...)
@@ -470,9 +488,15 @@ void MainWindow::assembleNLoadFile(QString path)
         Computer::getDefault()->Undos->undo();
         return;
     }
+    catch(...)
+    {
+        qDebug("What happened?");
+        return;
+    }
 //    progressy->setValue(2);
 //    progressy->setLabelText("Loading file.");
-    if(loadFile(namePath.remove(".asm").append(".obj")))
+     Computer::getDefault()->Undos->endMacro();
+    if(loadFile("/TemporaryFile.obj"))
     {
 //        progressy->setLabelText("File loaded.");
 //        progressy->setValue(3);
@@ -481,13 +505,14 @@ void MainWindow::assembleNLoadFile(QString path)
     }
     else
     {
+        Computer::getDefault()->Undos->undo();
         qDebug("didn't work");
         QErrorMessage* errory = new QErrorMessage(this);
         errory->showMessage("This file couldn't be loaded.");
 //        progressy->cancel();
     }
 
-    Computer::getDefault()->Undos->endMacro();
+
     //    embler.assembleFile();
 
 }

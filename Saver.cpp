@@ -4,10 +4,23 @@
 #include <iostream>
 #include <fstream>
 #include <QFileDialog>
+
+/*
+ * Here's the plan.
+ * 
+ * For saving, there will be a set of steps
+ * 
+ *  Step 1:  Find out 
+ * 
+ * 
+ */
+
+
 Saver::Saver()
 {
 
 }
+
 void Saver::getSaveBounds(mem_addr_t & start, mem_addr_t &end)
 {
 
@@ -58,6 +71,9 @@ void Saver::savePortable( mem_addr_t beginning, mem_addr_t end, bool takeComment
 
     std::ofstream destination;
     destination.open(fileName.toLocal8Bit().toStdString());
+    //First, we need to scan for Labels that are mark sub routines
+
+
     if(takeCommentBefore)
     {
         handleComments(destination,beginning-1);

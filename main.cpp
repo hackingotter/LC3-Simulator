@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
     qDebug(QString().setNum(QCoreApplication::applicationPid()).toLocal8Bit());
     QCoreApplication::setApplicationName("LC-3 Sim");
 
-    QCoreApplication::setApplicationVersion("1.0.0.0");
+    QCoreApplication::setApplicationVersion("0.1.0");
     QCoreApplication::setAttribute(Qt::AA_MacDontSwapCtrlAndMeta);
     QCoreApplication::setOrganizationName("Eastern Illinois University");
     QApplication a(argc, argv);//not gonna lie, don't know what this does

@@ -93,6 +93,7 @@ private:
 
     data_t getNumberType(std::string num);
     void cleanComments();
+    void assembleFileButForSomeReasonTheOtherOneDoesntWork(const char *infile, const char *outFile);
 public:
     Assembler();
 

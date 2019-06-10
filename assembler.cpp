@@ -4,6 +4,8 @@
 
 #include "Assembler.h"
 #include <iostream>
+#include <fstream>
+#include <QFile>
 #include "GlobalTypes.h"
 using namespace std;
 
@@ -50,37 +52,159 @@ Assembler::Assembler() : parserRegex(regex(
     commentDict = map<mem_addr_t, QString> ();
     dataDict    = map<mem_addr_t,data_t> ();
 }
-
-void Assembler::assembleFile(const char *inFile, const char *outFile) {
+void Assembler::assembleFileButForSomeReasonTheOtherOneDoesntWork(const char * infile, const char * outFile)
+{
     MASK
-    std::ifstream iStream(inFile, std::ios_base::in);
-    std::ofstream oStream(outFile, std::ios_base::out | std::ios_base::binary);
+    QFile inFileDumb(infile);
+    inFileDumb.open(QIODevice::ReadOnly);
+
+    std::ifstream iStream(infile,std::ios_base::in);
+    iStream.open(infile,std::ios_base::in);
+
+    try{
+        iStream.seekg(0,ios_base::beg);
+    }
+    catch(...)
+    {
+        std::cout<<"The file should be open"<<std::endl;
+    }
 
 
-    if(iStream)
+    QFile outFileDumb(outFile);
+
+    if(!inFileDumb.isOpen())
+    {
+        std::cout<<"infile doesn't work"<<std::endl;
+        UNMASK
+        throw "This program has an actual reason for not working and that reason is that the in file has some problem.";
+    }
+
+    if(!outFileDumb.isOpen())
+    {
+        std::cout<<"outfile doesn't work"<<std::endl;
+        UNMASK
+        throw "This program has an actual reason for not working and that reason is that the out file has some problem.";
+    }
+
+    for(int runNum = 1; runNum <= 2; runNum++)
+    {
+        QTextStream inFileDumbStream(&inFileDumb);
+//        inFileDumbStream.reset();
+        int i = 0;
+        qDebug("Did you even look at the file");
+        while(!inFileDumbStream.atEnd())
+        {
+            inFileDumbStream.pos();
+//            inFileDumbStream.readLine(1000);
+            std::cout<< i++<<std::endl;
+        }
+//        inFileDumbStream.
+//        qDebug(inFileDumbStream.readAll().toLocal8Bit());
+
+
+    }
+    UNMASK
+}
+void Assembler::assembleFile(const char *inFile, const char *outFile) {
+//    try{
+//    assembleFileButForSomeReasonTheOtherOneDoesntWork(inFile,outFile);
+//    }
+//    catch(char* str)
+//    {
+//        throw str;
+//    }
+//    return;
+    MASK
+    std::ifstream* iStream = new std::ifstream(inFile, std::ios_base::in);
+//    std::ifstream iStream("C:/Users/Jedadiah/Documents/GitHub/LC3-Sim/lc3os.asm",std::ios_base::in);
+    std::ofstream* oStream = new std::ofstream(outFile, std::ios_base::out | std::ios_base::binary);
+
+    try{
+        std::cout<<"He1llo"<<std::endl;
+        std::cout<<inFile<<std::endl;
+//    iStream.open(inFile);
+    }
+    catch(...)
+    {
+        std::cout<<"What?"<<std::endl;
+        qDebug("I have failed");
+        UNMASK
+        throw std::string("H");
+    }
+    qDebug(QString("I am attempting to assemble the file" + QString(inFile) + " into " + QString(outFile)).toLocal8Bit());
+    if(iStream->is_open())
     {
         qDebug("IStream is good");
     }
+    else
+    {
+        qDebug("IStream is bad");
+    }
+    if(oStream->is_open())
+    {
+        qDebug("OStream is good");
+    }
+    else
+    {
+        qDebug("OStream is bad");
+    }
+
+
+    iStream->seekg(0,ios_base::end);
+    qDebug(QString("I have found the file to be of size :%1").arg(iStream->tellg()).toLocal8Bit());
+    iStream->seekg(0,ios_base::beg);
+    qDebug("I am going to the beginning");
+    qDebug(QString("I am now at %1").arg(iStream->tellg()).toLocal8Bit());
+    qDebug("I am going to the end");
+    iStream->seekg(0,ios_base::end);
+    qDebug(QString("I am now at %1").arg(iStream->tellg()).toLocal8Bit());
+    qDebug(QString("I have found the file to be of size :%1").arg(iStream->tellg()).toLocal8Bit());
+
+
+
     for (int runNum = 1; runNum <= 2; runNum++) {
-
-        if(iStream.is_open())
+    iStream = new std::ifstream(inFile, std::ios_base::in);
+        if(iStream->is_open())
+            {
+                qDebug("IStream is good");
+            }
+            else
+            {
+                qDebug("IStream is bad");
+            }
+        if(oStream->is_open())
+            {
+                qDebug("OStream is good");
+            }
+            else
+            {
+                qDebug("OStream is bad");
+            }
+//        std::ifstream iStream("C:/Users/Jedadiah/Documents/GitHub/LC3-Sim/lc3os.asm",std::ifstream::in);
+        qDebug("Preparing to seek");
+        if(runNum == 1)
         {
-            qDebug("It's open");
         }
-        else
-        {
-            qDebug("It's not open");
-        }
-//        iStream.seekg(0,ios_base::end);
-        iStream.clear();
-//        iStream.seekg(0,ios_base::beg);
+        qDebug(QString("I am now at %1").arg(iStream->tellg()).toLocal8Bit());
+        qDebug("Going to the beginning of the file");
+        iStream->seekg(0,ios_base::beg);
 
-        if (!iStream.is_open()) {
+        qDebug("Seeked");
+        qDebug(QString("I am now at %1").arg(iStream->tellg()).toLocal8Bit());
+        if (!iStream->is_open()) {
+            UNMASK
+            qDebug("Could not open file");
             throw "Could not open in File";
         }
-        if (!oStream.is_open()) {
+        qDebug("=========================");
+        qDebug("✔️ Was able to open the input file.");
+        if (!oStream->is_open()) {
+            UNMASK
+            qDebug("Could not open file");
             throw "Could not open out file";
         }
+        qDebug("✔️ Was able to open the output file.");
+//        iStream.seekg(0,ios_base::beg);
 
         std::string line;
 
@@ -97,17 +221,38 @@ void Assembler::assembleFile(const char *inFile, const char *outFile) {
             default:
                 break;
         }
-
+        qDebug("=========================");
+        qDebug(QString("This is run #%1").arg(runNum).toLocal8Bit());
         hitDotEND = false;
-        while (std::getline(iStream, line) && !hitDotEND) {
-            pc = processLine(line, runType, pc, oStream);
+
+        while (std::getline(*iStream, line) && !hitDotEND) {
+            int lineLength = line.length();
+            char dumbConversion[lineLength+1];
+            strcpy(dumbConversion,line.c_str());
+            QString lineNumber = getHexString(pc);
+            qDebug(getHexString(pc).append(": ").append(QString(dumbConversion)).toLocal8Bit());
+
+            pc = processLine(line, runType, pc, *oStream);
+
         }
+        qDebug(QString("I am now at %1").arg(iStream->tellg()).toLocal8Bit());
+        iStream->clear();
+        if(runType == PreRun)
+        {
         endingAddress = pc;
+
+        }
         programLength = endingAddress - startingAddress;
+        qDebug(QString("The number of lines is %1").arg(programLength).toLocal8Bit());
     }
 
-    iStream.close();
-    oStream.close();
+    qDebug("Time to close the iStream");
+    iStream->close();
+    delete iStream;
+    qDebug("Time to close the oStream");
+    oStream->close();
+    delete oStream;
+
     UNMASK
 
 }
@@ -135,20 +280,33 @@ void Assembler::passLabelsToComputer(Computer *comp)
 {
     MASK
     if (startingAddress == 0xFFFF) {
+        qDebug("It is not yet time for labels");
         return;
     }
+    qDebug("Label Time!");
 
     if (!comp)
+    {
+        qDebug("Argument exception: comp");
         throw "Argument exception: comp";
+    }
+    qDebug("Computer exists!");
+    qDebug(QString("Starting at ").append(getHexString(startingAddress)).toLocal8Bit());
 
+    qDebug(QString("Ending at   ").append(getHexString(endingAddress)).toLocal8Bit());
     for (mem_addr_t addr = startingAddress; addr <= endingAddress && addr >= startingAddress; addr ++) {
+
         QString text = labelForAddress(addr);
 
         if (text.isEmpty()) {
-            comp->setMemLabel(addr,NULL);
+            qDebug(QString("setting label at ").append(getHexString(addr).append("to ''")).toLocal8Bit());
+            comp->setMemLabelText(addr,"");
+
         } else {
+            qDebug(QString("setting label at ").append(getHexString(addr)).append(" to ").append(text).toLocal8Bit());
             comp->setMemLabelText(addr,text);
         }
+        qDebug("Time for the next label!");
     }
     UNMASK
 }
@@ -169,6 +327,7 @@ void Assembler::passCommentsToComputer(Computer *comp)
     cleanComments();
     MASK
     foreach (const auto n, commentDict) {
+        qDebug(QString(n.second).toLocal8Bit());
         comp->setMemComment(n.first,n.second);
     }
     UNMASK

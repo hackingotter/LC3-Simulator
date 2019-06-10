@@ -56,7 +56,7 @@ void UndoStackMasker::resizeEvent(QResizeEvent *event)
 const QSize UndoStackMasker::constructSize()
 {
     QSize* out = new QSize();
-    qDebug("Phase 2" + QString().setNum(QSV->viewport()->width()).toLocal8Bit());
+    qDebug("Phase 2 " + QString().setNum(QSV->viewport()->width()).toLocal8Bit());
     out->setWidth(this->width());
     out->setHeight(this->height());
 
