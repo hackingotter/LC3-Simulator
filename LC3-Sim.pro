@@ -125,7 +125,8 @@ DISTFILES += \
     lc3os.asm \
     Commitment \
     pennCompilertest.asm \
-    Priority.txt
+    Priority.txt \
+    loadSaveTests.asm
 
 STATECHARTS += \
     State Chart.scxml \

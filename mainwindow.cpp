@@ -98,7 +98,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 {
 
     setWindowTitle("LC-3 Sim");
-
+    assembleNLoadFile("C:\\Users\\Jedadiah\\Documents\\GitHub\\LC3-Sim\\loadSaveTests.asm");
 //    Computer::getDefault()->lowerBoundTimes();
     std::cout<<Computer::getDefault()->proposedNewAddress(8,5,10,-2)<<std::endl;
 
@@ -224,26 +224,27 @@ void MainWindow::setupMenuBar()
     fileActions <<actionSave_File_As;
 //    fileActions <<actionSave_State;
 //    fileActions <<actionLoad_State;
-//    fileActions <<actionTestingSave;
+    fileActions <<actionTestingSave;
     actionAssemble_Load_File->setShortcut(QKeySequence(tr("Ctrl+D")));
     actionSave_File_As->setShortcut(QKeySequence(tr("Ctrl+S")));
 
 //    <<actionAssemble_File<<actionAssemble_Load_File<<actionSave_File<<actionSave_File_As<<actionSave_State<<actionLoad_State;
 //    fileActions << actionTestingSave;
     ui->menuFile->addActions(fileActions);
-
     CONNECT(actionSave_State,triggered(),this, storeState());
     CONNECT(actionLoad_State,triggered(),this, reloadState());
     CONNECT(actionLoad_File,triggered(),this,loadFile());
     CONNECT(actionAssemble_Load_File,triggered(),this, assembleNLoadFile());
+    qDebug("Setting up testing Save");
     connect(actionTestingSave, &QAction::triggered, this,[=](){this->prettySave();});
-
+    this->prettySave();
     QMenu* fillMenu = new QMenu("Fill...");
     setupScreenMenuDropdown(*fillMenu);
     ui->menuScreen->addMenu(fillMenu);
 }
 void MainWindow::prettySave()
 {
+    qDebug("Beginning Pretty Save");
     QString fileName = QFileDialog::getSaveFileName(nullptr,"Save to *.asm",QString(),"*.asm");
 
 
@@ -433,16 +434,10 @@ void MainWindow::assembleNLoadFile(QString path)
     try
     {
 
-//        QString test("a");
-//        qDebug(test.toLocal8Bit());
-//        qDebug(test.toLocal8Bit().data());
-//        const char* ccp = (test.toLocal8Bit().data());
-
-//        const char* ccpp = namePath.toLocal8Bit().data();
-//        qDebug(QString("I am attempting to assemble the file" + ccp + " into " + QString(ccpp)).toLocal8Bit());
         const QByteArray qba = path.toLocal8Bit();
 
         const char* ccpp = qba.constData();
+        qDebug(QString("I am attempting to assemble the file" + path + " into " + "/TemporaryFile.obj").toLocal8Bit());
 
 //        path.append("obj")
 

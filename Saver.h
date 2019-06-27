@@ -22,7 +22,7 @@ public:
     void static savePortable(mem_addr_t beginning = 0x3000, mem_addr_t end = 0x3100, bool takeCommentBefore = true, QString fileName = "testing123.asm");
 
 private:
-
+    void static isNonDataLabled(mem_addr_t target);
     void static handleLabels(std::ofstream &destination, mem_addr_t addr);
     void static handleValues(std::ofstream &destination, mem_addr_t addr);
     void static handleComments(std::ofstream &destination, mem_addr_t addr);

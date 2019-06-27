@@ -758,6 +758,7 @@ mem_loc_t *Computer::getMemLocationsBlock(mem_addr_t addr, val_t blockSize)
     }
     return block;
 }
+
 void Computer::connectAddrs(mem_addr_t source, mem_addr_t target)
 {
     Computer::getDefault()->connectAddrs(source,_memory[target]);

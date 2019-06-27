@@ -115,7 +115,9 @@ void Assembler::assembleFile(const char *inFile, const char *outFile) {
 //    }
 //    return;
     MASK
+    qDebug("time to make the iStream");
     std::ifstream* iStream = new std::ifstream(inFile, std::ios_base::in);
+    qDebug("time to make the oStream");
 //    std::ifstream iStream("C:/Users/Jedadiah/Documents/GitHub/LC3-Sim/lc3os.asm",std::ios_base::in);
     std::ofstream* oStream = new std::ofstream(outFile, std::ios_base::out | std::ios_base::binary);
 
