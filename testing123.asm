@@ -1,9 +1,11 @@
 
 	.ORIG x3000
-    x0000	
-    x0000	
-    x0000	
-    x0000	
+THIS_IS_JUST_A_LABEL 
+     BR LABEL 	;
+    AND R4, R3, R2	;
+LABEL 
+    RET 	
+DATA     .FILL x3000	;
     x0000	
     x0000	
     x0000	

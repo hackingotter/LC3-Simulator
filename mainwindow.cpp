@@ -246,7 +246,7 @@ void MainWindow::prettySave()
 {
     qDebug("Beginning Pretty Save");
     QString fileName = QFileDialog::getSaveFileName(nullptr,"Save to *.asm",QString(),"*.asm");
-
+    Saver::savePortable(0x3000,0x3010,true,fileName);
 
 }
 

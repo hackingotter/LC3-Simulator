@@ -115,8 +115,19 @@ void Assembler::assembleFile(const char *inFile, const char *outFile) {
 //    }
 //    return;
     MASK
+    qDebug("time to try any old ifstream");
+    std::ifstream iStream2;
+    iStream2.open("test.txt",std::ios_base::in);
+
     qDebug("time to make the iStream");
-    std::ifstream* iStream = new std::ifstream(inFile, std::ios_base::in);
+    std::ifstream iStreamNotPointer;
+    iStreamNotPointer.open(inFile, std::ios_base::in);
+    if(iStreamNotPointer.is_open())
+    {
+        qDebug(QString("I was able to open %1").arg(inFile).toLocal8Bit());
+    }
+
+    std::ifstream* iStream = &iStreamNotPointer;
     qDebug("time to make the oStream");
 //    std::ifstream iStream("C:/Users/Jedadiah/Documents/GitHub/LC3-Sim/lc3os.asm",std::ios_base::in);
     std::ofstream* oStream = new std::ofstream(outFile, std::ios_base::out | std::ios_base::binary);
@@ -124,7 +135,8 @@ void Assembler::assembleFile(const char *inFile, const char *outFile) {
     try{
         std::cout<<"He1llo"<<std::endl;
         std::cout<<inFile<<std::endl;
-//    iStream.open(inFile);
+        std::cout<<outFile<<std::endl;
+//        iStream.open(inFile);
     }
     catch(...)
     {
@@ -189,6 +201,7 @@ void Assembler::assembleFile(const char *inFile, const char *outFile) {
         }
         qDebug(QString("I am now at %1").arg(iStream->tellg()).toLocal8Bit());
         qDebug("Going to the beginning of the file");
+        qDebug("Wasting time");
         iStream->seekg(0,ios_base::beg);
 
         qDebug("Seeked");

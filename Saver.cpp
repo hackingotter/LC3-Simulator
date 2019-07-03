@@ -115,6 +115,14 @@ void Saver::savePortable( mem_addr_t beginning, mem_addr_t end, bool takeComment
 
     std::ofstream destination;
     destination.open(fileName.toLocal8Bit().toStdString());
+    if(destination.is_open())
+    {
+        qDebug(QString("The destination (%1) is open!").arg(fileName).toLocal8Bit());
+    }
+    else
+    {
+        qDebug(QString("The destination (%1) is not open!").arg(fileName).toLocal8Bit());
+    }
     //First, we need to scan for Labels that are mark sub routines
     LabelType labelTypes[end-beginning];
     generateNonDataLabelDictionary(labelTypes,beginning,end);
