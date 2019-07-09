@@ -98,12 +98,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 {
 
     setWindowTitle("LC-3 Sim");
-    assembleNLoadFile("C:\\Users\\Jedadiah\\Documents\\GitHub\\LC3-Sim\\loadSaveTests.asm");
-//    Computer::getDefault()->lowerBoundTimes();
-    std::cout<<Computer::getDefault()->proposedNewAddress(8,5,10,-2)<<std::endl;
+    //    Computer::getDefault()->lowerBoundTimes();
+//    std::cout<<Computer::getDefault()->proposedNewAddress(8,5,10,-2)<<std::endl;
 
-    Saver::savePortable();
-    std::cout<<Computer::getDefault()->proposedNewAddress(9,5,10,-2)<<std::endl;
+//    Saver::savePortable();
+//    std::cout<<Computer::getDefault()->proposedNewAddress(9,5,10,-2)<<std::endl;
     Computer::getDefault()->setProgramStatus(cond_z);
 
     Utility::systemInfoDebug();//Just some fun info
@@ -145,6 +144,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     readSettings();
     update();
 //    testSave();
+    assembleNLoadFile("C:\\Users\\Jedadiah\\Documents\\GitHub\\LC3-Sim\\loadSaveTests.asm");
 
 }
 MainWindow::~MainWindow()
@@ -235,12 +235,12 @@ void MainWindow::setupMenuBar()
     CONNECT(actionLoad_State,triggered(),this, reloadState());
     CONNECT(actionLoad_File,triggered(),this,loadFile());
     CONNECT(actionAssemble_Load_File,triggered(),this, assembleNLoadFile());
-    qDebug("Setting up testing Save");
-    connect(actionTestingSave, &QAction::triggered, this,[=](){this->prettySave();});
-    this->prettySave();
-    QMenu* fillMenu = new QMenu("Fill...");
-    setupScreenMenuDropdown(*fillMenu);
-    ui->menuScreen->addMenu(fillMenu);
+//    qDebug("Setting up testing Save");
+//    connect(actionTestingSave, &QAction::triggered, this,[=](){this->prettySave();});
+//    this->prettySave();
+//    QMenu* fillMenu = new QMenu("Fill...");
+//    setupScreenMenuDropdown(*fillMenu);
+//    ui->menuScreen->addMenu(fillMenu);
 }
 void MainWindow::prettySave()
 {

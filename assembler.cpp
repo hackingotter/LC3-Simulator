@@ -117,11 +117,16 @@ void Assembler::assembleFile(const char *inFile, const char *outFile) {
     MASK
     qDebug("time to try any old ifstream");
     std::ifstream iStream2;
-    iStream2.open("test.txt",std::ios_base::in);
+    iStream2.open("C:/Users/Joseph Melberg/Documents/GitHub/LC3-Simulator/loadSaveTests.asm",std::ios_base::in);
 
     qDebug("time to make the iStream");
     std::ifstream iStreamNotPointer;
-    iStreamNotPointer.open(inFile, std::ios_base::in);
+    iStreamNotPointer.open(inFile, std::ifstream::in);
+    if(iStreamNotPointer.fail())
+    {
+        qDebug("I don't know how to open files...for some reason");
+        cerr<<strerror(errno);
+    }
     if(iStreamNotPointer.is_open())
     {
         qDebug(QString("I was able to open %1").arg(inFile).toLocal8Bit());
@@ -129,7 +134,7 @@ void Assembler::assembleFile(const char *inFile, const char *outFile) {
 
     std::ifstream* iStream = &iStreamNotPointer;
     qDebug("time to make the oStream");
-//    std::ifstream iStream("C:/Users/Jedadiah/Documents/GitHub/LC3-Sim/lc3os.asm",std::ios_base::in);
+//    std::ifstream iStream("C:\Users\Joseph Melberg\Documents\GitHub\LC3-Simulator\lc3os.asm",std::ios_base::in);
     std::ofstream* oStream = new std::ofstream(outFile, std::ios_base::out | std::ios_base::binary);
 
     try{
@@ -153,6 +158,9 @@ void Assembler::assembleFile(const char *inFile, const char *outFile) {
     else
     {
         qDebug("IStream is bad");
+        iStream->fail();
+        qDebug("I don't know how to open files...for some reason");
+        cerr<<strerror(errno);
     }
     if(oStream->is_open())
     {
