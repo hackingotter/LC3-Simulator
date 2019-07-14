@@ -144,7 +144,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     readSettings();
     update();
 //    testSave();
-    assembleNLoadFile("C:\\Users\\Jedadiah\\Documents\\GitHub\\LC3-Sim\\loadSaveTests.asm");
+
+        QString inFileName = QFileDialog::getOpenFileName();
+    assembleNLoadFile(inFileName);
 
 }
 MainWindow::~MainWindow()
@@ -236,7 +238,7 @@ void MainWindow::setupMenuBar()
     CONNECT(actionLoad_File,triggered(),this,loadFile());
     CONNECT(actionAssemble_Load_File,triggered(),this, assembleNLoadFile());
 //    qDebug("Setting up testing Save");
-//    connect(actionTestingSave, &QAction::triggered, this,[=](){this->prettySave();});
+    connect(actionTestingSave, &QAction::triggered, this,[=](){this->prettySave();});
 //    this->prettySave();
 //    QMenu* fillMenu = new QMenu("Fill...");
 //    setupScreenMenuDropdown(*fillMenu);

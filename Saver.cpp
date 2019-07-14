@@ -134,8 +134,6 @@ void Saver::savePortable( mem_addr_t beginning, mem_addr_t end, bool takeComment
             qDebug(QString("%1 points at somewhere it can go").arg(getHexString(index+beginning)).toLocal8Bit());
         }
     }
-
-
     if(takeCommentBefore)
     {
         handleComments(destination,beginning-1);

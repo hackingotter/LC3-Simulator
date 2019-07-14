@@ -5,6 +5,7 @@
 #include "Assembler.h"
 #include <iostream>
 #include <fstream>
+#include <QFileDialog> 
 #include <QFile>
 #include "GlobalTypes.h"
 using namespace std;
@@ -106,16 +107,9 @@ void Assembler::assembleFileButForSomeReasonTheOtherOneDoesntWork(const char * i
     UNMASK
 }
 void Assembler::assembleFile(const char *inFile, const char *outFile) {
-//    try{
-//    assembleFileButForSomeReasonTheOtherOneDoesntWork(inFile,outFile);
-//    }
-//    catch(char* str)
-//    {
-//        throw str;
-//    }
-//    return;
     MASK
     qDebug("time to try any old ifstream");
+
     std::ifstream iStream2;
     iStream2.open("C:/Users/Joseph Melberg/Documents/GitHub/LC3-Simulator/loadSaveTests.asm",std::ios_base::in);
 
@@ -137,19 +131,6 @@ void Assembler::assembleFile(const char *inFile, const char *outFile) {
 //    std::ifstream iStream("C:\Users\Joseph Melberg\Documents\GitHub\LC3-Simulator\lc3os.asm",std::ios_base::in);
     std::ofstream* oStream = new std::ofstream(outFile, std::ios_base::out | std::ios_base::binary);
 
-    try{
-        std::cout<<"He1llo"<<std::endl;
-        std::cout<<inFile<<std::endl;
-        std::cout<<outFile<<std::endl;
-//        iStream.open(inFile);
-    }
-    catch(...)
-    {
-        std::cout<<"What?"<<std::endl;
-        qDebug("I have failed");
-        UNMASK
-        throw std::string("H");
-    }
     qDebug(QString("I am attempting to assemble the file" + QString(inFile) + " into " + QString(outFile)).toLocal8Bit());
     if(iStream->is_open())
     {
