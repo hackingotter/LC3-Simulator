@@ -102,6 +102,7 @@ void Saver::handleComments(std::ofstream & destination, mem_addr_t addr)
     QString comment = Computer::getDefault()->getMemComment(addr);
 
     comment.replace(QRegExp("\n"),"\n\t");
+    comment.replace(QRegExp("\b"),"");//fixes bug
 //    comment.replace(QRegExp("\b"),Computer::getDefault()->getMemLabel(addr)->name);
 
     destination << comment.toStdString()<< std::endl;

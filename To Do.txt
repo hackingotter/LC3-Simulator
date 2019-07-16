@@ -1,0 +1,11 @@
+Update Scrollbars
+
+Fix RegisterView look
+Make Unit Tests
+Clean Up Menu
+
+Fix comment marching by identifying when you are in a comment block, you can put an enter before it, assume that enter blocks use ;;
+
+=============Done===========
+
+Fix Saving

@@ -2999,7 +2999,7 @@ QString Computer::mnemGen(mem_loc_t loc)const
             out = "RET" + out.remove(0,3);
             if( val & 0x0001)
             {
-//                out.replace()
+                out = "JMPT R7";
             }
         }
         else
@@ -3057,7 +3057,16 @@ QString Computer::mnemGen(mem_loc_t loc)const
         }
         else
         {
-            out += " " + name_or_addr(_memory[val&0x00FF].value);//TODO this code could be wrong
+            out = name_or_addr(_memory[val&0x00FF].value);//
+            if( out.contains(QRegExp("TRAP")))
+            {
+                out = out.replace(QRegExp("TRAP_"),"");
+            }
+            else
+            {
+                out = "TRAP "+ out;
+            }
+//            out += " " + name_or_addr(_memory[val&0x00FF].value);//TODO this code could be wrong
         }
         break;
     }

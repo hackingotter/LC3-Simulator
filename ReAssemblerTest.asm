@@ -1,9 +1,13 @@
 .ORIG x3000
-
+AND R0, R0, #0;
+AND R1, R0, R0;
+ADD R0, R0, #1;
+ADD R1, R1, x10;
 TEST_STRING .STRINGZ "abcdefg"
 .FILL -1
 Te .FILL x12bd
 .FILL 0x343d
 Anothing .STRINGZ 'a'
 .FILL -1
+AND R4,R3,R2
 .END

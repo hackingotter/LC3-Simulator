@@ -1,5 +1,6 @@
 #include "QScreen"
 #include "UndoStackMasker.h"
+#include <QInputDialog>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QStandardItemModel>
@@ -147,7 +148,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
         QString inFileName = QFileDialog::getOpenFileName();
     assembleNLoadFile(inFileName);
-
+    prettySave();
+    inFileName = QFileDialog::getOpenFileName();
+    assembleNLoadFile(inFileName);
 }
 MainWindow::~MainWindow()
 {
@@ -244,11 +247,26 @@ void MainWindow::setupMenuBar()
 //    setupScreenMenuDropdown(*fillMenu);
 //    ui->menuScreen->addMenu(fillMenu);
 }
+QString getSaveValue(QString text)
+{
+    QString out;
+    bool ok;
+    do{
+        out =  QInputDialog::getText(nullptr, "QInputDialog::getText()",
+                                     text, QLineEdit::Normal,
+                                     QDir::home().dirName(), &ok);
+    }while(!ok || text.isEmpty());
+    return out;
+
+}
 void MainWindow::prettySave()
 {
     qDebug("Beginning Pretty Save");
     QString fileName = QFileDialog::getSaveFileName(nullptr,"Save to *.asm",QString(),"*.asm");
-    Saver::savePortable(0x3000,0x3010,true,fileName);
+//    mem_addr_t begin = Utility::QSTRING2INTBASE(getSaveValue("Save Start"),16);
+//    mem_addr_t end   = Utility::QSTRING2INTBASE(getSaveValue("Save End"),16);
+
+    Saver::savePortable(0x0000,0x27b,true,fileName);
 
 }
 
@@ -649,7 +667,7 @@ void MainWindow::setupRegisterView()
     view->setModel(regModel);
     qDebug("Showing Grid");
     view->showGrid();
-    view->setColumnWidth(0,8);
+    view->setColumnWidth(0,1);
     view->setColumnWidth(1,43);
     view->resizeColumnToContents(reg_value_column);
     qDebug("Setting horizantal heading options");
