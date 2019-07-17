@@ -1,11 +1,19 @@
-Update Scrollbars
+
 
 Fix RegisterView look
 Make Unit Tests
 Clean Up Menu
 
+
+So this doesn't work
 Fix comment marching by identifying when you are in a comment block, you can put an enter before it, assume that enter blocks use ;;
+============Doing============
+
+Fix Saving II
 
 =============Done===========
-
+Update Scrollbars
+Test Input 
+Get rid of Mem
+Deactivate Watch and Console
 Fix Saving

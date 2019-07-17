@@ -3060,7 +3060,7 @@ QString Computer::mnemGen(mem_loc_t loc)const
             out = name_or_addr(_memory[val&0x00FF].value);//
             if( out.contains(QRegExp("TRAP")))
             {
-                out = out.replace(QRegExp("TRAP_"),"");
+                out = out.replace(QRegExp("TRAP_"),"");//clip off the useless part
             }
             else
             {

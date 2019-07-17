@@ -117,6 +117,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     qDebug("About to setup ui");
     ui->setupUi(this);//this puts everything in place
+    ui->consoleTab->deleteLater();
+    ui->tab_3->deleteLater();
     setupConnections();
     setupDisplay();
     setupMenuBar();
@@ -145,12 +147,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     readSettings();
     update();
 //    testSave();
-
+    if(false)
+    {
         QString inFileName = QFileDialog::getOpenFileName();
     assembleNLoadFile(inFileName);
     prettySave();
     inFileName = QFileDialog::getOpenFileName();
     assembleNLoadFile(inFileName);
+    }
 }
 MainWindow::~MainWindow()
 {
@@ -180,9 +184,12 @@ void MainWindow::setupViews()
     for(int i = 0;i<3;i++)
     {
         MemWindow* memy = new MemWindow(model,Saturn->generateBar());
+                setupMemView(memy->getMemView(),false,true);
         CONNECT(this,signalUpdate(),memy,kick());
         ui->MemorySplitter->addWidget(memy);
+
     };
+    ui->MemorySplitter->children().at(2);
     setupMemView(ui->MemView3View);
 
     setupStackView();
@@ -337,7 +344,7 @@ void MainWindow::setupConnections()
 void MainWindow::setupUndoInterface()
 {
     UndoStackMasker* widge = new UndoStackMasker(Computer::getDefault()->Undos);
-    ui->splitter_2->addWidget(widge);
+    ui->undoStackSpot->addWidget(widge);
 
     widge->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Expanding);
 }

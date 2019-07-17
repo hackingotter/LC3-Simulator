@@ -19,7 +19,7 @@ InOutSet::InOutSet(QWidget *parent) : QWidget(parent)
 
     QVBoxLayout* bigVLayout = new QVBoxLayout(this);
 
-    QLabel* testingLabel = new QLabel("Testing 1 2 3 ");
+    QLabel* testingLabel = new QLabel("I/O");
 
     QHBoxLayout* hLayout = new QHBoxLayout();
     QVBoxLayout* vLayout = new QVBoxLayout();
