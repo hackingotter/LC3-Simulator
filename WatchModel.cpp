@@ -5,13 +5,15 @@
 WatchModel::WatchModel(QObject* parent, bool *access):modeler(parent,access)
 {
     Offset =new QVector<val_t>();
-    Offset->append(4);
-    Offset->append(19);
-    Offset->append(9);
-    Offset->append(10);
-
-    setRowCount(4);
-    setColumnCount(modeler::columnCount()+3);
+//    Offset->append(4);
+//    Offset->append(19);
+//    Offset->append(9);
+    for(int i = 0; i < 10; i++)
+    {
+        Offset->append(i);
+    }
+    setRowCount(10);
+//    setColumnCount(modeler::columnCount()+3);
 
 }
 QVariant WatchModel::data(const QModelIndex &index, int role) const

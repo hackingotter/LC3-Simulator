@@ -109,7 +109,7 @@
              <item>
               <widget class="QPushButton" name="pushButton_4">
                <property name="text">
-                <string>PushButton</string>
+                <string>TBD</string>
                </property>
               </widget>
              </item>
@@ -262,7 +262,7 @@
          <enum>QTabWidget::Rounded</enum>
         </property>
         <property name="currentIndex">
-         <number>4</number>
+         <number>1</number>
         </property>
         <property name="elideMode">
          <enum>Qt::ElideRight</enum>
@@ -305,7 +305,7 @@
              </layout>
             </item>
             <item>
-             <widget class="QPlainTextEdit" name="plainTextEdit"/>
+             <widget class="QPlainTextEdit" name="consoleOut"/>
             </item>
            </layout>
           </item>
@@ -618,8 +618,8 @@
     <addaction name="actionInfo"/>
    </widget>
    <addaction name="menuFile"/>
-   <addaction name="menuOptions"/>
    <addaction name="menuMore_Options"/>
+   <addaction name="menuOptions"/>
    <addaction name="menuScreen"/>
    <addaction name="menuHelp"/>
   </widget>

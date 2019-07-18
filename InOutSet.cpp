@@ -44,18 +44,17 @@ InOutSet::InOutSet(QWidget *parent) : QWidget(parent)
     textDisplay->setWordWrap(true);
     textDisplay->setAlignment(Qt::AlignTop|Qt::AlignLeft);
     textDisplay->setFocusPolicy(Qt::StrongFocus);
-//    textDisplay->setStyleSheet(":focus{background-color:rgb(255,225,255)}");
-
-
+//    textDisplay->setStyleSheet(":focus{background-color:rgb(255,225,255)},background-color:rgb(150,150,150)");
+//    textDisplay->setStyleSheet("background-color:rgb(150,150,150)");
     setLayout(bigVLayout);
     bigVLayout->addWidget(testingLabel);
     hLayout->addWidget(textDisplay);
     hLayout->addLayout(vLayout);
-    vLayout->addWidget(InputMonitor);
-    vLayout->addWidget(OutputMonitor);
+//    vLayout->addWidget(InputMonitor);
+//    vLayout->addWidget(OutputMonitor);
     bigVLayout->addLayout(hLayout);
     textDisplay->setText("");
-//    this->setStyleSheet("background-color:rgb(150,150,150)");
+
 
 }
 

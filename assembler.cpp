@@ -336,11 +336,13 @@ void Assembler::passCommentsToComputer(Computer *comp)
     }
     UNMASK
 }
+
 void Assembler::cleanComments()
 {
     commentDict[startingAddress-1] =  commentDict[0xFFFE] + commentDict[startingAddress-1] ;
     commentDict[0xFFFE] = "";
 }
+
 data_t Assembler::dataTypeForAddress(mem_addr_t addr)
 {
     auto match = dataDict.find(addr);
@@ -397,15 +399,18 @@ uint16_t Assembler::processLine(string &line, RunType runType, uint16_t pc, ofst
         // input checking
         // .ORIG not set yet
         if (pc == 0xFFFF && !instruction.empty() && instruction != ".ORIG") {
+            oStream.close();
             throw "ERROR: .ORIG must be the first instruction >> " + line;
         }
         if (pc != 0xFFFF && instruction == ".ORIG") {
+            oStream.close();
             throw "ERROR: .ORIG cannot appear twice >> " + line;
         }
 
         string e = checkInput(instruction, firstReg, secondReg, thirdReg, opNumber, opLabel, opString, nOfRegs,
                               nOrL);
         if (!e.empty()) {
+            oStream.close();
             throw  getHexString(pc).toStdString() + ": " +e + " >> " + line;
         }
     }
@@ -669,14 +674,14 @@ uint16_t Assembler::getNumberOrOffset(const string &instruction, NumOrLabel nOrL
         if (instruction == "TRAP") {
             // trap8
             if (num > 0x00FF) {
-                throw "ERROR: trap vector exceeds 8 bit";
+                throw "ERROR: trap vector exceeds 8 bit at pc" + to_string(pc) + ")";
             }
             op |= num;
         } else if (instruction == "STR" || instruction == "LDR") {
             // offset6
             if (num > 0x001F || (~num + 1) > 0x0020) {
                 // boundary check for offset6
-                throw "ERROR: offset6 out of bounds";
+                throw "ERROR: offset6 out of bounds at pc" + to_string(pc) + ")";
             }
             op |= (num & 0x003F);
         } else {
@@ -686,7 +691,7 @@ uint16_t Assembler::getNumberOrOffset(const string &instruction, NumOrLabel nOrL
             // imm5
             if (num > 0x000F || (~num + 1) > 0x0010) {
                 // boundary check for imm5
-                throw "ERROR: imm5 out of bounds";
+                throw "ERROR: imm5 out of bounds at pc" + to_string(pc) + ")";
             }
             op |= (num & 0x001F);
         }
@@ -709,7 +714,7 @@ uint16_t Assembler::getNumberOrOffset(const string &instruction, NumOrLabel nOrL
             // PCoffset11
             if (offset > 0x03FF || (~offset + 1) > 0x0400) {
                 // boundary check for PCoffset11
-                throw "ERROR: PCoffset11 out of bounds";
+                throw "ERROR: PCoffset11 out of bounds at pc" + to_string(pc) + ")";
             }
             op |= (offset & 0x07FF);
         } else {

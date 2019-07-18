@@ -275,7 +275,7 @@ void HighlightScrollBarOverlay::paintEvent(QPaintEvent *paintEvent)
 
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, false);
-    QColor colors[] = {Qt::red,Qt::yellow,Qt::green,Qt::blue,Qt::black,Qt::gray,Qt::darkBlue};
+    QColor colors[] = {Qt::red,Qt::yellow,Qt::red,Qt::blue,Qt::black,Qt::gray,Qt::darkBlue};
     foreach (int themeColor, highlights.keys()) {
         const QColor &color = (colors[themeColor]);
         for (int i = 0, total = highlights[themeColor].size(); i < total; ++i) {

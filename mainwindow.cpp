@@ -117,8 +117,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     qDebug("About to setup ui");
     ui->setupUi(this);//this puts everything in place
-    ui->consoleTab->deleteLater();
+//    ui->consoleTab->deleteLater();
     ui->tab_3->deleteLater();
+    ui->actionLoad->deleteLater();
+    ui->actionSave_2->deleteLater();
+    ui->menuOptions->deleteLater();
+    ui->menuMore_Options->deleteLater();
     setupConnections();
     setupDisplay();
     setupMenuBar();
@@ -154,7 +158,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     prettySave();
     inFileName = QFileDialog::getOpenFileName();
     assembleNLoadFile(inFileName);
+
     }
+
 }
 MainWindow::~MainWindow()
 {
@@ -191,7 +197,7 @@ void MainWindow::setupViews()
     };
     ui->MemorySplitter->children().at(2);
     setupMemView(ui->MemView3View);
-
+//    ui->MemView3->deleteLater();
     setupStackView();
     qDebug("Model Created");
     /*
@@ -268,12 +274,19 @@ QString getSaveValue(QString text)
 }
 void MainWindow::prettySave()
 {
-    qDebug("Beginning Pretty Save");
-    QString fileName = QFileDialog::getSaveFileName(nullptr,"Save to *.asm",QString(),"*.asm");
-//    mem_addr_t begin = Utility::QSTRING2INTBASE(getSaveValue("Save Start"),16);
-//    mem_addr_t end   = Utility::QSTRING2INTBASE(getSaveValue("Save End"),16);
 
-    Saver::savePortable(0x0000,0x27b,true,fileName);
+    qDebug("Beginning Pretty Save");
+
+    QString fileName = QFileDialog::getSaveFileName(nullptr,"Save to *.asm",QString(),"*.asm");
+    if(fileName == QString())
+    {
+        qDebug("Looks like they decided not to saves");
+        return;
+    }
+    mem_addr_t begin = Utility::QSTRING2INTBASE(getSaveValue("Save Start"),16);
+    mem_addr_t end   = Utility::QSTRING2INTBASE(getSaveValue("Save End"),16);
+
+    Saver::savePortable(begin,end,true,fileName);
 
 }
 
@@ -311,13 +324,14 @@ void MainWindow::setupScreenMenuDropdown(QMenu & menu)
 
 void MainWindow::setupConsoleInterface()
 {
-    ui->plainTextEdit->insertPlainText("Hello");
+    ui->consoleOut->insertPlainText("Hello");
 //    QFuture<void> f1 = QtConcurrent::run(startConsole(),QString("1"));
 //    f1.begin();
 }
 void MainWindow::testingSave()
 {
-    Saver::savePortable();
+    prettySave();
+//    Saver::savePortable();
 }
 void MainWindow::reloadState()
 {
@@ -413,6 +427,7 @@ QString MainWindow::assembleFile(QString path)
     catch(const std::string& e)
     {
         std::cout<<e<<std::endl;
+
         return "";
     }
     catch(...)
@@ -620,7 +635,7 @@ void MainWindow::setupInOut()
 
      CONNECT(actionClearInput,triggered(),InOutPut, clearText());
      InOutMenuBar->addAction(actionClearInput);
-    ui->menuBar->addMenu(InOutMenuBar);
+//    ui->menuBar->addMenu(InOutMenuBar);
     CONNECT(this, reCheck(), InOutPut, update());
 }
 void MainWindow::onTableClicked(const QModelIndex & current)
@@ -674,14 +689,15 @@ void MainWindow::setupRegisterView()
     view->setModel(regModel);
     qDebug("Showing Grid");
     view->showGrid();
-    view->setColumnWidth(0,1);
+    view->resizeColumnToContents(1);
+    view->setColumnWidth(0,10);
     view->setColumnWidth(1,43);
     view->resizeColumnToContents(reg_value_column);
     qDebug("Setting horizantal heading options");
     {
         QHeaderView* hori = view->horizontalHeader();
         hori->hide();
-        hori->setSectionResizeMode(reg_color_column,QHeaderView::Fixed);
+//        hori->setSectionResizeMode(reg_color_column,QHeaderView::Fixed);
         hori->setSectionResizeMode(reg_name_column,QHeaderView::Fixed);
         hori->setDefaultAlignment(Qt::AlignRight);
     }
@@ -899,7 +915,7 @@ void MainWindow::on_consoleEnterButton_pressed()
     qDebug("handled");
     QTextStream streamy(&phil);
     while(!streamy.atEnd())
-        ui->plainTextEdit->insertPlainText(streamy.readLine()+"\n");
+        ui->consoleOut->insertPlainText(streamy.readLine()+"\n");
 
 
 }

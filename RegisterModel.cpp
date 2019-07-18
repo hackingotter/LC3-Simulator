@@ -289,7 +289,7 @@ cond_t RegisterModel::handle_CC_RegisterView_Input(QString in)
 
     if(lowered.toInt()>0)return     cond_p;
     if(lowered.toInt()<0)return     cond_n;
-
+    if(lowered.toInt()==0)return    cond_z;
 
     return cond_z;
 }

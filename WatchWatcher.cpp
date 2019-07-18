@@ -14,7 +14,7 @@ WatchWatcher::WatchWatcher(QWidget *parent,bool* access): QWidget(parent),_acces
 
     QHBoxLayout* hlayout = new QHBoxLayout(this);
     hlayout->addWidget(Coat);
-    hlayout->addWidget(Delete);
+//    hlayout->addWidget(Delete);
     setLayout(hlayout);
     Levi =new WatchModel(parent,_access);
     Coat->setModel(Levi);

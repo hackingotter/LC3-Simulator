@@ -11,6 +11,7 @@
 //#include "Simulator.h"
 #include "Console.h"
 #include "Saver.h"
+#include "computer.h"
 #include <string.h>
 #include <stdlib.h>
 
@@ -63,7 +64,12 @@ void startConsole() {
     while (true) {
 
         char* line = getConsoleLine();
-        handleConsoleIn(line);
+        bool successful = (handleConsoleIn(line));
+        if(successful)
+        {
+
+        }
+
     }
 
 }
@@ -132,15 +138,16 @@ bool handleConsoleIn(char * line)
     }
     CASE("c","continue",argv,0)
     {
-
+        continueCommand(argv);
     }
+    /*
     CASE("check","check",argv,0)
     {
         CASE("count","count",argv,1)
         {
 
         }
-    }
+    }*/
     CASE("cl","clear",argv,0)
     {
 
@@ -154,37 +161,37 @@ bool handleConsoleIn(char * line)
         printf("For information, type \"help --command\"");
         return true;
     }
-    CASE("i","input",argv,0)
-    {
+//    CASE("i","input",argv,0)
+//    {
 
-    }
-    CASE("l","list",argv ,0)
-    {
+//    }
+//    CASE("l","list",argv ,0)
+//    {
 
-    }
-    CASE("ld","load",argv,0)
+//    }
+    CASE("ld","load",argv,1)
     {
-
+        Computer::getDefault()->loadProgramFile(argv[1]);
     }
     CASE("n","next",argv ,0)
     {
 
     }
-    CASE("p","print",argv,0)
-    {
+//    CASE("p","print",argv,0)
+//    {
 
-    }
-    CASE("q","quit",argv ,0)
-    {
+//    }
+//    CASE("q","quit",argv ,0)
+//    {
 
-    }
-    CASE("r","reset",argv,0)
-    {
+//    }
+//    CASE("r","reset",argv,0)
+//    {
 
-    }
+//    }
     CASE("s","step",argv ,0)
     {
-
+        stepCommand(argv);
     }
     CASE("save","save",argv,0)
     {
@@ -193,7 +200,9 @@ bool handleConsoleIn(char * line)
         if(!a){return false;}
         mem_addr_t stop  = Utility::unifiedInput2Val(QString(argv[2]),&a);
         if(!a){return false;}
-        Saver::savePortable(start,stop,true,QFileDialog::getSaveFileName(nullptr,"Save to *.asm",QString(),"*.asm"));
+        QString fileName = QFileDialog::getSaveFileName(nullptr,"Save to *.asm",QString(),"*.asm");
+        Saver::savePortable(start,stop,true,fileName);
+
         return true;
     }
     CASE("script","script",argv,0)
@@ -297,10 +306,7 @@ console_err_t traceCommand(console_arg_t args)
 }
 console_err_t runCommand(console_arg_t args)
 {
-    if(args == nullptr)
-    {
-
-    }
+    return continueCommand(args);
 //    if(!strcmp("-s",args[0]))
 //    {
 //        return stepCommand(nullptr);
@@ -313,7 +319,6 @@ console_err_t testCommand(console_arg_t args)
 }
 console_err_t saveCommand(console_arg_t args)
 {
-
 }
 console_err_t checkCommand(console_arg_t args)
 {
