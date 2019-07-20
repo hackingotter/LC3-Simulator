@@ -108,10 +108,11 @@ void Assembler::assembleFileButForSomeReasonTheOtherOneDoesntWork(const char * i
 }
 void Assembler::assembleFile(const char *inFile, const char *outFile) {
     MASK
+
     qDebug("time to try any old ifstream");
 
-    std::ifstream iStream2;
-    iStream2.open("C:/Users/Joseph Melberg/Documents/GitHub/LC3-Simulator/loadSaveTests.asm",std::ios_base::in);
+//    std::ifstream iStream2;
+//    iStream2.open("C:/Users/Joseph Melberg/Documents/GitHub/LC3-Simulator/loadSaveTests.asm",std::ios_base::in);
 
     qDebug("time to make the iStream");
     std::ifstream iStreamNotPointer;
@@ -162,6 +163,8 @@ void Assembler::assembleFile(const char *inFile, const char *outFile) {
     iStream->seekg(0,ios_base::end);
     qDebug(QString("I am now at %1").arg(iStream->tellg()).toLocal8Bit());
     qDebug(QString("I have found the file to be of size :%1").arg(iStream->tellg()).toLocal8Bit());
+
+    try {
 
 
 
@@ -250,14 +253,32 @@ void Assembler::assembleFile(const char *inFile, const char *outFile) {
         qDebug(QString("The number of lines is %1").arg(programLength).toLocal8Bit());
     }
 
+    }
+    catch(...){
+
     qDebug("Time to close the iStream");
     iStream->close();
     delete iStream;
     qDebug("Time to close the oStream");
     oStream->close();
     delete oStream;
+    }
+    iStream->close();
+    oStream->close();
+    if(iStream->is_open())
+    {
+        qDebug("something weird");
+
+    }
+    else{
+        qDebug("it's closed");
+
+    }
+    qDebug("HMM?");
+
 
     UNMASK
+
 
 }
 

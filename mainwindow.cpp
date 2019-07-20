@@ -153,13 +153,18 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 //    testSave();
     if(false)
     {
-        QString inFileName = QFileDialog::getOpenFileName();
-    assembleNLoadFile(inFileName);
+    QString inFileName = QFileDialog::getOpenFileName();
+    qDebug(inFileName.toLocal8Bit());
+    assembleNLoadFile("LC3-Simulator/Assembler Unit Test/AND.asm");
     prettySave();
     inFileName = QFileDialog::getOpenFileName();
     assembleNLoadFile(inFileName);
 
     }
+    connect(ui->actionInfo, &QAction::triggered, this,[=](){MainWindow::importantInfo();});
+//    QObject::connect(ui->actionInfo,SIGNAL(triggered()),this,SLOT(()));
+//    ui->actionInfo
+//     CONNECT(ui->actionInfo,triggered(),this, this::);
 
 }
 MainWindow::~MainWindow()
@@ -171,6 +176,7 @@ void MainWindow::importantInfo()
     HelpMenu* help = new HelpMenu();
     help->show();
     help->activateWindow();
+
 }
 //MemWindow* MainWindow::makeNConnectNewMemWindow(modeler* model)
 //{
@@ -232,19 +238,19 @@ void MainWindow::setupMenuBar()
     QAction* actionSave_File_As= new QAction("Save File As ...",this);
     QAction* actionSave_State = new QAction("Save IDE State",this);
     QAction* actionLoad_State = new QAction("Load IDE State",this);
-    QAction* actionTestingSave = new QAction("Test saving",this);
+    QAction* actionTestingSave = new QAction("To Save, use console",this);
 
     QList<QAction*> fileActions;
 //    fileActions <<actionLoad_File;
 //    fileActions <<actionAssemble_File;
     fileActions <<actionAssemble_Load_File;
 //    fileActions <<actionSave_File;
-    fileActions <<actionSave_File_As;
+//    fileActions <<actionSave_File_As;
 //    fileActions <<actionSave_State;
 //    fileActions <<actionLoad_State;
     fileActions <<actionTestingSave;
     actionAssemble_Load_File->setShortcut(QKeySequence(tr("Ctrl+D")));
-    actionSave_File_As->setShortcut(QKeySequence(tr("Ctrl+S")));
+//    actionSave_File_As->setShortcut(QKeySequence(tr("Ctrl+S")));
 
 //    <<actionAssemble_File<<actionAssemble_Load_File<<actionSave_File<<actionSave_File_As<<actionSave_State<<actionLoad_State;
 //    fileActions << actionTestingSave;
@@ -254,7 +260,7 @@ void MainWindow::setupMenuBar()
     CONNECT(actionLoad_File,triggered(),this,loadFile());
     CONNECT(actionAssemble_Load_File,triggered(),this, assembleNLoadFile());
 //    qDebug("Setting up testing Save");
-    connect(actionTestingSave, &QAction::triggered, this,[=](){this->prettySave();});
+    connect(actionTestingSave, &QAction::triggered, this,[=](){/*this->prettySave()*/;});
 //    this->prettySave();
 //    QMenu* fillMenu = new QMenu("Fill...");
 //    setupScreenMenuDropdown(*fillMenu);
@@ -800,7 +806,11 @@ void MainWindow::prepWork()
 
 
 }
-
+void MainWindow::on_info_pressed(){
+    HelpMenu* help = new HelpMenu();
+    help->show();
+    help->activateWindow();
+}
 void MainWindow::on_pushButton_4_pressed()
 {
 

@@ -41,6 +41,7 @@ FORMS += \
     form.ui
 
 HEADERS += \
+    ShortcutWindow.h \
     status.h \
     Assembler.h \
     mainwindow.h \
@@ -82,6 +83,7 @@ HEADERS += \
 
 SOURCES += \
     Bridge.cpp \
+    ShortcutWindow.cpp \
     mainwindow.cpp \
     ThreadManager.cpp \
     modeler.cpp \
@@ -120,6 +122,7 @@ SOURCES += \
 
 
 DISTFILES += \
+    Assembler_Unit_Test/AND.asm \
     Test.txt \
     Test_copy.txt \
     lc3os.asm \

@@ -169,19 +169,12 @@ public slots:
 
 
     void setupInOut();
-
     void setupControlButtons();
-
-
     void setupUndoInterface();
     void on_continueButton_clicked();
-
     void setupRegisterView();
-
     void setupStackView();
-
     void setupThreadManager();
-
     void setupMenuBar();
     void setupScreenMenuDropdown(QMenu &menu);
     void setupConsoleInterface();
@@ -192,19 +185,9 @@ public slots:
     void assembleNLoadFile(QString path = QString());
 
     void on_MemView3Input_returnPressed();
-
-
-
-
-
-
     void on_MemView3PCButton_pressed();
-
-
     void on_NextButton_pressed();
-
     static void  threadTest(QString);
-
 
     void my_int_func(int x)
     {
@@ -229,7 +212,7 @@ public slots:
     void storeState();
 private slots:
     void on_pushButton_4_pressed();
-
+    void on_info_pressed();
     void on_IntoButton_pressed();
     void on_undoButton_pressed();
     void on_redoButton_pressed();
